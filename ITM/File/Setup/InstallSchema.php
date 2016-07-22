@@ -1,3 +1,5 @@
+<?php
+
 namespace ITM\File\Setup;
 
 use Magento\Framework\Setup\InstallSchemaInterface;
