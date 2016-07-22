@@ -72,7 +72,32 @@ class Magento2Module{
 		$txt .= "class InstallSchema implements InstallSchemaInterface {"."\n\n";
 		$txt .= "\t".'public function install(SchemaSetupInterface $setup, ModuleContextInterface $context) {'."\n";
 		$txt .= "\t\t".'$setup->startSetup ();'."\n";
+		
+		if($this->_config["backend_model"]){
+			foreach($this->_config["backend_model"] as $model){
+				$txt .= "\t\t".'$table = $setup->getConnection ()'."\n";
+				$txt .= "\t\t\t\t\t\t".'->newTable ( $setup->getTable ( \''.strtolower($this->_vendor).'_'.strtolower($this->_module).'_'.strtolower($model["name"]).'\' ) )'."\n";
+				$txt .= "\t\t\t\t\t\t\t\t".'->addColumn ( \'id\', \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER, null, ['."\n";
+				$txt .= "\t\t\t\t\t\t\t\t\t\t".'\'identity\' => true,'."\n";
+				$txt .= "\t\t\t\t\t\t\t\t\t\t".'\'unsigned\' => true,'."\n";
+				$txt .= "\t\t\t\t\t\t\t\t\t\t".'\'nullable\' => false,'."\n";
+				$txt .= "\t\t\t\t\t\t\t\t\t\t".'\'primary\' => true'."\n";
+				$txt .= "\t\t\t\t\t\t\t\t".'], \'Id\' )'."\n";
+				$txt .= "\t\t\t\t\t\t\t\t".'->addColumn ( \'status\', \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER, 1, ['."\n";
+				$txt .= "\t\t\t\t\t\t\t\t\t\t".'\'default\' => null'."\n";
+				$txt .= "\t\t\t\t\t\t\t\t\t\t".'], \'Status\' );'."\n";
+				$txt .= "\t\t".'$setup->getConnection ()->createTable ( $table );'."\n";
+				$txt .= "\t\t".''."\n";
+				$txt .= "\t\t".''."\n";
+				$txt .= "\t\t".''."\n";
+
+
+			}
+		}
+		
 		$txt .= "\t\t"."// your code here"."\n";
+
+
 		$txt .= "\t\t".'$setup->endSetup ();'."\n";
 		$txt .= "\t"."}"."\n";
 		$txt .= "}";
