@@ -217,25 +217,6 @@ class Magento2Module{
 			$this->CreateFolder($this->_vendor."/".$this->_module."/view/adminhtml/templates");
 		}
 	}
-	function CreateAdminhtmlModelFile($model){
-		$url = $this->_vendor."/".$this->_module."/"."Block/Adminhtml"."/".$model["name"].".php";
-		$file = fopen($url, "w") or die("Unable to open file!");
-		
-		$txt = "<?php"."\n\n";
-		$txt .= "namespace ".$this->_vendor."\\".$this->_module."\Block\Adminhtml;"."\n\n";
-		$txt .="class ".$model["name"]." extends \Magento\Backend\Block\Widget\Grid\Container {"."\n";
-		$txt .="\t"."protected function _construct() {"."\n";
-		$txt .="\t\t".'$this->_controller = \'adminhtml_'.strtolower($model["name"]).'\';'."\n";
-		$txt .="\t\t".'$this->_blockGroup = \''.$this->_vendor.'_'.$this->_module.'\';'."\n";
-		$txt .="\t\t".'$this->_headerText = __ ( \''.$model["name"].'\' );'."\n";
-		$txt .="\t\t".'$this->_addButtonLabel = __ ( \'Add New Entry\' );'."\n";
-		$txt .="\t\t".'parent::_construct ();'."\n";
-		$txt .="\t"."}"."\n";
-		$txt .="}";
-		
-		fwrite($file, $txt);
-		fclose($file);
-	}
 	
 	function CreateBackEndModel($model){
 		// Create Block Folder
@@ -258,7 +239,7 @@ class Magento2Module{
 			// Create Block Files
 			// Adminhtml/ {model}.php
 		$this->CreateAdminhtmlModelFile($model);
-		//$this->CreateAdminhtmlModelGridFile($model);
+		$this->CreateAdminhtmlModelGridFile($model);
 		//$this->CreateAdminhtmlModelEditFile($model);
 		
 		//$this->CreateAdminhtmlModelGridEditFormFile($model);
@@ -287,6 +268,134 @@ class Magento2Module{
 		$this->CreateViewAdminhtmlLayoutIndexFile($model);
 		$this->CreateViewAdminhtmlLayoutEditFile($model);
 	}
+	function CreateAdminhtmlModelGridFile($model){
+		$url = $this->_vendor."/".$this->_module."/"."Block/Adminhtml/".$model["name"]."/Grid.php";
+	
+		$file = fopen($url, "w") or die("Unable to open file!");
+	
+		$txt = '<?php'."\n\n";
+	
+		$txt .= 'namespace '.$this->_vendor.'\\'.$this->_module.'\Block\Adminhtml\\'.$model["name"].';'."\n\n";
+		$txt .= 'use '.$this->_vendor.'\\'.$this->_module.'\Model\System\Config\Status;'."\n\n";
+		$txt .= "class Grid extends \Magento\Backend\Block\Widget\Grid\Extended {"."\n";
+	
+	
+		$txt .= "\t".'protected $_status;'."\n";
+		$txt .= "\t".'protected $_collectionFactory;'."\n";
+		$txt .= "\t".'public function __construct('."\n";
+		$txt .= "\t\t\t".'\Magento\Backend\Block\Template\Context $context,'."\n";
+		$txt .= "\t\t\t".'\Magento\Backend\Helper\Data $backendHelper,'."\n";
+		$txt .= "\t\t\t".'\\'.$this->_vendor.'\\'.$this->_module.'\Model\Resource\\'.$model["name"].'\Collection $collectionFactory,'."\n";
+		$txt .= "\t\t\t".'Status $status,'."\n";
+		$txt .= "\t\t\t".'array $data = []'."\n";
+		$txt .= "\t\t".') {'."\n";
+		$txt .= "\t\t\t".'$this->_status = $status;'."\n";
+		$txt .= "\t\t\t".'$this->_collectionFactory = $collectionFactory;'."\n";
+		$txt .= "\t\t\t".'parent::__construct($context, $backendHelper, $data);'."\n";
+		$txt .= "\t\t".'}'."\n";
+		
+		
+		$txt .= "\t".'protected function _construct() {'."\n";
+		$txt .= "\t\t".'parent::_construct();'."\n";
+		$txt .= "\t\t".'$this->setId(\''.strtolower($model["name"]).'Grid\');'."\n";
+		$txt .= "\t\t".'$this->setDefaultSort(\'id\');'."\n";
+		$txt .= "\t\t".'$this->setDefaultDir(\'DESC\');'."\n";
+		$txt .= "\t\t".'$this->setSaveParametersInSession(true);'."\n";
+		$txt .= "\t\t".'$this->setUseAjax(false);'."\n";
+		$txt .= "\t".'}'."\n";
+		
+		$txt .= "\t".'protected function _getStore() {'."\n";
+		$txt .= "\t\t".'$storeId = ( int ) $this->getRequest ()->getParam ( \'store\', 0 );'."\n";
+		$txt .= "\t\t".'return $this->_storeManager->getStore ( $storeId );'."\n";
+		$txt .= "\t".'}'."\n";
+		
+		
+		$txt .= "\t".'protected function _prepareCollection() {'."\n";
+		$txt .= "\t\t".'try {'."\n";
+		$txt .= "\t\t\t".'$collection = $this->_collectionFactory->load ();'."\n";
+		$txt .= "\t\t\t".'$this->setCollection ( $collection );'."\n";
+		$txt .= "\t\t\t".'parent::_prepareCollection ();'."\n";
+		$txt .= "\t\t\t".'return $this;'."\n";
+		$txt .= "\t\t".'} catch ( Exception $e ) {'."\n";
+		$txt .= "\t\t\t".'echo $e->getMessage ();'."\n";
+		$txt .= "\t\t\t".'die ();'."\n";
+		$txt .= "\t\t".'}'."\n";
+		$txt .= "\t".'}'."\n";
+		
+		
+		
+		$txt .= "\t".'protected function _prepareColumns() {'."\n";
+		$txt .= "\t\t".'$this->addColumn ( \'id\', [ '."\n";
+		$txt .= "\t\t\t\t".'\'header\' => __ ( \'ID\' ),'."\n";
+		$txt .= "\t\t\t\t".'\'type\' => \'number\','."\n";
+		$txt .= "\t\t\t\t".'\'index\' => \'id\','."\n";
+		$txt .= "\t\t\t\t".'\'header_css_class\' => \'col-id\','."\n";
+		$txt .= "\t\t\t\t".'\'column_css_class\' => \'col-id\''."\n";
+		$txt .= "\t\t".'] );'."\n";
+		$txt .= "\t\t".'$this->addColumn ( \'status\', ['."\n";
+		$txt .= "\t\t\t\t".'\'header\' => __ ( \'Status\' ),'."\n";
+		$txt .= "\t\t\t\t".'\'index\' => \'status\','."\n";
+		$txt .= "\t\t\t\t".'\'class\' => \'status\','."\n";
+		$txt .= "\t\t\t\t".'\'type\' => \'options\','."\n";
+		$txt .= "\t\t\t\t".'\'options\' => $this->_status->getOptionArray ()'."\n";
+		$txt .= "\t\t".'] );'."\n";
+		$txt .= "\t\t".'$block = $this->getLayout ()->getBlock ( \'grid.bottom.links\' );'."\n";
+		$txt .= "\t\t".'if ($block) {'."\n";
+		$txt .= "\t\t\t".'$this->setChild ( \'grid.bottom.links\', $block );'."\n";
+		$txt .= "\t\t".'}'."\n";
+		$txt .= "\t\t".'return parent::_prepareColumns ();'."\n";
+		$txt .= "\t".'}'."\n";
+		
+		
+		$txt .= "\t".'protected function _prepareMassaction() {'."\n";
+		$txt .= "\t\t".'$this->setMassactionIdField ( \'id\' );'."\n";
+		$txt .= "\t\t".'$this->getMassactionBlock ()->setFormFieldName ( \'id\' );'."\n";
+		$txt .= "\t\t".'$this->getMassactionBlock ()->addItem ( \'delete\', array( '."\n";
+		$txt .= "\t\t\t\t".'\'label\' => __ ( \'Delete\' ),'."\n";
+		$txt .= "\t\t\t\t".'\'url\' => $this->getUrl ( \''.strtolower($this->_vendor).'_'.strtolower($this->_module).'/*/massDelete\' ),'."\n";
+		$txt .= "\t\t\t\t".'\'confirm\' => __ ( \'Are you sure?\' )'."\n";
+		$txt .= "\t\t".') );'."\n";
+		$txt .= "\t\t".'return $this;'."\n";
+		$txt .= "\t".'}'."\n";
+		
+		
+		$txt .= "\t".'public function getGridUrl() {'."\n";
+		$txt .= "\t\t".'return $this->getUrl ( \''.strtolower($this->_vendor).'_'.strtolower($this->_module).'/*/index\', ['."\n";
+		$txt .= "\t\t\t".'\'_current\' => true '."\n";
+		$txt .= "\t\t".'] );'."\n";
+		$txt .= "\t".'}'."\n";
+		
+		$txt .= "\t".'public function getRowUrl($row) {'."\n";
+		$txt .= "\t\t".'return $this->getUrl ( \''.strtolower($this->_vendor).'_'.strtolower($this->_module).'/*/edit\', ['."\n";
+		$txt .= "\t\t\t".'\'store\' => $this->getRequest ()->getParam ( \'store\' ),'."\n";
+		$txt .= "\t\t\t".'\'id\' => $row->getId ()'."\n";
+		$txt .= "\t\t".'] );'."\n";
+		$txt .= "\t".'}'."\n";
+		$txt .= '}';
+		fwrite($file, $txt);
+		fclose($file);
+	}
+	
+	function CreateAdminhtmlModelFile($model){
+		$url = $this->_vendor."/".$this->_module."/"."Block/Adminhtml"."/".$model["name"].".php";
+		$file = fopen($url, "w") or die("Unable to open file!");
+	
+		$txt = "<?php"."\n\n";
+		$txt .= "namespace ".$this->_vendor."\\".$this->_module."\Block\Adminhtml;"."\n\n";
+		$txt .="class ".$model["name"]." extends \Magento\Backend\Block\Widget\Grid\Container {"."\n";
+		$txt .="\t"."protected function _construct() {"."\n";
+		$txt .="\t\t".'$this->_controller = \'adminhtml_'.strtolower($model["name"]).'\';'."\n";
+		$txt .="\t\t".'$this->_blockGroup = \''.$this->_vendor.'_'.$this->_module.'\';'."\n";
+		$txt .="\t\t".'$this->_headerText = __ ( \''.$model["name"].'\' );'."\n";
+		$txt .="\t\t".'$this->_addButtonLabel = __ ( \'Add New Entry\' );'."\n";
+		$txt .="\t\t".'parent::_construct ();'."\n";
+		$txt .="\t"."}"."\n";
+		$txt .="}";
+	
+		fwrite($file, $txt);
+		fclose($file);
+	}
+	
 	function CreateControllersAdminhtmlModelSaveFile($model){
 		$url = $this->_vendor."/".$this->_module."/"."Controller/Adminhtml/".$model["name"]."/Save.php";
 	
@@ -366,12 +475,8 @@ class Magento2Module{
 		$txt .= 'namespace '.$this->_vendor.'\\'.$this->_module.'\Controller\Adminhtml\\'.$model["name"].';'."\n\n";
 	
 		$txt .= "class NewAction extends \\".$this->_vendor."\\".$this->_module."\Controller\Adminhtml\\".$model["name"]." {"."\n";
-	
-	
 		$txt .= "\t".'public function execute() {'."\n";
-	
 		$txt .= "\t\t".'$this->_forward(\'edit\');'."\n";
-	
 		$txt .= "\t"."}"."\n";
 		$txt .= '}';
 		fwrite($file, $txt);
