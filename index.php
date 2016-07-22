@@ -271,7 +271,7 @@ class Magento2Module{
 		
 		$this->CreateControllersAdminhtmlModelFile($model);
 		$this->CreateControllersAdminhtmlModelDeleteFile($model);
-		//$this->CreateControllersAdminhtmlModelEditFile($model);
+		$this->CreateControllersAdminhtmlModelEditFile($model);
 		//$this->CreateControllersAdminhtmlModelIndexFile($model);
 		//$this->CreateControllersAdminhtmlModelMassDeleteFile($model);
 		//$this->CreateControllersAdminhtmlModelNewActionFile($model);
@@ -286,6 +286,71 @@ class Magento2Module{
 		// Create view Files
 		$this->CreateViewAdminhtmlLayoutIndexFile($model);
 		$this->CreateViewAdminhtmlLayoutEditFile($model);
+	}
+	function CreateControllersAdminhtmlModelEditFile($model){
+		$url = $this->_vendor."/".$this->_module."/"."Controller/Adminhtml/".$model["name"]."/Edit.php";
+	
+		$file = fopen($url, "w") or die("Unable to open file!");
+	
+		$txt = '<?php'."\n\n";
+	
+		$txt .= 'namespace '.$this->_vendor.'\\'.$this->_module.'\Controller\Adminhtml\\'.$model["name"].';'."\n\n";
+	
+		$txt .= "class Edit extends \\".$this->_vendor."\\".$this->_module."\Controller\Adminhtml\\".$model["name"]." {"."\n";
+	
+	
+		$txt .= "\t".'public function execute() {'."\n";
+		$txt .= "\t\t".' $id = $this->getRequest()->getParam(\'id\');'."\n";
+		$txt .= "\t\t".'$model = $this->_objectManager->create(\''.$this->_vendor.'\\'.$this->_module.'\Model\\'.$model["name"].'\');'."\n";
+		$txt .= "\t\t".'if ($id) {'."\n";
+		$txt .= "\t\t\t".'$model->load($id);'."\n";
+		$txt .= "\t\t\t".'if (!$model->getId()) {'."\n";
+		$txt .= "\t\t\t\t".'$this->messageManager->addError(__(\'This item no longer exists.\'));'."\n";
+		$txt .= "\t\t\t\t".'$this->_redirect(\''.strtolower($this->_vendor).'_'.strtolower($this->_module).'/*\');'."\n";
+		$txt .= "\t\t\t\t".'return;'."\n";
+		$txt .= "\t\t\t".'}'."\n";
+		$txt .= "\t\t".'}'."\n";
+		$txt .= "\t\t".'$data = $this->_objectManager->get(\'Magento\Backend\Model\Session\')->getPageData(true);'."\n";
+		$txt .= "\t\t".'if (!empty($data)) {'."\n";
+		$txt .= "\t\t\t".'$model->addData($data);'."\n";
+		$txt .= "\t\t".'}'."\n";
+		$txt .= "\t\t".'$resultPage = $this->resultPageFactory->create();'."\n";
+		$txt .= "\t\t".'if ($id) {'."\n";
+		$txt .= "\t\t\t".'$resultPage->getConfig()->getTitle()->prepend(__(\'Edit Items Entry\'));'."\n";
+		$txt .= "\t\t".'}else{'."\n";
+		$txt .= "\t\t\t".'$resultPage->getConfig()->getTitle()->prepend(__(\'Add Items Entry\'));'."\n";
+		$txt .= "\t\t".'}'."\n";
+		$txt .= "\t\t".'$this->_coreRegistry->register(\'current_'.strtolower($this->_vendor).'_'.strtolower($this->_module).'_'.strtolower($model["name"]).'\', $model);'."\n";
+		$txt .= "\t\t".'$this->_initAction();'."\n";
+		$txt .= "\t\t".'$this->_view->getLayout()->getBlock(\''.strtolower($model["name"]).'_'.strtolower($model["name"]).'_edit\');'."\n";
+		$txt .= "\t\t".'$this->_view->renderLayout();'."\n";
+		
+	
+		$txt .= "\t"."}"."\n";
+		$txt .= '}';
+		fwrite($file, $txt);
+		fclose($file);
+	}
+	function ff($model){
+		$url = $this->_vendor."/".$this->_module."/"."Controller/Adminhtml/".$model["name"]."/Edit.php";
+	
+		$file = fopen($url, "w") or die("Unable to open file!");
+	
+		$txt = '<?php'."\n\n";
+	
+		$txt .= 'namespace '.$this->_vendor.'\\'.$this->_module.'\Controller\Adminhtml\\'.$model["name"].';'."\n\n";
+	
+		$txt .= "class Edit extends \\".$this->_vendor."\\".$this->_module."\Controller\Adminhtml\\".$model["name"]." {"."\n";
+	
+	
+		$txt .= "\t".'public function execute() {'."\n";
+	
+	
+	
+		$txt .= "\t"."}"."\n";
+		$txt .= '}';
+		fwrite($file, $txt);
+		fclose($file);
 	}
 	function CreateControllersAdminhtmlModelDeleteFile($model){
 		$url = $this->_vendor."/".$this->_module."/"."Controller/Adminhtml/".$model["name"]."/Delete.php";
