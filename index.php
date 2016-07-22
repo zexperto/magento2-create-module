@@ -267,7 +267,47 @@ class Magento2Module{
 		// Create view Files
 		$this->CreateViewAdminhtmlLayoutIndexFile($model);
 		$this->CreateViewAdminhtmlLayoutEditFile($model);
+		
+		// Create Config Status File
+		$this->CreateModelSystemConfigStatusFile($model);
 	}
+	function CreateModelSystemConfigStatusFile($model){
+		
+		$this->CreateFolder($this->_vendor."/".$this->_module."/"."Model/System");
+		$this->CreateFolder($this->_vendor."/".$this->_module."/"."Model/System/Config");
+		
+		$url = $this->_vendor."/".$this->_module."/"."Model/System/Config/Status.php";
+	
+		$file = fopen($url, "w") or die("Unable to open file!");
+	
+		$txt = '<?php'."\n\n";
+	
+		$txt .= 'namespace '.$this->_vendor.'\\'.$this->_module.'\Model\System\Config;'."\n\n";
+		
+		$txt .= 'use Magento\Framework\Option\ArrayInterface;'."\n";
+		
+		$txt .= "class Status implements ArrayInterface {"."\n";
+	
+	
+		$txt .= "\t".'const ENABLED = 1;'."\n";
+		$txt .= "\t".'const DISABLED = 0;'."\n";
+		
+		$txt .= "\t".'public function toOptionArray() {'."\n";
+		$txt .= "\t\t".'$options = ['."\n";
+		$txt .= "\t\t\t".'self::ENABLED => __ ( \'Enabled\' ),'."\n";
+		$txt .= "\t\t\t".'self::DISABLED => __ ( \'Disabled\' )'."\n";
+		$txt .= "\t\t".'];'."\n";
+		$txt .= "\t\t".'return $options;'."\n";
+		$txt .= "\t".'}'."\n";
+		
+		$txt .= "\t".''."\n";
+	
+		
+		$txt .= '}';
+		fwrite($file, $txt);
+		fclose($file);
+	}
+	
 	function CreateAdminhtmlModelGridEditTabsMainFile($model){
 		$url = $this->_vendor."/".$this->_module."/"."Block/Adminhtml/".$model["name"]."/Edit/Tab/Main.php";
 	
@@ -534,7 +574,7 @@ class Magento2Module{
 		$txt .= "\t\t\t\t".'\'index\' => \'status\','."\n";
 		$txt .= "\t\t\t\t".'\'class\' => \'status\','."\n";
 		$txt .= "\t\t\t\t".'\'type\' => \'options\','."\n";
-		$txt .= "\t\t\t\t".'\'options\' => $this->_status->getOptionArray ()'."\n";
+		$txt .= "\t\t\t\t".'\'options\' => $this->_status->toOptionArray ()'."\n";
 		$txt .= "\t\t".'] );'."\n";
 		$txt .= "\t\t".'$block = $this->getLayout ()->getBlock ( \'grid.bottom.links\' );'."\n";
 		$txt .= "\t\t".'if ($block) {'."\n";
