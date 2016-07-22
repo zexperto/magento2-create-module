@@ -268,8 +268,9 @@ class Magento2Module{
 		
 		
 			// Create Controllers Files
-		//$this->CreateControllersAdminhtmlModelFile($model);
-		//$this->CreateControllersAdminhtmlModelDeleteFile($model);
+		
+		$this->CreateControllersAdminhtmlModelFile($model);
+		$this->CreateControllersAdminhtmlModelDeleteFile($model);
 		//$this->CreateControllersAdminhtmlModelEditFile($model);
 		//$this->CreateControllersAdminhtmlModelIndexFile($model);
 		//$this->CreateControllersAdminhtmlModelMassDeleteFile($model);
@@ -277,15 +278,141 @@ class Magento2Module{
 		//$this->CreateControllersAdminhtmlModelSaveFile($model);
 		
 		
-		
 		// Create Model Files
-		//$this->CreateModelModelFile($model);
-		//$this->CreateModelResourceModelFile($model);
-		//$this->CreateModelResourceModelCollectionFile($model);
+		$this->CreateModelModelFile($model);
+		$this->CreateModelResourceModelFile($model);
+		$this->CreateModelResourceModelCollectionFile($model);
 		
 		// Create view Files
 		$this->CreateViewAdminhtmlLayoutIndexFile($model);
 		$this->CreateViewAdminhtmlLayoutEditFile($model);
+	}
+	function CreateControllersAdminhtmlModelDeleteFile($model){
+		$url = $this->_vendor."/".$this->_module."/"."Controller/Adminhtml/".$model["name"]."/Delete.php";
+	
+		$file = fopen($url, "w") or die("Unable to open file!");
+	
+		$txt = '<?php'."\n\n";
+		
+		$txt .= 'namespace '.$this->_vendor.'\\'.$this->_module.'\Controller\Adminhtml\\'.$model["name"].';'."\n\n";
+		
+		$txt .= "class Delete extends \\".$this->_vendor."\\".$this->_module."\Controller\Adminhtml\\".$model["name"]." {"."\n";
+		
+	
+		$txt .= "\t".'public function execute() {'."\n";
+		
+		$txt .= "\t\t".'$id = $this->getRequest ()->getParam ( \'id\' );'."\n";
+		$txt .= "\t\t".'if ($id) {'."\n";
+		$txt .= "\t\t\t".'try {'."\n";
+		$txt .= "\t\t\t\t".'$model = $this->_objectManager->create ( \''.$this->_vendor.'\\'.$this->_module.'\Model\\'.$model["name"].'\' );'."\n";
+		$txt .= "\t\t\t\t".'$model->load ( $id );'."\n";
+		$txt .= "\t\t\t\t".'$model->delete ();'."\n";
+		$txt .= "\t\t\t\t".'$this->messageManager->addSuccess ( __ ( \'You deleted the item.\' ) );'."\n";
+		$txt .= "\t\t\t\t".'$this->_redirect ( \''.strtolower($this->_vendor).'_'.strtolower($this->_module).'/*/\' );'."\n";
+		
+		$txt .= "\t\t\t\t".'return;'."\n";
+		$txt .= "\t\t\t".'} catch ( \Magento\Framework\Exception\LocalizedException $e ) {'."\n";
+		$txt .= "\t\t\t\t".'$this->messageManager->addError ( $e->getMessage () );'."\n";
+		$txt .= "\t\t\t".'} catch ( \Exception $e ) {'."\n";
+		$txt .= "\t\t\t\t".'$this->messageManager->addError ( __ ( \'We can\\\'t delete item right now. Please review the log and try again.\' ) );'."\n";
+		$txt .= "\t\t\t\t".'$this->_objectManager->get ( \'Psr\Log\LoggerInterface\' )->critical ( $e );'."\n";
+		$txt .= "\t\t\t\t".'$this->_redirect ( \''.strtolower($this->_vendor).'_'.strtolower($this->_module).'/*/edit\', ['."\n";
+		$txt .= "\t\t\t\t\t\t".'\'id\' => $this->getRequest ()->getParam ( \'id\' )'."\n";
+		$txt .= "\t\t\t\t".'] );'."\n";
+		$txt .= "\t\t\t\t".'return;'."\n";
+		$txt .= "\t\t\t".'}'."\n";
+		$txt .= "\t\t".'}'."\n";
+		$txt .= "\t\t".'$this->messageManager->addError ( __ ( \'We can\\\'t find a item to delete.\' ) );'."\n";
+		$txt .= "\t\t".'$this->_redirect ( \''.strtolower($this->_vendor).'_'.strtolower($this->_module).'/*/\' );'."\n";
+		
+		$txt .= "\t"."}"."\n";
+	
+	
+	
+		$txt .= '}';
+		fwrite($file, $txt);
+		fclose($file);
+	}
+	
+	function CreateControllersAdminhtmlModelFile($model){
+		$url = $this->_vendor."/".$this->_module."/"."Controller/Adminhtml/".$model["name"].".php";
+		
+		$file = fopen($url, "w") or die("Unable to open file!");
+	
+		$txt = '<?php'."\n\n";
+		$txt .= 'namespace '.$this->_vendor.'\\'.$this->_module.'\Controller\Adminhtml;'."\n\n";
+		$txt .= "abstract class ".$model["name"]." extends \Magento\Backend\App\Action {"."\n";
+		$txt .= "\t".'protected $_coreRegistry;'."\n";
+		$txt .= "\t".'protected $resultForwardFactory;'."\n";
+		$txt .= "\t".'protected $resultPageFactory;'."\n";
+		
+		$txt .= "\t".'public function __construct(\Magento\Backend\App\Action\Context $context, \Magento\Framework\Registry $coreRegistry, \Magento\Backend\Model\View\Result\ForwardFactory $resultForwardFactory, \Magento\Framework\View\Result\PageFactory $resultPageFactory) {'."\n";
+		$txt .= "\t\t".'$this->_coreRegistry = $coreRegistry;'."\n";
+		$txt .= "\t\t".'parent::__construct ( $context );'."\n";
+		$txt .= "\t\t".'$this->resultForwardFactory = $resultForwardFactory;'."\n";
+		$txt .= "\t\t".'$this->resultPageFactory = $resultPageFactory;'."\n";
+		$txt .= "\t"."}"."\n";
+		
+		$txt .= "\t".'protected function _initAction() {'."\n";
+		$txt .= "\t\t".'$this->_view->loadLayout ();'."\n";
+		$txt .= "\t\t".'$this->_setActiveMenu ( \''.$this->_vendor.'_'.$this->_module.'::'.strtolower($model["name"]).'\' )->_addBreadcrumb ( __ ( \''.$model["name"].'\' ), __ ( \''.$model["name"].'\' ) );'."\n";
+		$txt .= "\t\t".'return $this;'."\n";
+		$txt .= "\t"."}"."\n";
+		
+		$txt .= "\t".'protected function _isAllowed() {'."\n";
+		$txt .= "\t\t".'return $this->_authorization->isAllowed ( \''.$this->_vendor.'_'.$this->_module.'::'.strtolower($model["name"]).'\' );'."\n";
+		$txt .= "\t"."}"."\n";
+		
+		
+		
+		$txt .= '}';
+		fwrite($file, $txt);
+		fclose($file);
+	}
+	
+	function CreateModelResourceModelCollectionFile($model){
+		$url = $this->_vendor."/".$this->_module."/"."Model/Resource/"."/".$model["name"]."/Collection.php";
+		$file = fopen($url, "w") or die("Unable to open file!");
+	
+		$txt = '<?php'."\n\n";
+		$txt .= 'namespace '.$this->_vendor.'\\'.$this->_module.'\Model\Resource\\'.$model["name"].';'."\n\n";
+		$txt .= "class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection {"."\n";
+		$txt .= "\t".'protected function _construct() {'."\n";
+		$txt .= "\t\t".'$this->_init(\''.$this->_vendor.'\\'.$this->_module.'\Model\\'.$model["name"].'\', \''.$this->_vendor.'\\'.$this->_module.'\Model\Resource\\'.$model["name"].'\');'."\n";
+		$txt .= "\t".'}'."\n";
+		$txt .= '}';
+		fwrite($file, $txt);
+		fclose($file);
+	}
+	
+	function CreateModelResourceModelFile($model){
+		$url = $this->_vendor."/".$this->_module."/"."Model/Resource/"."/".$model["name"].".php";
+		$file = fopen($url, "w") or die("Unable to open file!");
+	
+		$txt = '<?php'."\n\n";
+		$txt .= 'namespace '.$this->_vendor.'\\'.$this->_module.'\Model\Resource;'."\n\n";
+		$txt .= "class ".$model["name"]." extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb {"."\n";
+		$txt .= "\t".'protected function _construct() {'."\n";
+		$txt .= "\t\t".'$this->_init(\''.strtolower($this->_vendor.'_'.$this->_module.'_'.$model["table"]).'\', \'id\');'."\n";
+		$txt .= "\t".'}'."\n";
+		$txt .= '}';
+		fwrite($file, $txt);
+		fclose($file);
+	}
+	function CreateModelModelFile($model){
+		$url = $this->_vendor."/".$this->_module."/"."Model/"."/".$model["name"].".php";
+		$file = fopen($url, "w") or die("Unable to open file!");
+	
+		$txt = '<?php'."\n\n";
+		$txt .= 'namespace '.$this->_vendor.'\\'.$this->_module.'\Model;'."\n\n";
+		$txt .= "class ".$model["name"]." extends \Magento\Framework\Model\AbstractModel {"."\n";
+		$txt .= "\t".'protected function _construct() {'."\n";
+		$txt .= "\t\t".'parent::_construct();'."\n";
+		$txt .= "\t\t".'$this->_init(\''.$this->_vendor.'\\'.$this->_module.'\Model\Resource\\'.$model["name"].'\');'."\n";
+		$txt .= "\t".'}'."\n";
+		$txt .= '}';
+		fwrite($file, $txt);
+		fclose($file);
 	}
 	function CreateViewAdminhtmlLayoutIndexFile($model){
 		$url = $this->_vendor."/".$this->_module."/"."view/adminhtml/layout"."/".strtolower($this->_vendor)."_".strtolower($this->_module)."_".strtolower($model["name"])."_edit".".xml";
