@@ -54,7 +54,7 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended {
 				'index' => 'status',
 				'class' => 'status',
 				'type' => 'options',
-				'options' => $this->_status->getOptionArray ()
+				'options' => $this->_status->toOptionArray ()
 		] );
 		$block = $this->getLayout ()->getBlock ( 'grid.bottom.links' );
 		if ($block) {

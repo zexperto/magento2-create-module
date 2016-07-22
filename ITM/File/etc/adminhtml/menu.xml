@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Backend/etc/menu.xsd">
+	<menu>
+		<add id="itm_file::file" title="File" module="ITM_File" sortOrder="0" parent="itm::base"  resource="ITM_File::main"/>
+		<add id="itm_file::box" title="Box" module="ITM_File" sortOrder="10" parent="itm_file::file" action="itm_file/box/" resource="ITM_File::Box"/>
+	</menu>
+</config>

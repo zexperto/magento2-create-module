@@ -12,7 +12,7 @@ class Form extends \Magento\Backend\Block\Widget\Form\Generic {
 		$form = $this->_formFactory->create ( [
 			'data' => [
 				'id' => 'edit_form',
-				'action' => $this->getUrl ( 'itm_file//box/save' ),
+				'action' => $this->getUrl ( 'itm_file/box/save' ),
 				'method' => 'post'
 			]
 			

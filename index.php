@@ -65,7 +65,7 @@ class Magento2Module{
 		$file = fopen($url, "w") or die("Unable to open file!");
 		
 		$txt = "<?php"."\n\n";
-		$txt = "namespace ".$this->_vendor."\\".$this->_module."\Setup;"."\n\n";
+		$txt .= "namespace ".$this->_vendor."\\".$this->_module."\Setup;"."\n\n";
 		$txt .= "use Magento\Framework\Setup\InstallSchemaInterface;"."\n";
 		$txt .= "use Magento\Framework\Setup\SchemaSetupInterface;"."\n";
 		$txt .= "use Magento\Framework\Setup\ModuleContextInterface;"."\n\n";
@@ -439,7 +439,7 @@ class Magento2Module{
 		$txt .= "\t\t".'$form = $this->_formFactory->create ( ['."\n";
 		$txt .= "\t\t\t".'\'data\' => ['."\n";
 		$txt .= "\t\t\t\t".'\'id\' => \'edit_form\','."\n";
-		$txt .= "\t\t\t\t".'\'action\' => $this->getUrl ( \''.strtolower($this->_vendor).'_'.strtolower($this->_module).'//'.strtolower($model["name"]).'/save\' ),'."\n";
+		$txt .= "\t\t\t\t".'\'action\' => $this->getUrl ( \''.strtolower($this->_vendor).'_'.strtolower($this->_module).'/'.strtolower($model["name"]).'/save\' ),'."\n";
 		$txt .= "\t\t\t\t".'\'method\' => \'post\''."\n";
 		$txt .= "\t\t\t".']'."\n";
 		$txt .= "\t\t\t".''."\n";
@@ -1007,8 +1007,52 @@ class Magento2Module{
 			foreach($this->_config["backend_model"] as $model){
 				$this->CreateBackEndModel($model);
 			}
+			$this->CreateMenuFile($model);
+			$this->CreateRoutesFile($model);
 		}
 	}
+	
+	
+	function CreateMenuFile($backend_model){
+		$this->CreateFolder($this->_vendor."/".$this->_module."/"."etc/adminhtml");
+		$url = $this->_vendor."/".$this->_module."/"."etc/adminhtml/menu.xml";
+	
+		$file = fopen($url, "w") or die("Unable to open file!");
+	
+		$txt = '<?xml version="1.0"?>'."\n";
+		$txt .= '<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Backend/etc/menu.xsd">'."\n";
+		$txt .= "\t".'<menu>'."\n";
+		$txt .= "\t\t".'<add id="'.strtolower($this->_vendor).'_'.strtolower($this->_module).'::'.strtolower($this->_module).'" title="'.$this->_module.'" module="'.$this->_vendor.'_'.$this->_module.'" sortOrder="0" parent="itm::base"  resource="'.$this->_vendor.'_'.$this->_module.'::main"/>'."\n";
+		foreach($this->_config["backend_model"] as $model){
+			$txt .= "\t\t".'<add id="'.strtolower($this->_vendor).'_'.strtolower($this->_module).'::'.strtolower($model["name"]).'" title="'.$model["name"].'" module="'.$this->_vendor.'_'.$this->_module.'" sortOrder="10" parent="'.strtolower($this->_vendor).'_'.strtolower($this->_module).'::'.strtolower($this->_module).'" action="'.strtolower($this->_vendor).'_'.strtolower($this->_module).'/'.strtolower($model["name"]).'/" resource="'.$this->_vendor.'_'.$this->_module.'::'.$model["name"].'"/>'."\n";
+		}
+		$txt .= "\t".'</menu>'."\n";
+		$txt .= '</config>';
+	
+		fwrite($file, $txt);
+		fclose($file);
+	}
+	
+	function CreateRoutesFile($backend_model){
+		$this->CreateFolder($this->_vendor."/".$this->_module."/"."etc/adminhtml");
+		$url = $this->_vendor."/".$this->_module."/"."etc/adminhtml/routes.xml";
+	
+		$file = fopen($url, "w") or die("Unable to open file!");
+	
+		$txt = '<?xml version="1.0"?>'."\n";
+		$txt .= '<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../lib/internal/Magento/Framework/App/etc/routes.xsd">'."\n";
+		$txt .= "\t".'<router id="admin">'."\n";
+		$txt .= "\t\t".'<route id="'.strtolower($this->_vendor).'_'.strtolower($this->_module).'" frontName="'.strtolower($this->_vendor).'_'.strtolower($this->_module).'">'."\n";
+		$txt .= "\t\t\t".'<module name="'.$this->_vendor.'_'.$this->_module.'" />'."\n";
+		$txt .= "\t\t".'</route>'."\n";
+		$txt .= "\t".'</router>'."\n";
+		$txt .= '</config>';
+	
+		fwrite($file, $txt);
+		fclose($file);
+	}
+	
+	
 	function create(){
 		$this->CreateFolder($this->_vendor);
 		$this->CreateFolder($this->_vendor."/".$this->_module);
