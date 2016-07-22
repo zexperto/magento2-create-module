@@ -240,16 +240,16 @@ class Magento2Module{
 			// Adminhtml/ {model}.php
 		$this->CreateAdminhtmlModelFile($model);
 		$this->CreateAdminhtmlModelGridFile($model);
-		//$this->CreateAdminhtmlModelEditFile($model);
-		
-		//$this->CreateAdminhtmlModelGridEditFormFile($model);
-		//$this->CreateAdminhtmlModelGridEditTabsFile($model);
-		
-		//$this->CreateAdminhtmlModelGridEditTabsMainFile($model);
+		$this->CreateAdminhtmlModelEditFile($model);
 		
 		
-			// Create Controllers Files
+		$this->CreateAdminhtmlModelGridEditFormFile($model);
+		$this->CreateAdminhtmlModelGridEditTabsFile($model);
 		
+		$this->CreateAdminhtmlModelGridEditTabsMainFile($model);
+		
+		
+		// Create Controllers Files
 		$this->CreateControllersAdminhtmlModelFile($model);
 		$this->CreateControllersAdminhtmlModelDeleteFile($model);
 		$this->CreateControllersAdminhtmlModelEditFile($model);
@@ -268,6 +268,203 @@ class Magento2Module{
 		$this->CreateViewAdminhtmlLayoutIndexFile($model);
 		$this->CreateViewAdminhtmlLayoutEditFile($model);
 	}
+	function CreateAdminhtmlModelGridEditTabsMainFile($model){
+		$url = $this->_vendor."/".$this->_module."/"."Block/Adminhtml/".$model["name"]."/Edit/Tab/Main.php";
+	
+		$file = fopen($url, "w") or die("Unable to open file!");
+	
+		$txt = '<?php'."\n\n";
+	
+		$txt .= 'namespace '.$this->_vendor.'\\'.$this->_module.'\Block\Adminhtml\\'.$model["name"].'\Edit\Tab;'."\n\n";
+		$txt .= 'use Magento\Backend\Block\Widget\Form\Generic;'."\n";
+		$txt .= 'use Magento\Backend\Block\Widget\Tab\TabInterface;'."\n";
+		$txt .= 'use Magento\Backend\Block\Template\Context;'."\n";
+		$txt .= 'use Magento\Framework\Registry;'."\n";
+		$txt .= 'use Magento\Framework\Data\FormFactory;'."\n";
+		$txt .= 'use Magento\Cms\Model\Wysiwyg\Config;'."\n";
+		$txt .= 'use ITM\Pricing\Model\System\Config\Status;'."\n";
+		
+		$txt .= "class Main extends Generic implements TabInterface {"."\n";
+	
+		$txt .= "\t".'protected $_status;'."\n";
+		$txt .= "\t".'public function __construct(Context $context, Registry $registry, FormFactory $formFactory, Config $wysiwygConfig, Status $status, array $data = []) {'."\n";
+		$txt .= "\t".'$this->_status = $status;'."\n";	
+		$txt .= "\t\t".'parent::__construct ( $context, $registry, $formFactory, $data );'."\n";
+		$txt .= "\t".'}'."\n";
+		
+		$txt .= "\t".'public function getTabLabel() {'."\n";
+		$txt .= "\t\t".'return __ ( \'Item Information\' );'."\n";
+		$txt .= "\t".'}'."\n";
+		
+		
+		$txt .= "\t".'public function getTabTitle() {'."\n";
+		$txt .= "\t\t".'return __ ( \'Item Information\' );'."\n";
+		$txt .= "\t".'}'."\n";
+		
+		$txt .= "\t".'public function canShowTab() {'."\n";
+		$txt .= "\t\t".'return true;'."\n";
+		$txt .= "\t".'}'."\n";
+		
+		$txt .= "\t".'public function isHidden() {'."\n";
+		$txt .= "\t\t".'return false;'."\n";
+		$txt .= "\t".'}'."\n";
+		
+		$txt .= "\t".'protected function _prepareForm() {'."\n";
+		$txt .= "\t\t".'$model = $this->_coreRegistry->registry ( \'current_'.strtolower($this->_vendor).'_'.strtolower($this->_module).'_'.strtolower($model["name"]).'\' );'."\n";
+		$txt .= "\t\t".'$form = $this->_formFactory->create ();'."\n";
+		$txt .= "\t\t".'$form->setHtmlIdPrefix ( \'item_\' );'."\n";
+		$txt .= "\t\t".'$fieldset = $form->addFieldset ( \'base_fieldset\', ['."\n";
+		$txt .= "\t\t\t".'\'legend\' => __ ( \'Item Information\' )'."\n";
+		$txt .= "\t\t".'] );'."\n";
+		$txt .= "\t\t".'if ($model->getId ()) {'."\n";
+		$txt .= "\t\t\t".'$fieldset->addField ( \'id\', \'hidden\', ['."\n";
+		$txt .= "\t\t\t\t".'\'name\' => \'id\''."\n";
+		$txt .= "\t\t\t".'] );'."\n";
+		$txt .= "\t\t".'}'."\n";
+		
+		$txt .= "\t\t".'$fieldset->addField ( \'status\', \'select\', ['."\n";
+		$txt .= "\t\t\t".'\'name\' => \'status\','."\n";
+		$txt .= "\t\t\t".'\'label\' => __ ( \'Status\' ),'."\n";
+		$txt .= "\t\t\t".'\'options\' => $this->_status->toOptionArray ()'."\n";
+		$txt .= "\t\t\t".'] );'."\n";
+		$txt .= "\t\t".'$form->setValues ( $model->getData () );'."\n";
+		$txt .= "\t\t".'$this->setForm ( $form );'."\n";
+		$txt .= "\t\t".'return parent::_prepareForm ();'."\n";
+		$txt .= "\t".'}'."\n";
+		
+		$txt .= '}';
+		fwrite($file, $txt);
+		fclose($file);
+	}
+	function ff($model){
+		$url = $this->_vendor."/".$this->_module."/"."Controller/Adminhtml/".$model["name"]."/Edit.php";
+	
+		$file = fopen($url, "w") or die("Unable to open file!");
+	
+		$txt = '<?php'."\n\n";
+	
+		$txt .= 'namespace '.$this->_vendor.'\\'.$this->_module.'\Controller\Adminhtml\\'.$model["name"].';'."\n\n";
+	
+		$txt .= "class Edit extends \\".$this->_vendor."\\".$this->_module."\Controller\Adminhtml\\".$model["name"]." {"."\n";
+	
+	
+		$txt .= "\t".'public function execute() {'."\n";
+	
+		$txt .= "\t".''."\n";
+	
+		$txt .= "\t"."}"."\n";
+		$txt .= '}';
+		fwrite($file, $txt);
+		fclose($file);
+	}
+	function CreateAdminhtmlModelGridEditTabsFile($model){
+		$url = $this->_vendor."/".$this->_module."/"."Block/Adminhtml/".$model["name"]."/Edit/Tabs.php";
+	
+		$file = fopen($url, "w") or die("Unable to open file!");
+	
+		$txt = '<?php'."\n\n";
+		$txt .= 'namespace '.$this->_vendor.'\\'.$this->_module.'\Block\Adminhtml\\'.$model["name"].'\Edit;'."\n\n";
+		$txt .= "class Tabs extends \Magento\Backend\Block\Widget\Tabs {"."\n";
+		$txt .= "\t".'protected function _construct() {'."\n";
+		$txt .= "\t\t".'parent::_construct ();'."\n";
+		$txt .= "\t\t".'$this->setId ( \''.strtolower($this->_vendor).'_'.strtolower($this->_module).'_'.strtolower($model["name"]).'_edit_tabs\' );'."\n";
+		$txt .= "\t\t".'$this->setDestElementId ( \'edit_form\' );'."\n";
+		$txt .= "\t\t".'$this->setTitle ( __ ( \''.$model["name"].'\' ) );'."\n";
+		$txt .= "\t"."}"."\n";
+		$txt .= '}';
+		fwrite($file, $txt);
+		fclose($file);
+	}
+	
+	function CreateAdminhtmlModelGridEditFormFile($model){
+		$url = $this->_vendor."/".$this->_module."/"."Block/Adminhtml/".$model["name"]."/Edit/Form.php";
+	
+		$file = fopen($url, "w") or die("Unable to open file!");
+	
+		$txt = '<?php'."\n\n";
+	
+		$txt .= 'namespace '.$this->_vendor.'\\'.$this->_module.'\Block\Adminhtml\\'.$model["name"].'\Edit;'."\n\n";
+	
+		$txt .= "class Form extends \Magento\Backend\Block\Widget\Form\Generic {"."\n";
+	
+		$txt .= "\t".'protected function _construct() {'."\n";
+	
+		$txt .= "\t\t".'parent::_construct ();'."\n";
+		$txt .= "\t\t".'$this->setId ( \''.strtolower($this->_vendor).'_'.strtolower($model["name"]).'_form\' );'."\n";
+		$txt .= "\t\t".'$this->setTitle ( __ ( \''.$model["name"].' Information\' ) );'."\n";
+		$txt .= "\t".'}'."\n";
+		
+		
+		$txt .= "\t".'protected function _prepareForm() {'."\n";
+		$txt .= "\t\t".'$form = $this->_formFactory->create ( ['."\n";
+		$txt .= "\t\t\t".'\'data\' => ['."\n";
+		$txt .= "\t\t\t\t".'\'id\' => \'edit_form\','."\n";
+		$txt .= "\t\t\t\t".'\'action\' => $this->getUrl ( \''.strtolower($this->_vendor).'_'.strtolower($this->_module).'//'.strtolower($model["name"]).'/save\' ),'."\n";
+		$txt .= "\t\t\t\t".'\'method\' => \'post\''."\n";
+		$txt .= "\t\t\t".']'."\n";
+		$txt .= "\t\t\t".''."\n";
+		$txt .= "\t\t".'] );'."\n";
+		$txt .= "\t\t".'$form->setUseContainer ( true );'."\n";
+		$txt .= "\t\t".'$this->setForm ( $form );'."\n";
+		$txt .= "\t\t".'return parent::_prepareForm ();'."\n";
+		$txt .= "\t".'}'."\n";
+	
+		$txt .= '}';
+		fwrite($file, $txt);
+		fclose($file);
+	}
+	function CreateAdminhtmlModelEditFile($model){
+		$url = $this->_vendor."/".$this->_module."/"."Block/Adminhtml/".$model["name"]."/Edit.php";
+	
+		$file = fopen($url, "w") or die("Unable to open file!");
+	
+		$txt = '<?php'."\n\n";
+	
+		$txt .= 'namespace '.$this->_vendor.'\\'.$this->_module.'\Block\Adminhtml\\'.$model["name"].';'."\n\n";
+		$txt .= "class Edit extends \Magento\Backend\Block\Widget\Form\Container {"."\n";
+		
+		$txt .= "\t".'protected $_coreRegistry = null;'."\n";
+		$txt .= "\t".'public function __construct(\Magento\Backend\Block\Widget\Context $context, \Magento\Framework\Registry $registry, array $data = []) {'."\n";
+		$txt .= "\t\t".'$this->_coreRegistry = $registry;'."\n";
+		$txt .= "\t\t".'parent::__construct ( $context, $data );'."\n";
+		$txt .= "\t".'}'."\n";
+		
+		
+		$txt .= "\t".'protected function _construct() {'."\n";
+		$txt .= "\t\t".'$this->_objectId = \'id\';'."\n";
+		$txt .= "\t\t".'$this->_controller = \'adminhtml_'.strtolower($model["name"]).'\';'."\n";
+		$txt .= "\t\t".'$this->_blockGroup = \''.$this->_vendor.'_'.$this->_module.'\';'."\n";
+		$txt .= "\t\t".'parent::_construct ();'."\n";
+		$txt .= "\t\t".'$this->buttonList->add ( \'save_and_continue_edit\', ['."\n";
+		$txt .= "\t\t\t".'\'class\' => \'save\','."\n";
+		$txt .= "\t\t\t".'\'label\' => __ ( \'Save and Continue Edit\' ),'."\n";
+		$txt .= "\t\t\t".'\'data_attribute\' => ['."\n";
+		$txt .= "\t\t\t\t\t".'\'mage-init\' => ['."\n";
+		$txt .= "\t\t\t\t\t\t\t".'\'button\' => ['."\n";
+		$txt .= "\t\t\t\t\t\t\t\t\t".'\'event\' => \'saveAndContinueEdit\','."\n";
+		$txt .= "\t\t\t\t\t\t\t\t\t".'\'target\' => \'#edit_form\''."\n";
+		$txt .= "\t\t\t\t\t\t\t".'] '."\n";
+		$txt .= "\t\t\t\t\t".'] '."\n";
+		$txt .= "\t\t\t".'] '."\n";
+		$txt .= "\t\t".'], 10 );'."\n";
+		$txt .= "\t".'}'."\n";
+		
+		
+		$txt .= "\t".'public function getHeaderText() {'."\n";
+		$txt .= "\t\t".'$item = $this->_coreRegistry->registry ( \'current_'.strtolower($this->_vendor).'_'.strtolower($this->_module).'_'.strtolower($model["name"]).'\' );'."\n";
+		$txt .= "\t\t".'if ($item->getId ()) {'."\n";
+		$txt .= "\t\t\t".'return __ ( "Edit Item \'%1\'", $this->escapeHtml ( $item->getId () ) );'."\n";
+		$txt .= "\t\t".'} else {'."\n";
+		$txt .= "\t\t\t".'return __ ( \'New Item\' );'."\n";
+		$txt .= "\t\t".'}'."\n";
+		$txt .= "\t".'}'."\n";
+		
+		
+		$txt .= '}';
+		fwrite($file, $txt);
+		fclose($file);
+	}
+	
 	function CreateAdminhtmlModelGridFile($model){
 		$url = $this->_vendor."/".$this->_module."/"."Block/Adminhtml/".$model["name"]."/Grid.php";
 	
@@ -482,27 +679,7 @@ class Magento2Module{
 		fwrite($file, $txt);
 		fclose($file);
 	}
-	function ff($model){
-		$url = $this->_vendor."/".$this->_module."/"."Controller/Adminhtml/".$model["name"]."/Edit.php";
 	
-		$file = fopen($url, "w") or die("Unable to open file!");
-	
-		$txt = '<?php'."\n\n";
-	
-		$txt .= 'namespace '.$this->_vendor.'\\'.$this->_module.'\Controller\Adminhtml\\'.$model["name"].';'."\n\n";
-	
-		$txt .= "class Edit extends \\".$this->_vendor."\\".$this->_module."\Controller\Adminhtml\\".$model["name"]." {"."\n";
-	
-	
-		$txt .= "\t".'public function execute() {'."\n";
-	
-		$txt .= "\t".''."\n";
-	
-		$txt .= "\t"."}"."\n";
-		$txt .= '}';
-		fwrite($file, $txt);
-		fclose($file);
-	}
 	function CreateControllersAdminhtmlModelMassDeleteFile($model){
 		$url = $this->_vendor."/".$this->_module."/"."Controller/Adminhtml/".$model["name"]."/MassDelete.php";
 	
