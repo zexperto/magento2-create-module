@@ -272,10 +272,10 @@ class Magento2Module{
 		$this->CreateControllersAdminhtmlModelFile($model);
 		$this->CreateControllersAdminhtmlModelDeleteFile($model);
 		$this->CreateControllersAdminhtmlModelEditFile($model);
-		//$this->CreateControllersAdminhtmlModelIndexFile($model);
-		//$this->CreateControllersAdminhtmlModelMassDeleteFile($model);
-		//$this->CreateControllersAdminhtmlModelNewActionFile($model);
-		//$this->CreateControllersAdminhtmlModelSaveFile($model);
+		$this->CreateControllersAdminhtmlModelIndexFile($model);
+		$this->CreateControllersAdminhtmlModelMassDeleteFile($model);
+		$this->CreateControllersAdminhtmlModelNewActionFile($model);
+		$this->CreateControllersAdminhtmlModelSaveFile($model);
 		
 		
 		// Create Model Files
@@ -286,6 +286,182 @@ class Magento2Module{
 		// Create view Files
 		$this->CreateViewAdminhtmlLayoutIndexFile($model);
 		$this->CreateViewAdminhtmlLayoutEditFile($model);
+	}
+	function CreateControllersAdminhtmlModelSaveFile($model){
+		$url = $this->_vendor."/".$this->_module."/"."Controller/Adminhtml/".$model["name"]."/Save.php";
+	
+		$file = fopen($url, "w") or die("Unable to open file!");
+	
+		$txt = '<?php'."\n\n";
+	
+		$txt .= 'namespace '.$this->_vendor.'\\'.$this->_module.'\Controller\Adminhtml\\'.$model["name"].';'."\n\n";
+	
+		$txt .= "class Save extends \\".$this->_vendor."\\".$this->_module."\Controller\Adminhtml\\".$model["name"]." {"."\n";
+	
+	
+		$txt .= "\t".'public function execute() {'."\n";
+	
+		$txt .= "\t\t".'if ($this->getRequest ()->getPostValue ()) {'."\n";
+		$txt .= "\t\t\t".'try {'."\n";
+		$txt .= "\t\t\t\t".'$model = $this->_objectManager->create ( \''.$this->_vendor.'\\'.$this->_module.'\Model\\'.$model["name"].'\' );'."\n";
+		$txt .= "\t\t\t\t".'$data = $this->getRequest ()->getPostValue ();'."\n";
+		$txt .= "\t\t\t\t".'$inputFilter = new \Zend_Filter_Input ( [ ], [ ], $data );'."\n";
+		$txt .= "\t\t\t\t".'$data = $inputFilter->getUnescaped ();'."\n";
+		$txt .= "\t\t\t\t".'$id = $this->getRequest ()->getParam ( \'id\' );'."\n";
+		$txt .= "\t\t\t\t".'if ($id) {'."\n";
+		$txt .= "\t\t\t\t\t".'$model->load ( $id );'."\n";
+		$txt .= "\t\t\t\t\t".'if ($id != $model->getId ()) {'."\n";
+		$txt .= "\t\t\t\t\t\t".'throw new \Magento\Framework\Exception\LocalizedException ( __ ( \'The wrong item is specified.\' ) );'."\n";
+		$txt .= "\t\t\t\t\t".'}'."\n";
+		$txt .= "\t\t\t\t".'}'."\n";
+		$txt .= "\t\t\t\t".'$model->setData ( $data );'."\n";
+		$txt .= "\t\t\t\t".'$session = $this->_objectManager->get ( \'Magento\Backend\Model\Session\' );'."\n";
+		$txt .= "\t\t\t\t".'$session->setPageData ( $model->getData () );'."\n";
+		$txt .= "\t\t\t\t".'$model->save ();'."\n";
+		$txt .= "\t\t\t\t".'$this->messageManager->addSuccess ( __ ( \'You saved the item.\' ) );'."\n";
+		$txt .= "\t\t\t\t".'$session->setPageData ( false );'."\n";
+		$txt .= "\t\t\t\t".'if ($this->getRequest ()->getParam ( \'back\' )) {'."\n";
+		$txt .= "\t\t\t\t\t".'$this->_redirect ( \''.strtolower($this->_vendor).'_'.strtolower($this->_module).'/*/edit\', ['."\n";
+		$txt .= "\t\t\t\t\t\t".'\'id\' => $model->getId ()'."\n";
+		$txt .= "\t\t\t\t\t".'] );'."\n";
+		$txt .= "\t\t\t\t\t".'return;'."\n";
+		$txt .= "\t\t\t\t".'}'."\n";
+		$txt .= "\t\t\t\t".'$this->_redirect ( \''.strtolower($this->_vendor).'_'.strtolower($this->_module).'/*/\' );'."\n";
+		$txt .= "\t\t\t\t".'return;'."\n";
+		$txt .= "\t\t\t".'} catch ( \Magento\Framework\Exception\LocalizedException $e ) {'."\n";
+		$txt .= "\t\t\t\t".'$this->messageManager->addError ( $e->getMessage () );'."\n";
+		$txt .= "\t\t\t\t".'$id = ( int ) $this->getRequest ()->getParam ( \'id\' );'."\n";
+		$txt .= "\t\t\t\t".'if (! empty ( $id )) {'."\n";
+		$txt .= "\t\t\t\t\t".'$this->_redirect ( \''.strtolower($this->_vendor).'_'.strtolower($this->_module).'/*/edit\', ['."\n";
+		$txt .= "\t\t\t\t\t\t".'\'id\' => $id'."\n";
+		$txt .= "\t\t\t\t\t".'] );'."\n";
+		$txt .= "\t\t\t\t".'} else {'."\n";
+		$txt .= "\t\t\t\t\t".'$this->_redirect ( \''.strtolower($this->_vendor).'_'.strtolower($this->_module).'/*/new\');'."\n";
+		$txt .= "\t\t\t\t".'}'."\n";
+		$txt .= "\t\t\t\t".'return;'."\n";
+		$txt .= "\t\t\t".'} catch ( \Exception $e ) {'."\n";
+		$txt .= "\t\t\t\t".'$this->messageManager->addError ( __ ( \'Something went wrong while saving the item data. Please review the error log.\' ) );'."\n";
+		$txt .= "\t\t\t\t".'$this->_objectManager->get ( \'Psr\Log\LoggerInterface\' )->critical ( $e );'."\n";
+		$txt .= "\t\t\t\t".'$this->_objectManager->get ( \'Magento\Backend\Model\Session\' )->setPageData ( $data );'."\n";
+		$txt .= "\t\t\t\t".'$this->_redirect ( \''.strtolower($this->_vendor).'_'.strtolower($this->_module).'/*/edit\', [ '."\n";
+		$txt .= "\t\t\t\t\t".'\'id\' => $this->getRequest ()->getParam ( \'id\' )'."\n";
+		$txt .= "\t\t\t\t".'] );'."\n";
+		$txt .= "\t\t\t\t".'return;'."\n";
+		$txt .= "\t\t\t".'}'."\n";
+		$txt .= "\t\t".'}'."\n";
+		$txt .= "\t\t".'$this->_redirect ( \''.strtolower($this->_vendor).'_'.strtolower($this->_module).'/*/\' );'."\n";
+		
+		$txt .= "\t"."}"."\n";
+		$txt .= '}';
+		fwrite($file, $txt);
+		fclose($file);
+	}
+	function CreateControllersAdminhtmlModelNewActionFile($model){
+		$url = $this->_vendor."/".$this->_module."/"."Controller/Adminhtml/".$model["name"]."/NewAction.php";
+	
+		$file = fopen($url, "w") or die("Unable to open file!");
+	
+		$txt = '<?php'."\n\n";
+	
+		$txt .= 'namespace '.$this->_vendor.'\\'.$this->_module.'\Controller\Adminhtml\\'.$model["name"].';'."\n\n";
+	
+		$txt .= "class NewAction extends \\".$this->_vendor."\\".$this->_module."\Controller\Adminhtml\\".$model["name"]." {"."\n";
+	
+	
+		$txt .= "\t".'public function execute() {'."\n";
+	
+		$txt .= "\t\t".'$this->_forward(\'edit\');'."\n";
+	
+		$txt .= "\t"."}"."\n";
+		$txt .= '}';
+		fwrite($file, $txt);
+		fclose($file);
+	}
+	function ff($model){
+		$url = $this->_vendor."/".$this->_module."/"."Controller/Adminhtml/".$model["name"]."/Edit.php";
+	
+		$file = fopen($url, "w") or die("Unable to open file!");
+	
+		$txt = '<?php'."\n\n";
+	
+		$txt .= 'namespace '.$this->_vendor.'\\'.$this->_module.'\Controller\Adminhtml\\'.$model["name"].';'."\n\n";
+	
+		$txt .= "class Edit extends \\".$this->_vendor."\\".$this->_module."\Controller\Adminhtml\\".$model["name"]." {"."\n";
+	
+	
+		$txt .= "\t".'public function execute() {'."\n";
+	
+		$txt .= "\t".''."\n";
+	
+		$txt .= "\t"."}"."\n";
+		$txt .= '}';
+		fwrite($file, $txt);
+		fclose($file);
+	}
+	function CreateControllersAdminhtmlModelMassDeleteFile($model){
+		$url = $this->_vendor."/".$this->_module."/"."Controller/Adminhtml/".$model["name"]."/MassDelete.php";
+	
+		$file = fopen($url, "w") or die("Unable to open file!");
+	
+		$txt = '<?php'."\n\n";
+	
+		$txt .= 'namespace '.$this->_vendor.'\\'.$this->_module.'\Controller\Adminhtml\\'.$model["name"].';'."\n\n";
+	
+		$txt .= "class MassDelete extends \\".$this->_vendor."\\".$this->_module."\Controller\Adminhtml\\".$model["name"]." {"."\n";
+		$txt .= "\t".'public function execute() {'."\n";
+	
+		$txt .= "\t\t".'$itemsIds = $this->getRequest()->getParam(\'id\');'."\n";
+		$txt .= "\t\t".'if (!is_array($itemsIds)) {'."\n";
+		$txt .= "\t\t\t".'$this->messageManager->addError(__(\'Please select item(s).\'));'."\n";
+		$txt .= "\t\t".'} else {'."\n";
+		$txt .= "\t\t\t".'try {'."\n";
+		$txt .= "\t\t\t\t".'foreach ($itemsIds as $itemId) {'."\n";
+		$txt .= "\t\t\t\t\t".'$model = $this->_objectManager->create(\''.$this->_vendor.'\\'.$this->_module.'\Model\\'.$model["name"].'\');'."\n";
+		$txt .= "\t\t\t\t\t".'$model->load($itemId);'."\n";
+		$txt .= "\t\t\t\t\t".'$model->delete();'."\n";
+		$txt .= "\t\t\t\t".'}'."\n";
+		$txt .= "\t\t\t\t".'$this->messageManager->addSuccess('."\n";
+		$txt .= "\t\t\t\t\t".'__(\'A total of %1 record(s) have been deleted.\', count($itemsIds))'."\n";
+		$txt .= "\t\t\t\t".');'."\n";
+		$txt .= "\t\t\t".'} catch (\Magento\Framework\Exception\LocalizedException $e) {'."\n";
+		$txt .= "\t\t\t\t".'$this->messageManager->addError($e->getMessage());'."\n";
+		$txt .= "\t\t\t".'} catch (\Exception $e) {'."\n";
+		$txt .= "\t\t\t\t".'$this->messageManager->addException($e, __(\'An error occurred while deleting record(s).\'));'."\n";
+		$txt .= "\t\t\t".'}'."\n";
+		$txt .= "\t\t".'}'."\n";
+		$txt .= "\t\t".'$this->_redirect(\''.strtolower($this->_vendor).'_'.strtolower($this->_module).'/*/\');'."\n";
+	
+		$txt .= "\t"."}"."\n";
+		$txt .= '}';
+		fwrite($file, $txt);
+		fclose($file);
+	}
+	
+	function CreateControllersAdminhtmlModelIndexFile($model){
+		$url = $this->_vendor."/".$this->_module."/"."Controller/Adminhtml/".$model["name"]."/Index.php";
+	
+		$file = fopen($url, "w") or die("Unable to open file!");
+	
+		$txt = '<?php'."\n\n";
+	
+		$txt .= 'namespace '.$this->_vendor.'\\'.$this->_module.'\Controller\Adminhtml\\'.$model["name"].';'."\n\n";
+	
+		$txt .= "class Index extends \\".$this->_vendor."\\".$this->_module."\Controller\Adminhtml\\".$model["name"]." {"."\n";
+	
+	
+		$txt .= "\t".'public function execute() {'."\n";
+		$txt .= "\t\t".'$resultPage = $this->resultPageFactory->create();'."\n";
+		$txt .= "\t\t".'$resultPage->setActiveMenu(\''.$this->_vendor.'_'.$this->_module.'::'.strtolower($this->_module).'\');'."\n";
+		$txt .= "\t\t".'$resultPage->getConfig()->getTitle()->prepend(__(\''.$model["name"].'\'));'."\n";
+		$txt .= "\t\t".'$resultPage->addBreadcrumb(__(\''.$this->_vendor.'\'), __(\''.$this->_vendor.'\'));'."\n";
+		$txt .= "\t\t".'$resultPage->addBreadcrumb(__(\''.$model["name"].'\'), __(\''.$model["name"].'\'));'."\n";
+		$txt .= "\t\t".'return $resultPage;'."\n";
+	
+	
+		$txt .= "\t"."}"."\n";
+		$txt .= '}';
+		fwrite($file, $txt);
+		fclose($file);
 	}
 	function CreateControllersAdminhtmlModelEditFile($model){
 		$url = $this->_vendor."/".$this->_module."/"."Controller/Adminhtml/".$model["name"]."/Edit.php";
@@ -331,27 +507,7 @@ class Magento2Module{
 		fwrite($file, $txt);
 		fclose($file);
 	}
-	function ff($model){
-		$url = $this->_vendor."/".$this->_module."/"."Controller/Adminhtml/".$model["name"]."/Edit.php";
 	
-		$file = fopen($url, "w") or die("Unable to open file!");
-	
-		$txt = '<?php'."\n\n";
-	
-		$txt .= 'namespace '.$this->_vendor.'\\'.$this->_module.'\Controller\Adminhtml\\'.$model["name"].';'."\n\n";
-	
-		$txt .= "class Edit extends \\".$this->_vendor."\\".$this->_module."\Controller\Adminhtml\\".$model["name"]." {"."\n";
-	
-	
-		$txt .= "\t".'public function execute() {'."\n";
-	
-	
-	
-		$txt .= "\t"."}"."\n";
-		$txt .= '}';
-		fwrite($file, $txt);
-		fclose($file);
-	}
 	function CreateControllersAdminhtmlModelDeleteFile($model){
 		$url = $this->_vendor."/".$this->_module."/"."Controller/Adminhtml/".$model["name"]."/Delete.php";
 	
