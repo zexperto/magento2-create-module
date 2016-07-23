@@ -12,18 +12,15 @@ class UpgradeData implements UpgradeDataInterface {
 
 	public function __construct(EavSetupFactory $eavSetupFactory) {
 		$this->eavSetupFactory = $eavSetupFactory;
-
 	}
-
 
 	public function upgrade(ModuleDataSetupInterface $setup, ModuleContextInterface $context) {
 		$eavSetup = $this->eavSetupFactory->create ( [
-				'setup' => $setup
+			'setup' => $setup
 		] );
 
-
 		if (version_compare ( $context->getVersion (), '1.0.1' ) < 0) {
-			//your code here
+			//your code here" . "\n";
 		}
 
 	}

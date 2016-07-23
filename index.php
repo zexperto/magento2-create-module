@@ -148,135 +148,159 @@ class Uninstall implements UninstallInterface {
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
+	
+	
 	function CreateUpgradeSchemaFile() {
-		$path = $this->_vendor . "/" . $this->_module . "/" . "Setup" . "/" . "UpgradeSchema.php";
+		$path = sprintf ( '%s/%s/Setup/UpgradeSchema.php', $this->_vendor, $this->_module );
+	
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = "<?php" . "\n\n";
-		$txt = "namespace " . $this->_vendor . "\\" . $this->_module . "\Setup;" . "\n\n";
-		$txt .= "use Magento\Framework\Setup\UpgradeSchemaInterface;" . "\n";
-		$txt .= "use Magento\Framework\Setup\SchemaSetupInterface;" . "\n";
-		$txt .= "use Magento\Framework\Setup\ModuleContextInterface;" . "\n\n";
-		$txt .= "class UpgradeSchema implements UpgradeSchemaInterface {" . "\n\n";
-		$txt .= "\t" . 'public function upgrade(SchemaSetupInterface $setup, ModuleContextInterface $context){' . "\n";
-		$txt .= "\t\t" . '$setup->startSetup ();' . "\n\n";
+		$txt = sprintf('<?php
+				
+namespace %s\%s\Setup;
+
+use Magento\Framework\Setup\UpgradeSchemaInterface;
+use Magento\Framework\Setup\SchemaSetupInterface;
+use Magento\Framework\Setup\ModuleContextInterface;
+
+class UpgradeSchema implements UpgradeSchemaInterface {
+
+	public function upgrade(SchemaSetupInterface $setup, ModuleContextInterface $context){
+		$setup->startSetup ();
+				
+		if(!$context->getVersion()) {
+			// your code here" . "\n";
+		}
+
 		
-		$txt .= "\t\t" . 'if(!$context->getVersion()) {' . "\n";
-		$txt .= "\t\t\t" . "// your code here" . "\n";
-		$txt .= "\t\t" . '}' . "\n\n";
-		
-		$txt .= "\t\t" . 'if (version_compare($context->getVersion(), \'1.0.1\') < 0) {' . "\n";
-		$txt .= "\t\t\t" . "//code to upgrade to 1.0.1" . "\n";
-		$txt .= "\t\t" . '}' . "\n\n";
-		
-		$txt .= "\t\t" . 'if (version_compare($context->getVersion(), \'1.0.2\') < 0) {' . "\n";
-		$txt .= "\t\t\t" . " //code to upgrade to 1.0.2" . "\n";
-		$txt .= "\t\t" . '}' . "\n\n";
-		
-		$txt .= "\t\t" . '$setup->endSetup ();' . "\n";
-		$txt .= "\t" . "}" . "\n";
-		$txt .= "}";
+		if (version_compare($context->getVersion(), \'1.0.1\') < 0) {
+			//code to upgrade to 1.0.1" . "\n";
+		}
+
+		if (version_compare($context->getVersion(), \'1.0.2\') < 0) {
+			 //code to upgrade to 1.0.2" . "\n";
+		}
+
+		$setup->endSetup ();
+	}
+}',$this->_vendor,$this->_module);
 		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
+	
+	
 	function CreateUpgradeDataFile() {
-		$path = $this->_vendor . "/" . $this->_module . "/" . "Setup" . "/" . "UpgradeData.php";
+		$path = sprintf ( '%s/%s/Setup/UpgradeData.php', $this->_vendor, $this->_module );
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = "<?php" . "\n\n";
-		$txt .= "namespace " . $this->_vendor . "\\" . $this->_module . "\Setup;" . "\n\n";
-		$txt .= "use Magento\Eav\Setup\EavSetup;" . "\n";
-		$txt .= "use Magento\Eav\Setup\EavSetupFactory;" . "\n";
-		$txt .= "use Magento\Framework\Setup\UpgradeDataInterface;" . "\n";
-		$txt .= "use Magento\Framework\Setup\ModuleContextInterface;" . "\n";
-		$txt .= "use Magento\Framework\Setup\ModuleDataSetupInterface;" . "\n\n";
-		
-		$txt .= "class UpgradeData implements UpgradeDataInterface {" . "\n\n";
-		$txt .= "\t" . 'public function __construct(EavSetupFactory $eavSetupFactory) {' . "\n";
-		$txt .= "\t\t" . '$this->eavSetupFactory = $eavSetupFactory;' . "\n\n";
-		$txt .= "\t" . '}' . "\n\n\n";
-		
-		$txt .= "\t" . 'public function upgrade(ModuleDataSetupInterface $setup, ModuleContextInterface $context) {' . "\n";
-		
-		$txt .= "\t\t" . '$eavSetup = $this->eavSetupFactory->create ( [' . "\n";
-		$txt .= "\t\t\t\t" . '\'setup\' => $setup' . "\n";
-		$txt .= "\t\t" . '] );' . "\n\n\n";
-		
-		$txt .= "\t\t" . 'if (version_compare ( $context->getVersion (), \'1.0.1\' ) < 0) {' . "\n";
-		$txt .= "\t\t\t" . "//your code here" . "\n";
-		$txt .= "\t\t" . '}' . "\n\n";
-		
-		$txt .= "\t" . '}' . "\n\n";
-		
-		$txt .= "}";
+		$txt = sprintf('<?php
+
+namespace %s\%s\Setup;
+
+use Magento\Eav\Setup\EavSetup;
+use Magento\Eav\Setup\EavSetupFactory;
+use Magento\Framework\Setup\UpgradeDataInterface;
+use Magento\Framework\Setup\ModuleContextInterface;
+use Magento\Framework\Setup\ModuleDataSetupInterface;
+
+class UpgradeData implements UpgradeDataInterface {
+
+	public function __construct(EavSetupFactory $eavSetupFactory) {
+		$this->eavSetupFactory = $eavSetupFactory;
+	}
+
+	public function upgrade(ModuleDataSetupInterface $setup, ModuleContextInterface $context) {
+		$eavSetup = $this->eavSetupFactory->create ( [
+			\'setup\' => $setup
+		] );
+
+		if (version_compare ( $context->getVersion (), \'1.0.1\' ) < 0) {
+			//your code here" . "\n";
+		}
+
+	}
+
+}',$this->_vendor ,$this->_module);
 		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
+	
+	
 	function CreateSetup() {
 		if ($this->_config ["setup"]) {
-			$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "Setup" );
+			
+			$this->CreateFolder (sprintf('%s/%s/Setup',$this->_vendor,$this->_module));
 			$this->CreateInstallSchemaFile ();
 			$this->CreateUninstallFile ();
 			$this->CreateUpgradeSchemaFile ();
 			$this->CreateUpgradeDataFile ();
 		}
 	}
+	
+	
 	function CreateBlock() {
 		if ($this->_config ["block"]) {
-			$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "Block" );
+			$this->CreateFolder (sprintf('%s/%s/Block',$this->_vendor,$this->_module));
 		}
 	}
 	function CreateApi() {
 		if ($this->_config ["api"]) {
-			$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "Api" );
+			$this->CreateFolder (sprintf('%s/%s/Api',$this->_vendor,$this->_module));
 		}
 	}
 	function CreateModel() {
 		if ($this->_config ["model"]) {
-			$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "Model" );
+			$this->CreateFolder (sprintf('%s/%s/Model',$this->_vendor,$this->_module));
 		}
 	}
 	function CreateController() {
 		if ($this->_config ["controller"]) {
-			$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "Controller" );
+			$this->CreateFolder (sprintf('%s/%s/Controller',$this->_vendor,$this->_module));
 		}
 	}
 	function CreateView() {
 		if ($this->_config ["view"]) {
-			$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/view" );
+			$this->CreateFolder (sprintf('%s/%s/view',$this->_vendor,$this->_module));
 		}
 		
 		if ($this->_config ["view"] ["frontend"]) {
-			$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/view/frontend" );
-			$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/view/frontend/layout" );
-			$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/view/frontend/templates" );
+			$this->CreateFolder (sprintf('%s/%s/view/frontend',$this->_vendor,$this->_module));
+			$this->CreateFolder (sprintf('%s/%s/view/frontend/layout',$this->_vendor,$this->_module));
+			$this->CreateFolder (sprintf('%s/%s/view/frontend/templates',$this->_vendor,$this->_module));
 		}
 		
 		if ($this->_config ["view"] ["adminhtml"]) {
-			$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/view/adminhtml" );
-			$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/view/adminhtml/layout" );
-			$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/view/adminhtml/templates" );
+			$this->CreateFolder (sprintf('%s/%s/view/adminhtml',$this->_vendor,$this->_module));
+			$this->CreateFolder (sprintf('%s/%s/view/adminhtml/layout',$this->_vendor,$this->_module));
+			$this->CreateFolder (sprintf('%s/%s/view/adminhtml/templates',$this->_vendor,$this->_module));
 		}
 	}
+	
 	function CreateBackEndModel($model) {
 		// Create Block Folder
-		$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "Block" );
-		$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "Block/Adminhtml" );
-		$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "Block/Adminhtml/" . $model ["name"] );
-		$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "Block/Adminhtml/" . $model ["name"] . "/Edit" );
-		$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "Block/Adminhtml/" . $model ["name"] . "/Edit/Tab" );
+		
+		$this->CreateFolder (sprintf('%s/%s/Block',$this->_vendor,$this->_module));
+		$this->CreateFolder (sprintf('%s/%s/Block/Adminhtml',$this->_vendor,$this->_module));
+		$this->CreateFolder (sprintf('%s/%s/Block/Adminhtml/%s',$this->_vendor,$this->_module,$model ["name"]));
+		$this->CreateFolder (sprintf('%s/%s/Block/Adminhtml/%s',$this->_vendor,$this->_module,$model ["name"]));
+		$this->CreateFolder (sprintf('%s/%s/Block/Adminhtml/%s/Edit',$this->_vendor,$this->_module,$model ["name"]));
+		$this->CreateFolder (sprintf('%s/%s/Block/Adminhtml/%s/Edit/Tab',$this->_vendor,$this->_module,$model ["name"]));
+		
 		
 		// Create Controller Folder
-		$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "Controller" );
-		$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "Controller/Adminhtml" );
-		$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "Controller/Adminhtml/" . $model ["name"] );
+		$this->CreateFolder (sprintf('%s/%s/Controller',$this->_vendor,$this->_module));
+		$this->CreateFolder (sprintf('%s/%s/Controller/Adminhtml',$this->_vendor,$this->_module));
+		$this->CreateFolder (sprintf('%s/%s/Controller/Adminhtml/%s',$this->_vendor,$this->_module,$model ["name"]));
+		
 		
 		// Create Model Folder
-		$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "Model" );
-		$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "Model/Resource" );
-		$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "Model/Resource/" . $model ["name"] );
+		$this->CreateFolder (sprintf('%s/%s/Model',$this->_vendor,$this->_module));
+		$this->CreateFolder (sprintf('%s/%s/Model/Resource',$this->_vendor,$this->_module));
+		$this->CreateFolder (sprintf('%s/%s/Model/Resource/%s',$this->_vendor,$this->_module,$model ["name"]));
+		
 		
 		// Create Block Files
 		// Adminhtml/ {model}.php
@@ -311,125 +335,116 @@ class Uninstall implements UninstallInterface {
 		$this->CreateModelSystemConfigStatusFile ( $model );
 	}
 	function CreateModelSystemConfigStatusFile($model) {
-		$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "Model/System" );
-		$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "Model/System/Config" );
+		$this->CreateFolder (sprintf('%s/%s/Model/System',$this->_vendor,$this->_module));
+		$this->CreateFolder (sprintf('%s/%s/Model/System/Config',$this->_vendor,$this->_module));
 		
-		$path = $this->_vendor . "/" . $this->_module . "/" . "Model/System/Config/Status.php";
+		$path = sprintf('%s/%s/Model/System/Config/Status.php', $this->_vendor, $this->_module);
 		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = '<?php' . "\n\n";
+		$txt = sprintf('<?php
 		
-		$txt .= 'namespace ' . $this->_vendor . '\\' . $this->_module . '\Model\System\Config;' . "\n\n";
+namespace %s\%s\Model\System\Config;
+
+use Magento\Framework\Option\ArrayInterface;
 		
-		$txt .= 'use Magento\Framework\Option\ArrayInterface;' . "\n";
-		
-		$txt .= "class Status implements ArrayInterface {" . "\n";
-		
-		$txt .= "\t" . 'const ENABLED = 1;' . "\n";
-		$txt .= "\t" . 'const DISABLED = 0;' . "\n";
-		
-		$txt .= "\t" . 'public function toOptionArray() {' . "\n";
-		$txt .= "\t\t" . '$options = [' . "\n";
-		$txt .= "\t\t\t" . 'self::ENABLED => __ ( \'Enabled\' ),' . "\n";
-		$txt .= "\t\t\t" . 'self::DISABLED => __ ( \'Disabled\' )' . "\n";
-		$txt .= "\t\t" . '];' . "\n";
-		$txt .= "\t\t" . 'return $options;' . "\n";
-		$txt .= "\t" . '}' . "\n";
-		
-		$txt .= "\t" . '' . "\n";
-		
-		$txt .= '}';
+class Status implements ArrayInterface {
+	const ENABLED = 1;
+	const DISABLED = 0;
+	public function toOptionArray() {
+		$options = [
+			self::ENABLED => __ ( \'Enabled\' ),
+			self::DISABLED => __ ( \'Disabled\' )
+		];
+		return $options;
+	}
+}',$this->_vendor,$this->_module);
+
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
+	
 	function CreateAdminhtmlModelGridEditTabsMainFile($model) {
-		$path = $this->_vendor . "/" . $this->_module . "/" . "Block/Adminhtml/" . $model ["name"] . "/Edit/Tab/Main.php";
+		$path = sprintf('%s/%s/Block/Adminhtml/%s/Edit/Tab/Main.php',$this->_vendor,$this->_module ,$model ["name"]);
 		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = '<?php' . "\n\n";
+		$txt = sprintf('<?php
 		
-		$txt .= 'namespace ' . $this->_vendor . '\\' . $this->_module . '\Block\Adminhtml\\' . $model ["name"] . '\Edit\Tab;' . "\n\n";
-		$txt .= 'use Magento\Backend\Block\Widget\Form\Generic;' . "\n";
-		$txt .= 'use Magento\Backend\Block\Widget\Tab\TabInterface;' . "\n";
-		$txt .= 'use Magento\Backend\Block\Template\Context;' . "\n";
-		$txt .= 'use Magento\Framework\Registry;' . "\n";
-		$txt .= 'use Magento\Framework\Data\FormFactory;' . "\n";
-		$txt .= 'use Magento\Cms\Model\Wysiwyg\Config;' . "\n";
-		$txt .= 'use ITM\Pricing\Model\System\Config\Status;' . "\n";
-		
-		$txt .= "class Main extends Generic implements TabInterface {" . "\n";
-		
-		$txt .= "\t" . 'protected $_status;' . "\n";
-		$txt .= "\t" . 'public function __construct(Context $context, Registry $registry, FormFactory $formFactory, Config $wysiwygConfig, Status $status, array $data = []) {' . "\n";
-		$txt .= "\t" . '$this->_status = $status;' . "\n";
-		$txt .= "\t\t" . 'parent::__construct ( $context, $registry, $formFactory, $data );' . "\n";
-		$txt .= "\t" . '}' . "\n";
-		
-		$txt .= "\t" . 'public function getTabLabel() {' . "\n";
-		$txt .= "\t\t" . 'return __ ( \'Item Information\' );' . "\n";
-		$txt .= "\t" . '}' . "\n";
-		
-		$txt .= "\t" . 'public function getTabTitle() {' . "\n";
-		$txt .= "\t\t" . 'return __ ( \'Item Information\' );' . "\n";
-		$txt .= "\t" . '}' . "\n";
-		
-		$txt .= "\t" . 'public function canShowTab() {' . "\n";
-		$txt .= "\t\t" . 'return true;' . "\n";
-		$txt .= "\t" . '}' . "\n";
-		
-		$txt .= "\t" . 'public function isHidden() {' . "\n";
-		$txt .= "\t\t" . 'return false;' . "\n";
-		$txt .= "\t" . '}' . "\n";
-		
-		$txt .= "\t" . 'protected function _prepareForm() {' . "\n";
-		$txt .= "\t\t" . '$model = $this->_coreRegistry->registry ( \'current_' . strtolower ( $this->_vendor ) . '_' . strtolower ( $this->_module ) . '_' . strtolower ( $model ["name"] ) . '\' );' . "\n";
-		$txt .= "\t\t" . '$form = $this->_formFactory->create ();' . "\n";
-		$txt .= "\t\t" . '$form->setHtmlIdPrefix ( \'item_\' );' . "\n";
-		$txt .= "\t\t" . '$fieldset = $form->addFieldset ( \'base_fieldset\', [' . "\n";
-		$txt .= "\t\t\t" . '\'legend\' => __ ( \'Item Information\' )' . "\n";
-		$txt .= "\t\t" . '] );' . "\n";
-		$txt .= "\t\t" . 'if ($model->getId ()) {' . "\n";
-		$txt .= "\t\t\t" . '$fieldset->addField ( \'id\', \'hidden\', [' . "\n";
-		$txt .= "\t\t\t\t" . '\'name\' => \'id\'' . "\n";
-		$txt .= "\t\t\t" . '] );' . "\n";
-		$txt .= "\t\t" . '}' . "\n";
-		
-		$txt .= "\t\t" . '$fieldset->addField ( \'status\', \'select\', [' . "\n";
-		$txt .= "\t\t\t" . '\'name\' => \'status\',' . "\n";
-		$txt .= "\t\t\t" . '\'label\' => __ ( \'Status\' ),' . "\n";
-		$txt .= "\t\t\t" . '\'options\' => $this->_status->toOptionArray ()' . "\n";
-		$txt .= "\t\t\t" . '] );' . "\n";
-		$txt .= "\t\t" . '$form->setValues ( $model->getData () );' . "\n";
-		$txt .= "\t\t" . '$this->setForm ( $form );' . "\n";
-		$txt .= "\t\t" . 'return parent::_prepareForm ();' . "\n";
-		$txt .= "\t" . '}' . "\n";
-		
-		$txt .= '}';
+namespace %s\%s\Block\Adminhtml\%s\Edit\Tab;
+				
+use Magento\Backend\Block\Widget\Form\Generic;
+use Magento\Backend\Block\Widget\Tab\TabInterface;
+use Magento\Backend\Block\Template\Context;
+use Magento\Framework\Registry;
+use Magento\Framework\Data\FormFactory;
+use Magento\Cms\Model\Wysiwyg\Config;
+use %1$s\%2$s\Model\System\Config\Status;
+				
+class Main extends Generic implements TabInterface {
+	protected $_status;
+	public function __construct(Context $context, Registry $registry, FormFactory $formFactory, Config $wysiwygConfig, Status $status, array $data = []) {
+		$this->_status = $status;
+		parent::__construct ( $context, $registry, $formFactory, $data );
+	}
+
+	public function getTabLabel() {
+		return __ ( \'Item Information\');
+	}
+
+	public function getTabTitle() {
+		return __ ( \'Item Information\' );
+	}
+
+	public function canShowTab() {
+		return true;
+	}
+	public function isHidden() {
+		return false;
+	}
+	protected function _prepareForm() {
+		$model = $this->_coreRegistry->registry ( \'current_%s_%s_%s\' );
+		$form = $this->_formFactory->create ();
+		$form->setHtmlIdPrefix ( \'item_\' );
+		$fieldset = $form->addFieldset ( \'base_fieldset\', [
+			\'legend\' => __ ( \'Item Information\' )
+		] );
+		if ($model->getId ()) {
+			$fieldset->addField ( \'id\', \'hidden\', [
+				\'name\' => \'id\'
+			] );
+		}
+		$fieldset->addField ( \'status\', \'select\', [
+			\'name\' => \'status\',
+			\'label\' => __ ( \'Status\' ),
+			\'options\' => $this->_status->toOptionArray ()
+			] );
+		$form->setValues ( $model->getData () );
+		$this->setForm ( $form );
+		return parent::_prepareForm ();
+	}
+}
+',$this->_vendor,$this->_module,$model["name"], strtolower ( $this->_vendor ),strtolower ( $this->_module ),strtolower ( $model ["name"] ));
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	function ff($model) {
-		$path = $this->_vendor . "/" . $this->_module . "/" . "Controller/Adminhtml/" . $model ["name"] . "/Edit.php";
+	
+	
+	function example($model) {
+		
+		$path = sprintf('%s/%s/', $this->_vendor, $this->_module);
 		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = '<?php' . "\n\n";
+		$txt = sprintf('<?php
+			%s/%s
+		',$this->_vendor,$this->_module);
 		
-		$txt .= 'namespace ' . $this->_vendor . '\\' . $this->_module . '\Controller\Adminhtml\\' . $model ["name"] . ';' . "\n\n";
-		
-		$txt .= "class Edit extends \\" . $this->_vendor . "\\" . $this->_module . "\Controller\Adminhtml\\" . $model ["name"] . " {" . "\n";
-		
-		$txt .= "\t" . 'public function execute() {' . "\n";
-		
-		$txt .= "\t" . '' . "\n";
-		
-		$txt .= "\t" . "}" . "\n";
-		$txt .= '}';
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
+	
+	
 	function CreateAdminhtmlModelGridEditTabsFile($model) {
 		$path = $this->_vendor . "/" . $this->_module . "/" . "Block/Adminhtml/" . $model ["name"] . "/Edit/Tabs.php";
 		

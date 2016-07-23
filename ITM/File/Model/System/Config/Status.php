@@ -1,8 +1,9 @@
 <?php
-
+		
 namespace ITM\File\Model\System\Config;
 
 use Magento\Framework\Option\ArrayInterface;
+		
 class Status implements ArrayInterface {
 	const ENABLED = 1;
 	const DISABLED = 0;
@@ -13,5 +14,4 @@ class Status implements ArrayInterface {
 		];
 		return $options;
 	}
-	
 }
