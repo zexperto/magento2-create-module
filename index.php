@@ -19,37 +19,31 @@ class Magento2Module {
 		$path = sprintf ( '%s/%s/etc/module.xml', $this->_vendor, $this->_module );
 		$ext_file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = sprintf('<?xml version="1.0"?>
+		$txt = sprintf ( '<?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../lib/internal/Magento/Framework/Module/etc/module.xsd">
 	<module name="%s_%s" setup_version="%s" />
-</config>',$this->_vendor,$this->_module,$this->_version);
+</config>', $this->_vendor, $this->_module, $this->_version );
 		
 		fwrite ( $ext_file, $txt );
 		fclose ( $ext_file );
 	}
-	
-	
 	function setConfig($config) {
 		$this->_config = $config;
 	}
-	
-	
 	function CreateRegistrationFile() {
 		$path = sprintf ( '%s/%s/registration.php', $this->_vendor, $this->_module );
 		$ext_file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = sprintf("<?php
+		$txt = sprintf ( "<?php
 
 \Magento\Framework\Component\ComponentRegistrar::register(
 	\Magento\Framework\Component\ComponentRegistrar::MODULE,
 	'%s_%s',
-	__DIR__ );",$this->_vendor,$this->_module);
+	__DIR__ );", $this->_vendor, $this->_module );
 		
 		fwrite ( $ext_file, $txt );
 		fclose ( $ext_file );
 	}
-	
-	
 	function CreateDataFile() {
 		$path = sprintf ( '%s/%s/Helper/Data.php', $this->_vendor, $this->_module );
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
@@ -67,8 +61,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper {
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	
 	function CreateHelper() {
 		if ($this->_config ["helper"]) {
 			$path = sprintf ( '%s/%s/Helper', $this->_vendor, $this->_module );
@@ -76,13 +68,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper {
 			$this->CreateDataFile ();
 		}
 	}
-	
-	
 	function CreateInstallSchemaFile() {
 		$path = sprintf ( '%s/%s/Setup/InstallSchema.php', $this->_vendor, $this->_module );
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = sprintf('<?php
+		$txt = sprintf ( '<?php
 
 namespace %s\%s\Setup;
 
@@ -92,7 +82,7 @@ use Magento\Framework\Setup\ModuleContextInterface;
 
 class InstallSchema implements InstallSchemaInterface {
 	public function install(SchemaSetupInterface $setup, ModuleContextInterface $context) {
-		$setup->startSetup ();',$this->_vendor,$this->_module);
+		$setup->startSetup ();', $this->_vendor, $this->_module );
 		
 		if ($this->_config ["backend_model"]) {
 			foreach ( $this->_config ["backend_model"] as $model ) {
@@ -118,12 +108,9 @@ class InstallSchema implements InstallSchemaInterface {
 	}
 }';
 		
-		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	
 	function CreateUninstallFile() {
 		$path = sprintf ( '%s/%s/Setup/Uninstall.php', $this->_vendor, $this->_module );
 		
@@ -148,14 +135,12 @@ class Uninstall implements UninstallInterface {
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	
 	function CreateUpgradeSchemaFile() {
 		$path = sprintf ( '%s/%s/Setup/UpgradeSchema.php', $this->_vendor, $this->_module );
-	
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = sprintf('<?php
+		$txt = sprintf ( '<?php
 				
 namespace %s\%s\Setup;
 
@@ -183,19 +168,17 @@ class UpgradeSchema implements UpgradeSchemaInterface {
 
 		$setup->endSetup ();
 	}
-}',$this->_vendor,$this->_module);
+}', $this->_vendor, $this->_module );
 		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	
 	function CreateUpgradeDataFile() {
 		$path = sprintf ( '%s/%s/Setup/UpgradeData.php', $this->_vendor, $this->_module );
 		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = sprintf('<?php
+		$txt = sprintf ( '<?php
 
 namespace %s\%s\Setup;
 
@@ -222,85 +205,76 @@ class UpgradeData implements UpgradeDataInterface {
 
 	}
 
-}',$this->_vendor ,$this->_module);
+}', $this->_vendor, $this->_module );
 		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	
 	function CreateSetup() {
 		if ($this->_config ["setup"]) {
 			
-			$this->CreateFolder (sprintf('%s/%s/Setup',$this->_vendor,$this->_module));
+			$this->CreateFolder ( sprintf ( '%s/%s/Setup', $this->_vendor, $this->_module ) );
 			$this->CreateInstallSchemaFile ();
 			$this->CreateUninstallFile ();
 			$this->CreateUpgradeSchemaFile ();
 			$this->CreateUpgradeDataFile ();
 		}
 	}
-	
-	
 	function CreateBlock() {
 		if ($this->_config ["block"]) {
-			$this->CreateFolder (sprintf('%s/%s/Block',$this->_vendor,$this->_module));
+			$this->CreateFolder ( sprintf ( '%s/%s/Block', $this->_vendor, $this->_module ) );
 		}
 	}
 	function CreateApi() {
 		if ($this->_config ["api"]) {
-			$this->CreateFolder (sprintf('%s/%s/Api',$this->_vendor,$this->_module));
+			$this->CreateFolder ( sprintf ( '%s/%s/Api', $this->_vendor, $this->_module ) );
 		}
 	}
 	function CreateModel() {
 		if ($this->_config ["model"]) {
-			$this->CreateFolder (sprintf('%s/%s/Model',$this->_vendor,$this->_module));
+			$this->CreateFolder ( sprintf ( '%s/%s/Model', $this->_vendor, $this->_module ) );
 		}
 	}
 	function CreateController() {
 		if ($this->_config ["controller"]) {
-			$this->CreateFolder (sprintf('%s/%s/Controller',$this->_vendor,$this->_module));
+			$this->CreateFolder ( sprintf ( '%s/%s/Controller', $this->_vendor, $this->_module ) );
 		}
 	}
 	function CreateView() {
 		if ($this->_config ["view"]) {
-			$this->CreateFolder (sprintf('%s/%s/view',$this->_vendor,$this->_module));
+			$this->CreateFolder ( sprintf ( '%s/%s/view', $this->_vendor, $this->_module ) );
 		}
 		
 		if ($this->_config ["view"] ["frontend"]) {
-			$this->CreateFolder (sprintf('%s/%s/view/frontend',$this->_vendor,$this->_module));
-			$this->CreateFolder (sprintf('%s/%s/view/frontend/layout',$this->_vendor,$this->_module));
-			$this->CreateFolder (sprintf('%s/%s/view/frontend/templates',$this->_vendor,$this->_module));
+			$this->CreateFolder ( sprintf ( '%s/%s/view/frontend', $this->_vendor, $this->_module ) );
+			$this->CreateFolder ( sprintf ( '%s/%s/view/frontend/layout', $this->_vendor, $this->_module ) );
+			$this->CreateFolder ( sprintf ( '%s/%s/view/frontend/templates', $this->_vendor, $this->_module ) );
 		}
 		
 		if ($this->_config ["view"] ["adminhtml"]) {
-			$this->CreateFolder (sprintf('%s/%s/view/adminhtml',$this->_vendor,$this->_module));
-			$this->CreateFolder (sprintf('%s/%s/view/adminhtml/layout',$this->_vendor,$this->_module));
-			$this->CreateFolder (sprintf('%s/%s/view/adminhtml/templates',$this->_vendor,$this->_module));
+			$this->CreateFolder ( sprintf ( '%s/%s/view/adminhtml', $this->_vendor, $this->_module ) );
+			$this->CreateFolder ( sprintf ( '%s/%s/view/adminhtml/layout', $this->_vendor, $this->_module ) );
+			$this->CreateFolder ( sprintf ( '%s/%s/view/adminhtml/templates', $this->_vendor, $this->_module ) );
 		}
 	}
-	
 	function CreateBackEndModel($model) {
 		// Create Block Folder
-		
-		$this->CreateFolder (sprintf('%s/%s/Block',$this->_vendor,$this->_module));
-		$this->CreateFolder (sprintf('%s/%s/Block/Adminhtml',$this->_vendor,$this->_module));
-		$this->CreateFolder (sprintf('%s/%s/Block/Adminhtml/%s',$this->_vendor,$this->_module,$model ["name"]));
-		$this->CreateFolder (sprintf('%s/%s/Block/Adminhtml/%s',$this->_vendor,$this->_module,$model ["name"]));
-		$this->CreateFolder (sprintf('%s/%s/Block/Adminhtml/%s/Edit',$this->_vendor,$this->_module,$model ["name"]));
-		$this->CreateFolder (sprintf('%s/%s/Block/Adminhtml/%s/Edit/Tab',$this->_vendor,$this->_module,$model ["name"]));
-		
+		$this->CreateFolder ( sprintf ( '%s/%s/Block', $this->_vendor, $this->_module ) );
+		$this->CreateFolder ( sprintf ( '%s/%s/Block/Adminhtml', $this->_vendor, $this->_module ) );
+		$this->CreateFolder ( sprintf ( '%s/%s/Block/Adminhtml/%s', $this->_vendor, $this->_module, $model ["name"] ) );
+		$this->CreateFolder ( sprintf ( '%s/%s/Block/Adminhtml/%s', $this->_vendor, $this->_module, $model ["name"] ) );
+		$this->CreateFolder ( sprintf ( '%s/%s/Block/Adminhtml/%s/Edit', $this->_vendor, $this->_module, $model ["name"] ) );
+		$this->CreateFolder ( sprintf ( '%s/%s/Block/Adminhtml/%s/Edit/Tab', $this->_vendor, $this->_module, $model ["name"] ) );
 		
 		// Create Controller Folder
-		$this->CreateFolder (sprintf('%s/%s/Controller',$this->_vendor,$this->_module));
-		$this->CreateFolder (sprintf('%s/%s/Controller/Adminhtml',$this->_vendor,$this->_module));
-		$this->CreateFolder (sprintf('%s/%s/Controller/Adminhtml/%s',$this->_vendor,$this->_module,$model ["name"]));
-		
+		$this->CreateFolder ( sprintf ( '%s/%s/Controller', $this->_vendor, $this->_module ) );
+		$this->CreateFolder ( sprintf ( '%s/%s/Controller/Adminhtml', $this->_vendor, $this->_module ) );
+		$this->CreateFolder ( sprintf ( '%s/%s/Controller/Adminhtml/%s', $this->_vendor, $this->_module, $model ["name"] ) );
 		
 		// Create Model Folder
-		$this->CreateFolder (sprintf('%s/%s/Model',$this->_vendor,$this->_module));
-		$this->CreateFolder (sprintf('%s/%s/Model/Resource',$this->_vendor,$this->_module));
-		$this->CreateFolder (sprintf('%s/%s/Model/Resource/%s',$this->_vendor,$this->_module,$model ["name"]));
-		
+		$this->CreateFolder ( sprintf ( '%s/%s/Model', $this->_vendor, $this->_module ) );
+		$this->CreateFolder ( sprintf ( '%s/%s/Model/Resource', $this->_vendor, $this->_module ) );
+		$this->CreateFolder ( sprintf ( '%s/%s/Model/Resource/%s', $this->_vendor, $this->_module, $model ["name"] ) );
 		
 		// Create Block Files
 		// Adminhtml/ {model}.php
@@ -335,14 +309,14 @@ class UpgradeData implements UpgradeDataInterface {
 		$this->CreateModelSystemConfigStatusFile ( $model );
 	}
 	function CreateModelSystemConfigStatusFile($model) {
-		$this->CreateFolder (sprintf('%s/%s/Model/System',$this->_vendor,$this->_module));
-		$this->CreateFolder (sprintf('%s/%s/Model/System/Config',$this->_vendor,$this->_module));
+		$this->CreateFolder ( sprintf ( '%s/%s/Model/System', $this->_vendor, $this->_module ) );
+		$this->CreateFolder ( sprintf ( '%s/%s/Model/System/Config', $this->_vendor, $this->_module ) );
 		
-		$path = sprintf('%s/%s/Model/System/Config/Status.php', $this->_vendor, $this->_module);
+		$path = sprintf ( '%s/%s/Model/System/Config/Status.php', $this->_vendor, $this->_module );
 		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = sprintf('<?php
+		$txt = sprintf ( '<?php
 		
 namespace %s\%s\Model\System\Config;
 
@@ -358,18 +332,17 @@ class Status implements ArrayInterface {
 		];
 		return $options;
 	}
-}',$this->_vendor,$this->_module);
-
+}', $this->_vendor, $this->_module );
+		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
 	function CreateAdminhtmlModelGridEditTabsMainFile($model) {
-		$path = sprintf('%s/%s/Block/Adminhtml/%s/Edit/Tab/Main.php',$this->_vendor,$this->_module ,$model ["name"]);
+		$path = sprintf ( '%s/%s/Block/Adminhtml/%s/Edit/Tab/Main.php', $this->_vendor, $this->_module, $model ["name"] );
 		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = sprintf('<?php
+		$txt = sprintf ( '<?php
 		
 namespace %s\%s\Block\Adminhtml\%s\Edit\Tab;
 				
@@ -424,33 +397,28 @@ class Main extends Generic implements TabInterface {
 		return parent::_prepareForm ();
 	}
 }
-',$this->_vendor,$this->_module,$model["name"], strtolower ( $this->_vendor ),strtolower ( $this->_module ),strtolower ( $model ["name"] ));
+', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) );
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	
 	function example($model) {
-		
-		$path = sprintf('%s/%s/', $this->_vendor, $this->_module);
+		$path = sprintf ( '%s/%s/', $this->_vendor, $this->_module );
 		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = sprintf('<?php
+		$txt = sprintf ( '<?php
 			%s/%s
-		',$this->_vendor,$this->_module);
+		', $this->_vendor, $this->_module );
 		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	
 	function CreateAdminhtmlModelGridEditTabsFile($model) {
-		$path = sprintf('%s/%s/Block/Adminhtml/%s/Edit/Tabs.php',$this->_vendor,$this->_module ,$model ["name"]);
+		$path = sprintf ( '%s/%s/Block/Adminhtml/%s/Edit/Tabs.php', $this->_vendor, $this->_module, $model ["name"] );
 		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = sprintf('<?php
+		$txt = sprintf ( '<?php
 
 namespace %s\%s\Block\Adminhtml\%s\Edit;
 
@@ -461,17 +429,17 @@ class Tabs extends \Magento\Backend\Block\Widget\Tabs {
 			$this->setDestElementId ( \'edit_form\' );
 			$this->setTitle ( __ ( \'%3$s\' ) );
 	}
-}',$this->_vendor,$this->_module,$model ["name"],strtolower ( $this->_vendor ),strtolower ( $this->_module ),strtolower ( $model ["name"] ));
-
+}', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) );
+		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
 	function CreateAdminhtmlModelGridEditFormFile($model) {
-		$path = sprintf('%s/%s/Block/Adminhtml/%s/Edit/Form.php',$this->_vendor,$this->_module ,$model ["name"]);
+		$path = sprintf ( '%s/%s/Block/Adminhtml/%s/Edit/Form.php', $this->_vendor, $this->_module, $model ["name"] );
 		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = sprintf('<?php
+		$txt = sprintf ( '<?php
 
 namespace %s\%s\Block\Adminhtml\%s\Edit;
 
@@ -495,19 +463,17 @@ class Form extends \Magento\Backend\Block\Widget\Form\Generic {
 		$this->setForm ( $form );
 		return parent::_prepareForm ();
 	}
-}',$this->_vendor,$this->_module,$model ["name"],strtolower ( $this->_vendor ),strtolower ( $this->_module ),strtolower ( $model ["name"] ));
+}', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) );
 		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	
 	function CreateAdminhtmlModelEditFile($model) {
-		$path = sprintf('%s/%s/Block/Adminhtml/%s/Edit.php',$this->_vendor,$this->_module ,$model ["name"]);
+		$path = sprintf ( '%s/%s/Block/Adminhtml/%s/Edit.php', $this->_vendor, $this->_module, $model ["name"] );
 		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = sprintf('<?php
+		$txt = sprintf ( '<?php
 		
 namespace ' . $this->_vendor . '\\' . $this->_module . '\Block\Adminhtml\\' . $model ["name"] . ';
 		
@@ -546,16 +512,15 @@ class Edit extends \Magento\Backend\Block\Widget\Form\Container {
 			return __ ( \'New Item\' );
 		}
 	}
-}',$this->_vendor,$this->_module,$model ["name"],strtolower ( $this->_vendor ),strtolower ( $this->_module ),strtolower ( $model ["name"] ));
+}', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) );
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
 	function CreateAdminhtmlModelGridFile($model) {
-		$path = sprintf('%s/%s/Block/Adminhtml/%s/Grid.php',$this->_vendor,$this->_module ,$model ["name"]);
+		$path = sprintf ( '%s/%s/Block/Adminhtml/%s/Grid.php', $this->_vendor, $this->_module, $model ["name"] );
 		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-		$txt = sprintf('<?php
+		$txt = sprintf ( '<?php
 		
 namespace %s\%s\Block\Adminhtml\%s;
 		
@@ -640,19 +605,17 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended {
 			\'id\' => $row->getId ()
 		] );
 	}
-}',$this->_vendor,$this->_module,$model ["name"],strtolower ( $this->_vendor ),strtolower ( $this->_module ),strtolower ( $model ["name"] ));
+}', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) );
 		
-	
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
 	function CreateAdminhtmlModelFile($model) {
-		$path = sprintf('%s/%s/Block/Adminhtml/%s.php',$this->_vendor,$this->_module ,$model ["name"]);
+		$path = sprintf ( '%s/%s/Block/Adminhtml/%s.php', $this->_vendor, $this->_module, $model ["name"] );
 		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = sprintf('<?php
+		$txt = sprintf ( '<?php
 
 namespace %s\%s\Block\Adminhtml;
 
@@ -665,13 +628,11 @@ class %s extends \Magento\Backend\Block\Widget\Grid\Container {
 		$this->_addButtonLabel = __ ( \'Add New Entry\' );
 		parent::_construct ();
 	}
-}',$this->_vendor,$this->_module,$model ["name"],strtolower ( $this->_vendor ),strtolower ( $this->_module ),strtolower ( $model ["name"] ));
+}', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) );
 		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-
-
 	function CreateControllersAdminhtmlModelSaveFile($model) {
 		$path = $this->_vendor . "/" . $this->_module . "/" . "Controller/Adminhtml/" . $model ["name"] . "/Save.php";
 		
@@ -967,6 +928,7 @@ class %s extends \Magento\Backend\Block\Widget\Grid\Container {
 	}
 	function CreateModelModelFile($model) {
 		$path = $this->_vendor . "/" . $this->_module . "/" . "Model/" . "/" . $model ["name"] . ".php";
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
 		$txt = '<?php' . "\n\n";
@@ -980,46 +942,49 @@ class %s extends \Magento\Backend\Block\Widget\Grid\Container {
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
+	
+	
 	function CreateViewAdminhtmlLayoutIndexFile($model) {
-		$path = $this->_vendor . "/" . $this->_module . "/" . "view/adminhtml/layout" . "/" . strtolower ( $this->_vendor ) . "_" . strtolower ( $this->_module ) . "_" . strtolower ( $model ["name"] ) . "_edit" . ".xml";
+		$path = sprintf ( "%s/%s/view/adminhtml/layout/%s_%s_%s_edit" . ".xml", $this->_vendor, $this->_module, strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) );
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = '<?xml version="1.0"?>' . "\n";
-		$txt .= '<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="admin-2columns-left" xsi:noNamespaceSchemaLocation="../../../../../../../lib/internal/Magento/Framework/View/Layout/etc/page_configuration.xsd">' . "\n";
-		$txt .= "\t" . "<body>" . "\n";
-		
-		$txt .= "\t\t" . '<referenceContainer name="left">' . "\n";
-		$txt .= "\t\t\t" . '<block class="' . $this->_vendor . '\\' . $this->_module . '\Block\Adminhtml\\' . $model ["name"] . '\Edit\Tabs" name="' . strtolower ( $this->_vendor ) . '_' . strtolower ( $this->_module ) . '_' . strtolower ( $model ["name"] ) . '_edit_tabs">' . "\n";
-		$txt .= "\t\t\t\t\t" . '<block class="' . $this->_vendor . '\\' . $this->_module . '\Block\Adminhtml\\' . $model ["name"] . '\Edit\Tab\Main" name="' . strtolower ( $this->_vendor ) . '_' . strtolower ( $this->_module ) . '_' . strtolower ( $model ["name"] ) . '_edit_tab_main"/>' . "\n";
-		$txt .= "\t\t\t\t\t" . '<action method="addTab">' . "\n";
-		$txt .= "\t\t\t\t\t\t" . '<argument name="name" xsi:type="string">main_section</argument>' . "\n";
-		$txt .= "\t\t\t\t\t\t" . '<argument name="block" xsi:type="string">' . strtolower ( $this->_vendor ) . '_' . strtolower ( $this->_module ) . '_' . strtolower ( $model ["name"] ) . '_edit_tab_main</argument>' . "\n";
-		$txt .= "\t\t\t\t\t" . '</action>' . "\n";
-		$txt .= "\t\t\t" . '</block>' . "\n";
-		$txt .= "\t\t" . '</referenceContainer>' . "\n\n";
-		
-		$txt .= "\t\t" . '<referenceContainer name="content">' . "\n";
-		$txt .= "\t\t\t" . '<block class="' . $this->_vendor . '\\' . $this->_module . '\Block\Adminhtml\\' . $model ["name"] . '\Edit" name="' . strtolower ( $this->_module ) . '_' . strtolower ( $model ["name"] ) . '_edit"/>' . "\n";
-		$txt .= "\t\t" . '</referenceContainer>' . "\n";
-		
-		$txt .= "\t" . '</body>' . "\n";
-		$txt .= "</page>";
+		$txt = sprintf ( '<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="admin-2columns-left" xsi:noNamespaceSchemaLocation="../../../../../../../lib/internal/Magento/Framework/View/Layout/etc/page_configuration.xsd">
+	<body>
+		<referenceContainer name="left">
+			<block class="%s\%s\Block\Adminhtml\%s\Edit\Tabs" name="%s_%s_%s_edit_tabs">
+				<block class="%1$s\%2$s\Block\Adminhtml\%3$s\Edit\Tab\Main" name="' . strtolower ( $this->_vendor ) . '_' . strtolower ( $this->_module ) . '_' . strtolower ( $model ["name"] ) . '_edit_tab_main"/>
+				<action method="addTab">
+					<argument name="name" xsi:type="string">main_section</argument>
+					<argument name="block" xsi:type="string">%4$s_%5$s_%6$s_edit_tab_main</argument>
+				</action>
+			</block>
+		</referenceContainer>
+		<referenceContainer name="content">
+			<block class="' . $this->_vendor . '\\' . $this->_module . '\Block\Adminhtml\\' . $model ["name"] . '\Edit" name="' . strtolower ( $this->_module ) . '_' . strtolower ( $model ["name"] ) . '_edit"/>
+		</referenceContainer>
+	</body>
+</page>', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) );
 		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
+	
+	
 	function CreateViewAdminhtmlLayoutEditFile($model) {
-		$path = $this->_vendor . "/" . $this->_module . "/" . "view/adminhtml/layout" . "/" . strtolower ( $this->_vendor ) . "_" . strtolower ( $this->_module ) . "_" . strtolower ( $model ["name"] ) . "_index" . ".xml";
+		// $path = sprintf('%s/%s/view/adminhtml/layout/menu.xml',$this->_vendor,$this->_module);
+		$path = sprintf ( "%s/%s/view/adminhtml/layout/%s_%s_%s_index" . ".xml", $this->_vendor, $this->_module, strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) );
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = '<?xml version="1.0"?>' . "\n";
-		$txt .= '<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../../lib/internal/Magento/Framework/View/Layout/etc/page_configuration.xsd">' . "\n";
-		$txt .= "\t" . "<body>" . "\n";
-		$txt .= "\t\t" . '<referenceContainer name="content">' . "\n";
-		$txt .= "\t\t\t" . '<block class="' . $this->_vendor . '\\' . $this->_module . '\Block\Adminhtml\\' . $model ["name"] . '" name="' . strtolower ( $this->_module ) . '_' . strtolower ( $model ["name"] ) . '_container"/>' . "\n";
-		$txt .= "\t\t" . '</referenceContainer>' . "\n";
-		$txt .= "\t" . '</body>' . "\n";
-		$txt .= "</page>";
+		$txt = sprintf ( '<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../../lib/internal/Magento/Framework/View/Layout/etc/page_configuration.xsd">
+	<body>
+		<referenceContainer name="content">
+			<block class="%s\%s\Block\Adminhtml\%s" name="%s_%s_container"/>
+		</referenceContainer>
+	</body>
+</page>', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_module ), strtolower ( $model ["name"] ) );
 		
 		fwrite ( $file, $txt );
 		fclose ( $file );
@@ -1036,19 +1001,21 @@ class %s extends \Magento\Backend\Block\Widget\Grid\Container {
 	function CreateMenuFile($backend_model) {
 		$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "etc/adminhtml" );
 		
-		$path = sprintf('%s/%s/etc/adminhtml/menu.xml',$this->_vendor,$this->_module);
+		$path = sprintf ( '%s/%s/etc/adminhtml/menu.xml', $this->_vendor, $this->_module );
 		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = '<?xml version="1.0"?>
+		$txt = sprintf ( '<?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Backend/etc/menu.xsd">
 	<menu>
-		<add id="' . strtolower ( $this->_vendor ) . '_' . strtolower ( $this->_module ) . '::' . strtolower ( $this->_module ) . '" title="' . $this->_module . '" module="' . $this->_vendor . '_' . $this->_module . '" sortOrder="0" parent="itm::base"  resource="' . $this->_vendor . '_' . $this->_module . '::main"/>';
-		$txt .="\n";
+		<add id="%3$s_%4$s::%4$s" title="%2$s" module="%1$s_%2$s" sortOrder="0" parent="%3$s::base"  resource="%1$s_%2$s::main"/>', $this->_vendor, $this->_module, strtolower ( $this->_vendor ), strtolower ( $this->_module ) );
+		$txt .= "\n";
+		
 		foreach ( $this->_config ["backend_model"] as $model ) {
-			$txt .= "\t\t" . '<add id="' . strtolower ( $this->_vendor ) . '_' . strtolower ( $this->_module ) . '::' . strtolower ( $model ["name"] ) . '" title="' . $model ["name"] . '" module="' . $this->_vendor . '_' . $this->_module . '" sortOrder="10" parent="' . strtolower ( $this->_vendor ) . '_' . strtolower ( $this->_module ) . '::' . strtolower ( $this->_module ) . '" action="' . strtolower ( $this->_vendor ) . '_' . strtolower ( $this->_module ) . '/' . strtolower ( $model ["name"] ) . '/" resource="' . $this->_vendor . '_' . $this->_module . '::' . $model ["name"] . '"/>' . "\n";
+			$txt .= "\t\t" . sprintf ( '<add id="%4$s_%5$s::%6$s" title="%3$s" module="%1$s_%2$s" sortOrder="10" parent="%4$s_%5$s::%5$s" action="%4$s_%5$s/%6$s/" resource="%1$s_%2$s::%3$s"/>', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) ) . "\n";
 		}
-$txt .= '	</menu>
+		
+		$txt .= '	</menu>
 </config>';
 		
 		fwrite ( $file, $txt );
@@ -1056,18 +1023,19 @@ $txt .= '	</menu>
 	}
 	function CreateRoutesFile($backend_model) {
 		$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "etc/adminhtml" );
-		$path = $this->_vendor . "/" . $this->_module . "/" . "etc/adminhtml/routes.xml";
+		
+		$path = sprintf ( '%s/%s/etc/adminhtml/routes.xml', $this->_vendor, $this->_module );
 		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = '<?xml version="1.0"?>' . "\n";
-		$txt .= '<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../lib/internal/Magento/Framework/App/etc/routes.xsd">' . "\n";
-		$txt .= "\t" . '<router id="admin">' . "\n";
-		$txt .= "\t\t" . '<route id="' . strtolower ( $this->_vendor ) . '_' . strtolower ( $this->_module ) . '" frontName="' . strtolower ( $this->_vendor ) . '_' . strtolower ( $this->_module ) . '">' . "\n";
-		$txt .= "\t\t\t" . '<module name="' . $this->_vendor . '_' . $this->_module . '" />' . "\n";
-		$txt .= "\t\t" . '</route>' . "\n";
-		$txt .= "\t" . '</router>' . "\n";
-		$txt .= '</config>';
+		$txt = sprintf ( '<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../lib/internal/Magento/Framework/App/etc/routes.xsd">
+	<router id="admin">
+		<route id="%3$s_%4$s" frontName="%3$s_%4$s">
+			<module name="%1$s_%2$s" />
+		</route>
+	</router>
+</config>', $this->_vendor, $this->_module, strtolower ( $this->_vendor ), strtolower ( $this->_module ) );
 		
 		fwrite ( $file, $txt );
 		fclose ( $file );
