@@ -3,6 +3,7 @@
 namespace ITM\File\Block\Adminhtml;
 
 class Box extends \Magento\Backend\Block\Widget\Grid\Container {
+
 	protected function _construct() {
 		$this->_controller = 'adminhtml_box';
 		$this->_blockGroup = 'ITM_File';

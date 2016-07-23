@@ -1,9 +1,9 @@
 <?php
-
+		
 namespace ITM\File\Block\Adminhtml\Box;
-
+		
 use ITM\File\Model\System\Config\Status;
-
+		
 class Grid extends \Magento\Backend\Block\Widget\Grid\Extended {
 	protected $_status;
 	protected $_collectionFactory;
@@ -13,11 +13,11 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended {
 			\ITM\File\Model\Resource\Box\Collection $collectionFactory,
 			Status $status,
 			array $data = []
-		) {
-			$this->_status = $status;
-			$this->_collectionFactory = $collectionFactory;
-			parent::__construct($context, $backendHelper, $data);
-		}
+	) {
+		$this->_status = $status;
+		$this->_collectionFactory = $collectionFactory;
+		parent::__construct($context, $backendHelper, $data);
+	}
 	protected function _construct() {
 		parent::_construct();
 		$this->setId('boxGrid');
@@ -42,19 +42,19 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended {
 		}
 	}
 	protected function _prepareColumns() {
-		$this->addColumn ( 'id', [ 
-				'header' => __ ( 'ID' ),
-				'type' => 'number',
-				'index' => 'id',
-				'header_css_class' => 'col-id',
-				'column_css_class' => 'col-id'
+		$this->addColumn ( 'id', [
+			'header' => __ ( 'ID' ),
+			'type' => 'number',
+			'index' => 'id',
+			'header_css_class' => 'col-id',
+			'column_css_class' => 'col-id'
 		] );
 		$this->addColumn ( 'status', [
-				'header' => __ ( 'Status' ),
-				'index' => 'status',
-				'class' => 'status',
-				'type' => 'options',
-				'options' => $this->_status->toOptionArray ()
+			'header' => __ ( 'Status' ),
+			'index' => 'status',
+			'class' => 'status',
+			'type' => 'options',
+			'options' => $this->_status->toOptionArray ()
 		] );
 		$block = $this->getLayout ()->getBlock ( 'grid.bottom.links' );
 		if ($block) {
@@ -65,16 +65,16 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended {
 	protected function _prepareMassaction() {
 		$this->setMassactionIdField ( 'id' );
 		$this->getMassactionBlock ()->setFormFieldName ( 'id' );
-		$this->getMassactionBlock ()->addItem ( 'delete', array( 
-				'label' => __ ( 'Delete' ),
-				'url' => $this->getUrl ( 'itm_file/*/massDelete' ),
-				'confirm' => __ ( 'Are you sure?' )
+		$this->getMassactionBlock ()->addItem ( 'delete', array(
+			'label' => __ ( 'Delete' ),
+			'url' => $this->getUrl ( 'itm_file/*/massDelete' ),
+			'confirm' => __ ( 'Are you sure?' )
 		) );
 		return $this;
 	}
 	public function getGridUrl() {
 		return $this->getUrl ( 'itm_file/*/index', [
-			'_current' => true 
+			'_current' => true
 		] );
 	}
 	public function getRowUrl($row) {
