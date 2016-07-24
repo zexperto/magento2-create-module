@@ -634,316 +634,321 @@ class %s extends \Magento\Backend\Block\Widget\Grid\Container {
 		fclose ( $file );
 	}
 	function CreateControllersAdminhtmlModelSaveFile($model) {
-		$path = $this->_vendor . "/" . $this->_module . "/" . "Controller/Adminhtml/" . $model ["name"] . "/Save.php";
+		$path = sprintf ( "%s/%s/Controller/Adminhtml/%s/Save.php", $this->_vendor, $this->_module, $model ["name"] );
+		;
 		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = '<?php' . "\n\n";
+		$txt = sprintf ( '<?php
+
+namespace %s\%s\Controller\Adminhtml\%s;
+
+class Save extends \%1$s\%2$s\Controller\Adminhtml\%3$s {
+
+	public function execute() {
+		if ($this->getRequest ()->getPostValue ()) {
+			try {
+				$model = $this->_objectManager->create ( \'%1$s\%2$s\Model\%3$s\' );
+				$data = $this->getRequest ()->getPostValue ();
+				$inputFilter = new \Zend_Filter_Input ( [ ], [ ], $data );
+				$data = $inputFilter->getUnescaped ();
+				$id = $this->getRequest ()->getParam ( \'id\' );
+				if ($id) {
+					$model->load ( $id );
+					if ($id != $model->getId ()) {
+						throw new \Magento\Framework\Exception\LocalizedException ( __ ( \'The wrong item is specified.\' ) );
+					}
+				}
+				$model->setData ( $data );
+				$session = $this->_objectManager->get ( \'Magento\Backend\Model\Session\' );
+				$session->setPageData ( $model->getData () );
+				$model->save ();
+				$this->messageManager->addSuccess ( __ ( \'You saved the item.\' ) );
+				$session->setPageData ( false );
+				if ($this->getRequest ()->getParam ( \'back\' )) {
+					$this->_redirect ( \'%s_%s/*/edit\', [
+						\'id\' => $model->getId ()
+					] );
+				return;
+				}
+				$this->_redirect ( \'%4$s_%5$s/*/\' );
+				return;
+			} catch ( \Magento\Framework\Exception\LocalizedException $e ) {
+				$this->messageManager->addError ( $e->getMessage () );
+				$id = ( int ) $this->getRequest ()->getParam ( \'id\' );
+				if (! empty ( $id )) {
+					$this->_redirect ( \'%4$s_%5$s/*/edit\', [
+						\'id\' => $id
+					] );
+				} else {
+					$this->_redirect ( \'%4$s_%5$s/*/new\');
+				}
+				return;
+			} catch ( \Exception $e ) {
+				$this->messageManager->addError ( __ ( \'Something went wrong while saving the item data. Please review the error log.\' ) );
+				$this->_objectManager->get ( \'Psr\Log\LoggerInterface\' )->critical ( $e );
+				$this->_objectManager->get ( \'Magento\Backend\Model\Session\' )->setPageData ( $data );
+				$this->_redirect ( \'%4$s_%5$s/*/edit\', [ 
+					\'id\' => $this->getRequest ()->getParam ( \'id\' )
+				] );
+				return;
+			}
+		}
+		$this->_redirect ( \'%4$s_%5$s/*/\' );
+	}
+}', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) );
 		
-		$txt .= 'namespace ' . $this->_vendor . '\\' . $this->_module . '\Controller\Adminhtml\\' . $model ["name"] . ';' . "\n\n";
-		
-		$txt .= "class Save extends \\" . $this->_vendor . "\\" . $this->_module . "\Controller\Adminhtml\\" . $model ["name"] . " {" . "\n";
-		
-		$txt .= "\t" . 'public function execute() {' . "\n";
-		
-		$txt .= "\t\t" . 'if ($this->getRequest ()->getPostValue ()) {' . "\n";
-		$txt .= "\t\t\t" . 'try {' . "\n";
-		$txt .= "\t\t\t\t" . '$model = $this->_objectManager->create ( \'' . $this->_vendor . '\\' . $this->_module . '\Model\\' . $model ["name"] . '\' );' . "\n";
-		$txt .= "\t\t\t\t" . '$data = $this->getRequest ()->getPostValue ();' . "\n";
-		$txt .= "\t\t\t\t" . '$inputFilter = new \Zend_Filter_Input ( [ ], [ ], $data );' . "\n";
-		$txt .= "\t\t\t\t" . '$data = $inputFilter->getUnescaped ();' . "\n";
-		$txt .= "\t\t\t\t" . '$id = $this->getRequest ()->getParam ( \'id\' );' . "\n";
-		$txt .= "\t\t\t\t" . 'if ($id) {' . "\n";
-		$txt .= "\t\t\t\t\t" . '$model->load ( $id );' . "\n";
-		$txt .= "\t\t\t\t\t" . 'if ($id != $model->getId ()) {' . "\n";
-		$txt .= "\t\t\t\t\t\t" . 'throw new \Magento\Framework\Exception\LocalizedException ( __ ( \'The wrong item is specified.\' ) );' . "\n";
-		$txt .= "\t\t\t\t\t" . '}' . "\n";
-		$txt .= "\t\t\t\t" . '}' . "\n";
-		$txt .= "\t\t\t\t" . '$model->setData ( $data );' . "\n";
-		$txt .= "\t\t\t\t" . '$session = $this->_objectManager->get ( \'Magento\Backend\Model\Session\' );' . "\n";
-		$txt .= "\t\t\t\t" . '$session->setPageData ( $model->getData () );' . "\n";
-		$txt .= "\t\t\t\t" . '$model->save ();' . "\n";
-		$txt .= "\t\t\t\t" . '$this->messageManager->addSuccess ( __ ( \'You saved the item.\' ) );' . "\n";
-		$txt .= "\t\t\t\t" . '$session->setPageData ( false );' . "\n";
-		$txt .= "\t\t\t\t" . 'if ($this->getRequest ()->getParam ( \'back\' )) {' . "\n";
-		$txt .= "\t\t\t\t\t" . '$this->_redirect ( \'' . strtolower ( $this->_vendor ) . '_' . strtolower ( $this->_module ) . '/*/edit\', [' . "\n";
-		$txt .= "\t\t\t\t\t\t" . '\'id\' => $model->getId ()' . "\n";
-		$txt .= "\t\t\t\t\t" . '] );' . "\n";
-		$txt .= "\t\t\t\t\t" . 'return;' . "\n";
-		$txt .= "\t\t\t\t" . '}' . "\n";
-		$txt .= "\t\t\t\t" . '$this->_redirect ( \'' . strtolower ( $this->_vendor ) . '_' . strtolower ( $this->_module ) . '/*/\' );' . "\n";
-		$txt .= "\t\t\t\t" . 'return;' . "\n";
-		$txt .= "\t\t\t" . '} catch ( \Magento\Framework\Exception\LocalizedException $e ) {' . "\n";
-		$txt .= "\t\t\t\t" . '$this->messageManager->addError ( $e->getMessage () );' . "\n";
-		$txt .= "\t\t\t\t" . '$id = ( int ) $this->getRequest ()->getParam ( \'id\' );' . "\n";
-		$txt .= "\t\t\t\t" . 'if (! empty ( $id )) {' . "\n";
-		$txt .= "\t\t\t\t\t" . '$this->_redirect ( \'' . strtolower ( $this->_vendor ) . '_' . strtolower ( $this->_module ) . '/*/edit\', [' . "\n";
-		$txt .= "\t\t\t\t\t\t" . '\'id\' => $id' . "\n";
-		$txt .= "\t\t\t\t\t" . '] );' . "\n";
-		$txt .= "\t\t\t\t" . '} else {' . "\n";
-		$txt .= "\t\t\t\t\t" . '$this->_redirect ( \'' . strtolower ( $this->_vendor ) . '_' . strtolower ( $this->_module ) . '/*/new\');' . "\n";
-		$txt .= "\t\t\t\t" . '}' . "\n";
-		$txt .= "\t\t\t\t" . 'return;' . "\n";
-		$txt .= "\t\t\t" . '} catch ( \Exception $e ) {' . "\n";
-		$txt .= "\t\t\t\t" . '$this->messageManager->addError ( __ ( \'Something went wrong while saving the item data. Please review the error log.\' ) );' . "\n";
-		$txt .= "\t\t\t\t" . '$this->_objectManager->get ( \'Psr\Log\LoggerInterface\' )->critical ( $e );' . "\n";
-		$txt .= "\t\t\t\t" . '$this->_objectManager->get ( \'Magento\Backend\Model\Session\' )->setPageData ( $data );' . "\n";
-		$txt .= "\t\t\t\t" . '$this->_redirect ( \'' . strtolower ( $this->_vendor ) . '_' . strtolower ( $this->_module ) . '/*/edit\', [ ' . "\n";
-		$txt .= "\t\t\t\t\t" . '\'id\' => $this->getRequest ()->getParam ( \'id\' )' . "\n";
-		$txt .= "\t\t\t\t" . '] );' . "\n";
-		$txt .= "\t\t\t\t" . 'return;' . "\n";
-		$txt .= "\t\t\t" . '}' . "\n";
-		$txt .= "\t\t" . '}' . "\n";
-		$txt .= "\t\t" . '$this->_redirect ( \'' . strtolower ( $this->_vendor ) . '_' . strtolower ( $this->_module ) . '/*/\' );' . "\n";
-		
-		$txt .= "\t" . "}" . "\n";
-		$txt .= '}';
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
 	function CreateControllersAdminhtmlModelNewActionFile($model) {
-		$path = $this->_vendor . "/" . $this->_module . "/" . "Controller/Adminhtml/" . $model ["name"] . "/NewAction.php";
+		$path = sprintf ( "%s/%s/Controller/Adminhtml/%s/NewAction.php", $this->_vendor, $this->_module, $model ["name"] );
 		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = '<?php' . "\n\n";
-		
-		$txt .= 'namespace ' . $this->_vendor . '\\' . $this->_module . '\Controller\Adminhtml\\' . $model ["name"] . ';' . "\n\n";
-		
-		$txt .= "class NewAction extends \\" . $this->_vendor . "\\" . $this->_module . "\Controller\Adminhtml\\" . $model ["name"] . " {" . "\n";
-		$txt .= "\t" . 'public function execute() {' . "\n";
-		$txt .= "\t\t" . '$this->_forward(\'edit\');' . "\n";
-		$txt .= "\t" . "}" . "\n";
-		$txt .= '}';
+		$txt = sprintf ( '<?php
+
+namespace %s\%s\Controller\Adminhtml\%s;
+
+class NewAction extends \%1$s\%2$s\Controller\Adminhtml\%3$s {
+	public function execute() {
+		$this->_forward(\'edit\');
+	}
+}', $this->_vendor, $this->_module, $model ["name"] );
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
 	function CreateControllersAdminhtmlModelMassDeleteFile($model) {
-		$path = $this->_vendor . "/" . $this->_module . "/" . "Controller/Adminhtml/" . $model ["name"] . "/MassDelete.php";
+		$path = sprintf ( "%s/%s/Controller/Adminhtml/%s/MassDelete.php", $this->_vendor, $this->_module, $model ["name"] );
+		;
 		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = '<?php' . "\n\n";
-		
-		$txt .= 'namespace ' . $this->_vendor . '\\' . $this->_module . '\Controller\Adminhtml\\' . $model ["name"] . ';' . "\n\n";
-		
-		$txt .= "class MassDelete extends \\" . $this->_vendor . "\\" . $this->_module . "\Controller\Adminhtml\\" . $model ["name"] . " {" . "\n";
-		$txt .= "\t" . 'public function execute() {' . "\n";
-		
-		$txt .= "\t\t" . '$itemsIds = $this->getRequest()->getParam(\'id\');' . "\n";
-		$txt .= "\t\t" . 'if (!is_array($itemsIds)) {' . "\n";
-		$txt .= "\t\t\t" . '$this->messageManager->addError(__(\'Please select item(s).\'));' . "\n";
-		$txt .= "\t\t" . '} else {' . "\n";
-		$txt .= "\t\t\t" . 'try {' . "\n";
-		$txt .= "\t\t\t\t" . 'foreach ($itemsIds as $itemId) {' . "\n";
-		$txt .= "\t\t\t\t\t" . '$model = $this->_objectManager->create(\'' . $this->_vendor . '\\' . $this->_module . '\Model\\' . $model ["name"] . '\');' . "\n";
-		$txt .= "\t\t\t\t\t" . '$model->load($itemId);' . "\n";
-		$txt .= "\t\t\t\t\t" . '$model->delete();' . "\n";
-		$txt .= "\t\t\t\t" . '}' . "\n";
-		$txt .= "\t\t\t\t" . '$this->messageManager->addSuccess(' . "\n";
-		$txt .= "\t\t\t\t\t" . '__(\'A total of %1 record(s) have been deleted.\', count($itemsIds))' . "\n";
-		$txt .= "\t\t\t\t" . ');' . "\n";
-		$txt .= "\t\t\t" . '} catch (\Magento\Framework\Exception\LocalizedException $e) {' . "\n";
-		$txt .= "\t\t\t\t" . '$this->messageManager->addError($e->getMessage());' . "\n";
-		$txt .= "\t\t\t" . '} catch (\Exception $e) {' . "\n";
-		$txt .= "\t\t\t\t" . '$this->messageManager->addException($e, __(\'An error occurred while deleting record(s).\'));' . "\n";
-		$txt .= "\t\t\t" . '}' . "\n";
-		$txt .= "\t\t" . '}' . "\n";
-		$txt .= "\t\t" . '$this->_redirect(\'' . strtolower ( $this->_vendor ) . '_' . strtolower ( $this->_module ) . '/*/\');' . "\n";
-		
-		$txt .= "\t" . "}" . "\n";
-		$txt .= '}';
+		$txt = sprintf ( '<?php
+
+namespace %1$s\%2$s\Controller\Adminhtml\%3$s;
+
+class MassDelete extends \%1$s\%2$s\Controller\Adminhtml\%3$s {
+	public function execute() {
+		$itemsIds = $this->getRequest()->getParam(\'id\');
+		if (!is_array($itemsIds)) {
+			$this->messageManager->addError(__(\'Please select item(s).\'));
+		} else {
+				try {
+					foreach ($itemsIds as $itemId) {
+						$model = $this->_objectManager->create(\'%1$s\%2$s\Model\%3$s\');
+						$model->load($itemId);
+						$model->delete();
+					}
+					$this->messageManager->addSuccess(
+						__(\'A total of %1 record(s) have been deleted.\', count($itemsIds))
+					);
+				} catch (\Magento\Framework\Exception\LocalizedException $e) {
+					$this->messageManager->addError($e->getMessage());
+				} catch (\Exception $e) {
+					$this->messageManager->addException($e, __(\'An error occurred while deleting record(s).\'));
+				}
+		}
+		$this->_redirect(\'%4$s_%5$s/*/\');
+	}
+}', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) );
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
 	function CreateControllersAdminhtmlModelIndexFile($model) {
-		$path = $this->_vendor . "/" . $this->_module . "/" . "Controller/Adminhtml/" . $model ["name"] . "/Index.php";
+		$path = sprintf ( "%s/%s/Controller/Adminhtml/%s/Index.php", $this->_vendor, $this->_module, $model ["name"] );
+		;
 		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = '<?php' . "\n\n";
+		$txt = sprintf ( '<?php
+
+namespace %1$s\%2$s\Controller\Adminhtml\%3$s;
+
+class Index extends \%1$s\%2$s\Controller\Adminhtml\%3$s {
+
+	public function execute() {
+		$resultPage = $this->resultPageFactory->create();
+		$resultPage->setActiveMenu(\'%1$s_%2$s::%5$s\');
+		$resultPage->getConfig()->getTitle()->prepend(__(\'%3$s\'));
+		$resultPage->addBreadcrumb(__(\'%1$s\'), __(\'%1$s\'));
+		$resultPage->addBreadcrumb(__(\'%3$s\'), __(\'%3$s\'));
+		return $resultPage;
+	}
+}', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) );
 		
-		$txt .= 'namespace ' . $this->_vendor . '\\' . $this->_module . '\Controller\Adminhtml\\' . $model ["name"] . ';' . "\n\n";
-		
-		$txt .= "class Index extends \\" . $this->_vendor . "\\" . $this->_module . "\Controller\Adminhtml\\" . $model ["name"] . " {" . "\n";
-		
-		$txt .= "\t" . 'public function execute() {' . "\n";
-		$txt .= "\t\t" . '$resultPage = $this->resultPageFactory->create();' . "\n";
-		$txt .= "\t\t" . '$resultPage->setActiveMenu(\'' . $this->_vendor . '_' . $this->_module . '::' . strtolower ( $this->_module ) . '\');' . "\n";
-		$txt .= "\t\t" . '$resultPage->getConfig()->getTitle()->prepend(__(\'' . $model ["name"] . '\'));' . "\n";
-		$txt .= "\t\t" . '$resultPage->addBreadcrumb(__(\'' . $this->_vendor . '\'), __(\'' . $this->_vendor . '\'));' . "\n";
-		$txt .= "\t\t" . '$resultPage->addBreadcrumb(__(\'' . $model ["name"] . '\'), __(\'' . $model ["name"] . '\'));' . "\n";
-		$txt .= "\t\t" . 'return $resultPage;' . "\n";
-		
-		$txt .= "\t" . "}" . "\n";
-		$txt .= '}';
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
 	function CreateControllersAdminhtmlModelEditFile($model) {
-		$path = $this->_vendor . "/" . $this->_module . "/" . "Controller/Adminhtml/" . $model ["name"] . "/Edit.php";
+		$path = sprintf ( "%s/%s/Controller/Adminhtml/%s/Edit.php", $this->_vendor, $this->_module, $model ["name"] );
 		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = '<?php' . "\n\n";
+		$txt = sprintf ( '<?php
 		
-		$txt .= 'namespace ' . $this->_vendor . '\\' . $this->_module . '\Controller\Adminhtml\\' . $model ["name"] . ';' . "\n\n";
+namespace %s\%s\Controller\Adminhtml\%s;
+
+class Edit extends \%1$s\%2$s\Controller\Adminhtml\%3$s {
+
+	public function execute() {
+		$id = $this->getRequest()->getParam(\'id\');
+		$model = $this->_objectManager->create(\'%1$s\%2$s\Model\%3$s\');
+		if ($id) {
+			$model->load($id);
+			if (!$model->getId()) {
+				$this->messageManager->addError(__(\'This item no longer exists.\'));
+				$this->_redirect(\'%s_%s/*\');
+				return;
+			}
+		}
+		$data = $this->_objectManager->get(\'Magento\Backend\Model\Session\')->getPageData(true);
+		if (!empty($data)) {
+			$model->addData($data);
+		}
+		$resultPage = $this->resultPageFactory->create();
+		if ($id) {
+			$resultPage->getConfig()->getTitle()->prepend(__(\'Edit Items Entry\'));
+		}else{
+			$resultPage->getConfig()->getTitle()->prepend(__(\'Add Items Entry\'));
+		}
 		
-		$txt .= "class Edit extends \\" . $this->_vendor . "\\" . $this->_module . "\Controller\Adminhtml\\" . $model ["name"] . " {" . "\n";
-		
-		$txt .= "\t" . 'public function execute() {' . "\n";
-		$txt .= "\t\t" . ' $id = $this->getRequest()->getParam(\'id\');' . "\n";
-		$txt .= "\t\t" . '$model = $this->_objectManager->create(\'' . $this->_vendor . '\\' . $this->_module . '\Model\\' . $model ["name"] . '\');' . "\n";
-		$txt .= "\t\t" . 'if ($id) {' . "\n";
-		$txt .= "\t\t\t" . '$model->load($id);' . "\n";
-		$txt .= "\t\t\t" . 'if (!$model->getId()) {' . "\n";
-		$txt .= "\t\t\t\t" . '$this->messageManager->addError(__(\'This item no longer exists.\'));' . "\n";
-		$txt .= "\t\t\t\t" . '$this->_redirect(\'' . strtolower ( $this->_vendor ) . '_' . strtolower ( $this->_module ) . '/*\');' . "\n";
-		$txt .= "\t\t\t\t" . 'return;' . "\n";
-		$txt .= "\t\t\t" . '}' . "\n";
-		$txt .= "\t\t" . '}' . "\n";
-		$txt .= "\t\t" . '$data = $this->_objectManager->get(\'Magento\Backend\Model\Session\')->getPageData(true);' . "\n";
-		$txt .= "\t\t" . 'if (!empty($data)) {' . "\n";
-		$txt .= "\t\t\t" . '$model->addData($data);' . "\n";
-		$txt .= "\t\t" . '}' . "\n";
-		$txt .= "\t\t" . '$resultPage = $this->resultPageFactory->create();' . "\n";
-		$txt .= "\t\t" . 'if ($id) {' . "\n";
-		$txt .= "\t\t\t" . '$resultPage->getConfig()->getTitle()->prepend(__(\'Edit Items Entry\'));' . "\n";
-		$txt .= "\t\t" . '}else{' . "\n";
-		$txt .= "\t\t\t" . '$resultPage->getConfig()->getTitle()->prepend(__(\'Add Items Entry\'));' . "\n";
-		$txt .= "\t\t" . '}' . "\n";
-		$txt .= "\t\t" . '$this->_coreRegistry->register(\'current_' . strtolower ( $this->_vendor ) . '_' . strtolower ( $this->_module ) . '_' . strtolower ( $model ["name"] ) . '\', $model);' . "\n";
-		$txt .= "\t\t" . '$this->_initAction();' . "\n";
-		$txt .= "\t\t" . '$this->_view->getLayout()->getBlock(\'' . strtolower ( $model ["name"] ) . '_' . strtolower ( $model ["name"] ) . '_edit\');' . "\n";
-		$txt .= "\t\t" . '$this->_view->renderLayout();' . "\n";
-		
-		$txt .= "\t" . "}" . "\n";
-		$txt .= '}';
+		$this->_coreRegistry->register(\'current_%4$s_%5$s_%6$s\', $model);
+		$this->_initAction();
+		$this->_view->getLayout()->getBlock(\'%6$s_%6$s_edit\');
+		$this->_view->renderLayout();
+	}
+}', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) );
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
 	function CreateControllersAdminhtmlModelDeleteFile($model) {
-		$path = $this->_vendor . "/" . $this->_module . "/" . "Controller/Adminhtml/" . $model ["name"] . "/Delete.php";
+		$path = sprintf ( "%s/%s/Controller/Adminhtml/%s/Delete.php", $this->_vendor, $this->_module, $model ["name"] );
 		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = '<?php' . "\n\n";
+		$txt = sprintf ( '<?php
+
+namespace %s\%s\Controller\Adminhtml\%s;
+
+class Delete extends \%1$s\%2$s\Controller\Adminhtml\%3$s {
+	public function execute() {
+		$id = $this->getRequest ()->getParam ( \'id\' );
+		if ($id) {
+			try {
+				$model = $this->_objectManager->create ( \'%1$s\%2$s\Model\%3$s\' );
+				$model->load ( $id );
+				$model->delete ();
+				$this->messageManager->addSuccess ( __ ( \'You deleted the item.\' ) );
+				$this->_redirect ( \'%s_%s/*/\' );
+				return;
+			} catch ( \Magento\Framework\Exception\LocalizedException $e ) {
+				$this->messageManager->addError ( $e->getMessage () );
+			} catch ( \Exception $e ) {
+				$this->messageManager->addError ( __ ( \'We can\\\'t delete item right now. Please review the log and try again.\' ) );
+				$this->_objectManager->get ( \'Psr\Log\LoggerInterface\' )->critical ( $e );
+				$this->_redirect ( \'%4$s_%5$s/*/edit\', [
+						\'id\' => $this->getRequest ()->getParam ( \'id\' )
+				] );
+				return;
+			}
+		}
+		$this->messageManager->addError ( __ ( \'We can\\\'t find a item to delete.\' ) );
+		$this->_redirect ( \'%4$s_%5$s/*/\' );
+	}
+}', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ) );
 		
-		$txt .= 'namespace ' . $this->_vendor . '\\' . $this->_module . '\Controller\Adminhtml\\' . $model ["name"] . ';' . "\n\n";
-		
-		$txt .= "class Delete extends \\" . $this->_vendor . "\\" . $this->_module . "\Controller\Adminhtml\\" . $model ["name"] . " {" . "\n";
-		
-		$txt .= "\t" . 'public function execute() {' . "\n";
-		
-		$txt .= "\t\t" . '$id = $this->getRequest ()->getParam ( \'id\' );' . "\n";
-		$txt .= "\t\t" . 'if ($id) {' . "\n";
-		$txt .= "\t\t\t" . 'try {' . "\n";
-		$txt .= "\t\t\t\t" . '$model = $this->_objectManager->create ( \'' . $this->_vendor . '\\' . $this->_module . '\Model\\' . $model ["name"] . '\' );' . "\n";
-		$txt .= "\t\t\t\t" . '$model->load ( $id );' . "\n";
-		$txt .= "\t\t\t\t" . '$model->delete ();' . "\n";
-		$txt .= "\t\t\t\t" . '$this->messageManager->addSuccess ( __ ( \'You deleted the item.\' ) );' . "\n";
-		$txt .= "\t\t\t\t" . '$this->_redirect ( \'' . strtolower ( $this->_vendor ) . '_' . strtolower ( $this->_module ) . '/*/\' );' . "\n";
-		
-		$txt .= "\t\t\t\t" . 'return;' . "\n";
-		$txt .= "\t\t\t" . '} catch ( \Magento\Framework\Exception\LocalizedException $e ) {' . "\n";
-		$txt .= "\t\t\t\t" . '$this->messageManager->addError ( $e->getMessage () );' . "\n";
-		$txt .= "\t\t\t" . '} catch ( \Exception $e ) {' . "\n";
-		$txt .= "\t\t\t\t" . '$this->messageManager->addError ( __ ( \'We can\\\'t delete item right now. Please review the log and try again.\' ) );' . "\n";
-		$txt .= "\t\t\t\t" . '$this->_objectManager->get ( \'Psr\Log\LoggerInterface\' )->critical ( $e );' . "\n";
-		$txt .= "\t\t\t\t" . '$this->_redirect ( \'' . strtolower ( $this->_vendor ) . '_' . strtolower ( $this->_module ) . '/*/edit\', [' . "\n";
-		$txt .= "\t\t\t\t\t\t" . '\'id\' => $this->getRequest ()->getParam ( \'id\' )' . "\n";
-		$txt .= "\t\t\t\t" . '] );' . "\n";
-		$txt .= "\t\t\t\t" . 'return;' . "\n";
-		$txt .= "\t\t\t" . '}' . "\n";
-		$txt .= "\t\t" . '}' . "\n";
-		$txt .= "\t\t" . '$this->messageManager->addError ( __ ( \'We can\\\'t find a item to delete.\' ) );' . "\n";
-		$txt .= "\t\t" . '$this->_redirect ( \'' . strtolower ( $this->_vendor ) . '_' . strtolower ( $this->_module ) . '/*/\' );' . "\n";
-		
-		$txt .= "\t" . "}" . "\n";
-		
-		$txt .= '}';
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
 	function CreateControllersAdminhtmlModelFile($model) {
-		$path = $this->_vendor . "/" . $this->_module . "/" . "Controller/Adminhtml/" . $model ["name"] . ".php";
+		$path = sprintf ( "%s/%s/Controller/Adminhtml/%s.php", $this->_vendor, $this->_module, $model ["name"] );
 		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = '<?php' . "\n\n";
-		$txt .= 'namespace ' . $this->_vendor . '\\' . $this->_module . '\Controller\Adminhtml;' . "\n\n";
-		$txt .= "abstract class " . $model ["name"] . " extends \Magento\Backend\App\Action {" . "\n";
-		$txt .= "\t" . 'protected $_coreRegistry;' . "\n";
-		$txt .= "\t" . 'protected $resultForwardFactory;' . "\n";
-		$txt .= "\t" . 'protected $resultPageFactory;' . "\n";
+		$txt = sprintf ( '<?php
+
+namespace %s\%s\Controller\Adminhtml;
+
+abstract class %s extends \Magento\Backend\App\Action {
+	protected $_coreRegistry;
+	protected $resultForwardFactory;
+	protected $resultPageFactory;
+	public function __construct(\Magento\Backend\App\Action\Context $context, \Magento\Framework\Registry $coreRegistry, \Magento\Backend\Model\View\Result\ForwardFactory $resultForwardFactory, \Magento\Framework\View\Result\PageFactory $resultPageFactory) {
+		$this->_coreRegistry = $coreRegistry;
+		parent::__construct ( $context );
+		$this->resultForwardFactory = $resultForwardFactory;
+		$this->resultPageFactory = $resultPageFactory;
+	}
+	protected function _initAction() {
+		$this->_view->loadLayout ();
+		$this->_setActiveMenu ( \'%1$s_%2$s::%4$s\' )->_addBreadcrumb ( __ ( \'%3$s\' ), __ ( \'%3$s\' ) );
+		return $this;
+	}
+	protected function _isAllowed() {
+		return $this->_authorization->isAllowed ( \'%1$s_%2$s::%5$s\' );
+	}
+}', $this->_vendor, $this->_module, $model ["name"], strtolower ( $model ["table"] ),strtolower ( $model ["name"] ) );
 		
-		$txt .= "\t" . 'public function __construct(\Magento\Backend\App\Action\Context $context, \Magento\Framework\Registry $coreRegistry, \Magento\Backend\Model\View\Result\ForwardFactory $resultForwardFactory, \Magento\Framework\View\Result\PageFactory $resultPageFactory) {' . "\n";
-		$txt .= "\t\t" . '$this->_coreRegistry = $coreRegistry;' . "\n";
-		$txt .= "\t\t" . 'parent::__construct ( $context );' . "\n";
-		$txt .= "\t\t" . '$this->resultForwardFactory = $resultForwardFactory;' . "\n";
-		$txt .= "\t\t" . '$this->resultPageFactory = $resultPageFactory;' . "\n";
-		$txt .= "\t" . "}" . "\n";
-		
-		$txt .= "\t" . 'protected function _initAction() {' . "\n";
-		$txt .= "\t\t" . '$this->_view->loadLayout ();' . "\n";
-		$txt .= "\t\t" . '$this->_setActiveMenu ( \'' . $this->_vendor . '_' . $this->_module . '::' . strtolower ( $model ["name"] ) . '\' )->_addBreadcrumb ( __ ( \'' . $model ["name"] . '\' ), __ ( \'' . $model ["name"] . '\' ) );' . "\n";
-		$txt .= "\t\t" . 'return $this;' . "\n";
-		$txt .= "\t" . "}" . "\n";
-		
-		$txt .= "\t" . 'protected function _isAllowed() {' . "\n";
-		$txt .= "\t\t" . 'return $this->_authorization->isAllowed ( \'' . $this->_vendor . '_' . $this->_module . '::' . strtolower ( $model ["name"] ) . '\' );' . "\n";
-		$txt .= "\t" . "}" . "\n";
-		
-		$txt .= '}';
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
 	function CreateModelResourceModelCollectionFile($model) {
-		$path = $this->_vendor . "/" . $this->_module . "/" . "Model/Resource/" . "/" . $model ["name"] . "/Collection.php";
+		$path = sprintf ( "%s/%s/Model/Resource/%s/Collection.php", $this->_vendor, $this->_module, $model ["name"] );
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = '<?php' . "\n\n";
-		$txt .= 'namespace ' . $this->_vendor . '\\' . $this->_module . '\Model\Resource\\' . $model ["name"] . ';' . "\n\n";
-		$txt .= "class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection {" . "\n";
-		$txt .= "\t" . 'protected function _construct() {' . "\n";
-		$txt .= "\t\t" . '$this->_init(\'' . $this->_vendor . '\\' . $this->_module . '\Model\\' . $model ["name"] . '\', \'' . $this->_vendor . '\\' . $this->_module . '\Model\Resource\\' . $model ["name"] . '\');' . "\n";
-		$txt .= "\t" . '}' . "\n";
-		$txt .= '}';
+		$txt = sprintf ( '<?php
+				
+namespace %s\%s\Model\Resource\%s ;
+				
+class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection {
+	protected function _construct() {
+		$this->_init(\'%1$s\%2$s\Model\%3$s\', \'%1$s\%2$s\Model\Resource\%3$s\');
+	}
+}', $this->_vendor, $this->_module, $model ["name"] );
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
 	function CreateModelResourceModelFile($model) {
-		$path = $this->_vendor . "/" . $this->_module . "/" . "Model/Resource/" . "/" . $model ["name"] . ".php";
+		$path = sprintf ( "%s/%s/Model/Resource/%s.php", $this->_vendor, $this->_module, $model ["name"] );
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = '<?php' . "\n\n";
-		$txt .= 'namespace ' . $this->_vendor . '\\' . $this->_module . '\Model\Resource;' . "\n\n";
-		$txt .= "class " . $model ["name"] . " extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb {" . "\n";
-		$txt .= "\t" . 'protected function _construct() {' . "\n";
-		$txt .= "\t\t" . '$this->_init(\'' . strtolower ( $this->_vendor . '_' . $this->_module . '_' . $model ["table"] ) . '\', \'id\');' . "\n";
-		$txt .= "\t" . '}' . "\n";
-		$txt .= '}';
+		$txt = sprintf ( '<?php
+
+namespace %s\%s\Model\Resource;
+
+class %s extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb {
+	protected function _construct() {
+		$this->_init(\'%s_%s_%s\', \'id\');
+	}
+}', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["table"] ) );
+		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
 	function CreateModelModelFile($model) {
-		$path = $this->_vendor . "/" . $this->_module . "/" . "Model/" . "/" . $model ["name"] . ".php";
+		$path = sprintf ( "%s/%s/Model/%s.php", $this->_vendor, $this->_module, $model ["name"] );
+		;
 		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$txt = '<?php' . "\n\n";
-		$txt .= 'namespace ' . $this->_vendor . '\\' . $this->_module . '\Model;' . "\n\n";
-		$txt .= "class " . $model ["name"] . " extends \Magento\Framework\Model\AbstractModel {" . "\n";
-		$txt .= "\t" . 'protected function _construct() {' . "\n";
-		$txt .= "\t\t" . 'parent::_construct();' . "\n";
-		$txt .= "\t\t" . '$this->_init(\'' . $this->_vendor . '\\' . $this->_module . '\Model\Resource\\' . $model ["name"] . '\');' . "\n";
-		$txt .= "\t" . '}' . "\n";
-		$txt .= '}';
+		$txt = sprintf ( '<?php
+
+namespace %s\%s\Model;
+				
+class %s extends \Magento\Framework\Model\AbstractModel {
+	
+		protected function _construct() {
+			parent::_construct();
+			$this->_init(\'%1$s\%2$s\Model\Resource\%3$s\');
+		}
+}', $this->_vendor, $this->_module, $model ["name"] );
+		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	
 	function CreateViewAdminhtmlLayoutIndexFile($model) {
 		$path = sprintf ( "%s/%s/view/adminhtml/layout/%s_%s_%s_edit" . ".xml", $this->_vendor, $this->_module, strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) );
 		
@@ -970,8 +975,6 @@ class %s extends \Magento\Backend\Block\Widget\Grid\Container {
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	
 	function CreateViewAdminhtmlLayoutEditFile($model) {
 		// $path = sprintf('%s/%s/view/adminhtml/layout/menu.xml',$this->_vendor,$this->_module);
 		$path = sprintf ( "%s/%s/view/adminhtml/layout/%s_%s_%s_index" . ".xml", $this->_vendor, $this->_module, strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) );

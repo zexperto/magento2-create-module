@@ -3,6 +3,7 @@
 namespace ITM\File\Controller\Adminhtml\Box;
 
 class Index extends \ITM\File\Controller\Adminhtml\Box {
+
 	public function execute() {
 		$resultPage = $this->resultPageFactory->create();
 		$resultPage->setActiveMenu('ITM_File::file');

@@ -1,10 +1,11 @@
 <?php
-
+		
 namespace ITM\File\Controller\Adminhtml\Box;
 
 class Edit extends \ITM\File\Controller\Adminhtml\Box {
+
 	public function execute() {
-		 $id = $this->getRequest()->getParam('id');
+		$id = $this->getRequest()->getParam('id');
 		$model = $this->_objectManager->create('ITM\File\Model\Box');
 		if ($id) {
 			$model->load($id);
@@ -24,6 +25,7 @@ class Edit extends \ITM\File\Controller\Adminhtml\Box {
 		}else{
 			$resultPage->getConfig()->getTitle()->prepend(__('Add Items Entry'));
 		}
+		
 		$this->_coreRegistry->register('current_itm_file_box', $model);
 		$this->_initAction();
 		$this->_view->getLayout()->getBlock('box_box_edit');

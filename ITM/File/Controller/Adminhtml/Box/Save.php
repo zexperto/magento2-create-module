@@ -3,6 +3,7 @@
 namespace ITM\File\Controller\Adminhtml\Box;
 
 class Save extends \ITM\File\Controller\Adminhtml\Box {
+
 	public function execute() {
 		if ($this->getRequest ()->getPostValue ()) {
 			try {
@@ -27,7 +28,7 @@ class Save extends \ITM\File\Controller\Adminhtml\Box {
 					$this->_redirect ( 'itm_file/*/edit', [
 						'id' => $model->getId ()
 					] );
-					return;
+				return;
 				}
 				$this->_redirect ( 'itm_file/*/' );
 				return;
