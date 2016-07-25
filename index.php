@@ -1017,7 +1017,6 @@ class %s extends \Magento\Framework\Model\AbstractModel {
 		foreach ( $this->_config ["backend_model"] as $model ) {
 			$txt .= "\t\t" . sprintf ( '<add id="%4$s_%5$s::%6$s" title="%3$s" module="%1$s_%2$s" sortOrder="10" parent="%4$s_%5$s::%5$s" action="%4$s_%5$s/%6$s/" resource="%1$s_%2$s::main"/>', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) ) . "\n";
 		}
-		
 		$txt .= '	</menu>
 </config>';
 		
