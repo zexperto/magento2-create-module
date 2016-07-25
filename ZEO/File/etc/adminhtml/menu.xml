@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Backend/etc/menu.xsd">
+	<menu>
+		<add id="zeo::base" title="ZEO" module="ZEO_File" sortOrder="90" resource="ZEO_File::main"/>
+		<add id="zeo_file::file" title="File" module="ZEO_File" sortOrder="0" parent="zeo::base"  resource="ZEO_File::main"/>
+		<add id="zeo_file::box" title="Box" module="ZEO_File" sortOrder="10" parent="zeo_file::file" action="zeo_file/box/" resource="ZEO_File::main"/>
+	</menu>
+</config>

@@ -976,7 +976,6 @@ class %s extends \Magento\Framework\Model\AbstractModel {
 		fclose ( $file );
 	}
 	function CreateViewAdminhtmlLayoutEditFile($model) {
-		// $path = sprintf('%s/%s/view/adminhtml/layout/menu.xml',$this->_vendor,$this->_module);
 		$path = sprintf ( "%s/%s/view/adminhtml/layout/%s_%s_%s_index" . ".xml", $this->_vendor, $this->_module, strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) );
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
@@ -1011,11 +1010,12 @@ class %s extends \Magento\Framework\Model\AbstractModel {
 		$txt = sprintf ( '<?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Backend/etc/menu.xsd">
 	<menu>
+		<add id="%3$s::base" title="%1$s" module="%1$s_%2$s" sortOrder="90" resource="%1$s_%2$s::main"/>
 		<add id="%3$s_%4$s::%4$s" title="%2$s" module="%1$s_%2$s" sortOrder="0" parent="%3$s::base"  resource="%1$s_%2$s::main"/>', $this->_vendor, $this->_module, strtolower ( $this->_vendor ), strtolower ( $this->_module ) );
 		$txt .= "\n";
 		
 		foreach ( $this->_config ["backend_model"] as $model ) {
-			$txt .= "\t\t" . sprintf ( '<add id="%4$s_%5$s::%6$s" title="%3$s" module="%1$s_%2$s" sortOrder="10" parent="%4$s_%5$s::%5$s" action="%4$s_%5$s/%6$s/" resource="%1$s_%2$s::%3$s"/>', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) ) . "\n";
+			$txt .= "\t\t" . sprintf ( '<add id="%4$s_%5$s::%6$s" title="%3$s" module="%1$s_%2$s" sortOrder="10" parent="%4$s_%5$s::%5$s" action="%4$s_%5$s/%6$s/" resource="%1$s_%2$s::main"/>', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) ) . "\n";
 		}
 		
 		$txt .= '	</menu>
@@ -1086,6 +1086,6 @@ $config_array = [
 		] 
 ];
 
-$mod = new Magento2Module ( "ITM", "File" );
+$mod = new Magento2Module ( "ZEO", "File" );
 $mod->setConfig ( $config_array );
 echo $mod->create ( $config_array );
