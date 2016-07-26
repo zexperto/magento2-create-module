@@ -375,9 +375,13 @@ class UpgradeData implements UpgradeDataInterface {
 namespace %s\%s\Block\Adminhtml;
 	
 class %s extends \Magento\Backend\Block\Widget\Grid\Container {
-	
+	 /**
+     * Constructor
+     *
+     * @return void
+     */
 	protected function _construct() {
-		$this->_controller = \'adminhtml_%6$s\';
+		$this->_controller = \'adminhtml_%6$s\';/*block grid.php directory*/
 		$this->_blockGroup = \'%1$s_%2$s\';
 		$this->_headerText = __ ( \'%3$s\' );
 		$this->_addButtonLabel = __ ( \'Add New Entry\' );
@@ -400,8 +404,22 @@ namespace %s\%s\Block\Adminhtml\%s;
 use %1$s\%2$s\Model\System\Config\Status;
 	
 class Grid extends \Magento\Backend\Block\Widget\Grid\Extended {
+	 
+	/**
+     * @var \Magento\Catalog\Model\Product\Attribute\Source\Status
+     */
 	protected $_status;
 	protected $_collectionFactory;
+	
+	/**
+     * @param \Magento\Backend\Block\Template\Context $context
+     * @param \Magento\Backend\Helper\Data $backendHelper
+     * @param \Magento\Eav\Model\ResourceModel\Entity\Attribute\Set\CollectionFactory $setsFactory
+     * @param \Magento\Catalog\Model\Product\Attribute\Source\Status $status
+     * @param array $data
+     *
+     * @SuppressWarnings(PHPMD.ExcessiveParameterList)
+     */
 	public function __construct(
 			\Magento\Backend\Block\Template\Context $context,
 			\Magento\Backend\Helper\Data $backendHelper,
@@ -413,6 +431,10 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended {
 		$this->_collectionFactory = $collectionFactory;
 		parent::__construct($context, $backendHelper, $data);
 	}
+
+	/**
+     * @return void
+     */
 	protected function _construct() {
 		parent::_construct();
 		$this->setId(\'%6$sGrid\');
@@ -421,10 +443,18 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended {
 		$this->setSaveParametersInSession(true);
 		$this->setUseAjax(false);
 	}
+				
+	/**
+     * @return Store
+     */
 	protected function _getStore() {
 		$storeId = ( int ) $this->getRequest ()->getParam ( \'store\', 0 );
 		return $this->_storeManager->getStore ( $storeId );
 	}
+				
+	 /**
+     * @return $this
+     */
 	protected function _prepareCollection() {
 		try {
 			$collection = $this->_collectionFactory->load ();
@@ -436,6 +466,12 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended {
 			die ();
 		}
 	}
+	
+				
+	 /**
+     * @return $this
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+     */
 	protected function _prepareColumns() {
 		$this->addColumn ( \'id\', [
 			\'header\' => __ ( \'ID\' ),
@@ -457,6 +493,10 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended {
 		}
 		return parent::_prepareColumns ();
 	}
+				
+	 /**
+     * @return $this
+     */
 	protected function _prepareMassaction() {
 		$this->setMassactionIdField ( \'id\' );
 		$this->getMassactionBlock ()->setFormFieldName ( \'id\' );
@@ -467,11 +507,20 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended {
 		) );
 		return $this;
 	}
+	
+	/**
+     * @return string
+     */
 	public function getGridUrl() {
 		return $this->getUrl ( \'%4$s_%5$s/*/index\', [
 			\'_current\' => true
 		] );
 	}
+	
+	/**
+     * @param \Magento\Catalog\Model\Product|\Magento\Framework\Object $row
+     * @return string
+     */
 	public function getRowUrl($row) {
 		return $this->getUrl ( \'%4$s_%5$s/*/edit\', [
 			\'store\' => $this->getRequest ()->getParam ( \'store\' ),
@@ -484,6 +533,7 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended {
 		fclose ( $file );
 	}
 	
+	
 	function CreateAdminhtmlModelEditFile($model) {
 		$path = sprintf ( '%s/%s/Block/Adminhtml/%s/Edit.php', $this->_vendor, $this->_module, $model ["name"] );
 	
@@ -495,13 +545,31 @@ namespace ' . $this->_vendor . '\\' . $this->_module . '\Block\Adminhtml\\' . $m
 	
 class Edit extends \Magento\Backend\Block\Widget\Form\Container {
 	
+	/**
+     * Core registry
+     *
+     * @var \Magento\Framework\Registry
+     */
 	protected $_coreRegistry = null;
 	
+	
+	 /**
+     * @param \Magento\Backend\Block\Widget\Context $context
+     * @param \Magento\Framework\Registry $registry
+     * @param array $data
+     */
 	public function __construct(\Magento\Backend\Block\Widget\Context $context, \Magento\Framework\Registry $registry, array $data = []) {
 		$this->_coreRegistry = $registry;
 		parent::__construct ( $context, $data );
 	}
-	
+
+	/**
+     * Initialize form
+     * Add standard buttons
+     * Add "Save and Continue" button
+     *
+     * @return void
+     */
 	protected function _construct() {
 		$this->_objectId = \'id\';
 		$this->_controller = \'adminhtml_' . strtolower ( $model ["name"] ) . '\';
@@ -520,6 +588,12 @@ class Edit extends \Magento\Backend\Block\Widget\Form\Container {
 			]
 		], 10 );
 	}
+	
+	 /**
+     * Getter for form header text
+     *
+     * @return \Magento\Framework\Phrase
+     */
 	public function getHeaderText() {
 		$item = $this->_coreRegistry->registry ( \'current_' . strtolower ( $this->_vendor ) . '_' . strtolower ( $this->_module ) . '_' . strtolower ( $model ["name"] ) . '\' );
 		if ($item->getId ()) {
@@ -545,13 +619,25 @@ namespace %s\%s\Block\Adminhtml\%s\Edit;
 	
 class Form extends \Magento\Backend\Block\Widget\Form\Generic {
 	
+		/**
+     * Constructor
+     *
+     * @return void
+     */
 		protected function _construct() {
 			parent::_construct ();
 			$this->setId ( \'%s_%s_form\' );
 			$this->setTitle ( __ ( \'%1$s Information\' ) );
 		}
 	
+		 /**
+     * Prepare form before rendering HTML
+     *
+     * @return $this
+     */
 		protected function _prepareForm() {
+			
+			/** @var \Magento\Framework\Data\Form $form */
 			$form = $this->_formFactory->create ( [
 				\'data\' => [
 					\'id\' => \'edit_form\',
@@ -579,6 +665,12 @@ class Form extends \Magento\Backend\Block\Widget\Form\Generic {
 namespace %s\%s\Block\Adminhtml\%s\Edit;
 	
 class Tabs extends \Magento\Backend\Block\Widget\Tabs {
+	
+	/**
+     * Constructor
+     *
+     * @return void
+     */
 	protected function _construct() {
 		parent::_construct ();
 			$this->setId ( \'%s_%s_%s_edit_tabs\' );
@@ -615,22 +707,44 @@ class Main extends Generic implements TabInterface {
 		parent::__construct ( $context, $registry, $formFactory, $data );
 	}
 	
+	 /**
+     * {@inheritdoc}
+     */
 	public function getTabLabel() {
 		return __ ( \'Item Information\');
 	}
-	
+				
+	 /**
+     * {@inheritdoc}
+     */
 	public function getTabTitle() {
 		return __ ( \'Item Information\' );
 	}
-	
+				
+	 /**
+     * {@inheritdoc}
+     */
 	public function canShowTab() {
 		return true;
 	}
+				
+	 /**
+     * {@inheritdoc}
+     */				
 	public function isHidden() {
 		return false;
 	}
+				
+	/**
+     * Prepare form before rendering HTML
+     *
+     * @return $this
+     * @SuppressWarnings(PHPMD.NPathComplexity)
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+     */			
 	protected function _prepareForm() {
 		$model = $this->_coreRegistry->registry ( \'current_%s_%s_%s\' );
+		/** @var \Magento\Framework\Data\Form $form */
 		$form = $this->_formFactory->create ();
 		$form->setHtmlIdPrefix ( \'item_\' );
 		$fieldset = $form->addFieldset ( \'base_fieldset\', [
@@ -666,20 +780,57 @@ class Main extends Generic implements TabInterface {
 namespace %s\%s\Controller\Adminhtml;
 	
 abstract class %s extends \Magento\Backend\App\Action {
+
+	 /**
+     * Core registry
+     *
+     * @var \Magento\Framework\Registry
+     */
 	protected $_coreRegistry;
+
+	/**
+     * @var \Magento\Backend\Model\View\Result\ForwardFactory
+     */			
 	protected $resultForwardFactory;
+	
+	
+	/**
+     * @var \Magento\Framework\View\Result\PageFactory
+     */
 	protected $resultPageFactory;
+	
+				
+	 /**
+     * Initialize Group Controller
+     *
+     * @param \Magento\Backend\App\Action\Context $context
+     * @param \Magento\Framework\Registry $coreRegistry
+     * @param \Magento\Backend\Model\View\Result\ForwardFactory $resultForwardFactory
+     * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
+     */			
 	public function __construct(\Magento\Backend\App\Action\Context $context, \Magento\Framework\Registry $coreRegistry, \Magento\Backend\Model\View\Result\ForwardFactory $resultForwardFactory, \Magento\Framework\View\Result\PageFactory $resultPageFactory) {
 		$this->_coreRegistry = $coreRegistry;
 		parent::__construct ( $context );
 		$this->resultForwardFactory = $resultForwardFactory;
 		$this->resultPageFactory = $resultPageFactory;
 	}
+	
+	  /**
+     * Initiate action
+     *
+     * @return this
+     */
 	protected function _initAction() {
 		$this->_view->loadLayout ();
 		$this->_setActiveMenu ( \'%1$s_%2$s::%4$s\' )->_addBreadcrumb ( __ ( \'%3$s\' ), __ ( \'%3$s\' ) );
 		return $this;
 	}
+	
+	/**
+     * Determine if authorized to perform group actions.
+     *
+     * @return bool
+     */
 	protected function _isAllowed() {
 		return $this->_authorization->isAllowed ( \'%1$s_%2$s::%5$s\' );
 	}
@@ -785,7 +936,13 @@ namespace %1$s\%2$s\Controller\Adminhtml\%3$s;
 	
 class Index extends \%1$s\%2$s\Controller\Adminhtml\%3$s {
 	
+	/**
+     * %3$s list.
+     *
+     * @return \Magento\Backend\Model\View\Result\Page
+     */
 	public function execute() {
+		/** @var \Magento\Backend\Model\View\Result\Page $resultPage */
 		$resultPage = $this->resultPageFactory->create();
 		$resultPage->setActiveMenu(\'%1$s_%2$s::%5$s\');
 		$resultPage->getConfig()->getTitle()->prepend(__(\'%3$s\'));
@@ -811,6 +968,10 @@ class Index extends \%1$s\%2$s\Controller\Adminhtml\%3$s {
 namespace %1$s\%2$s\Controller\Adminhtml\%3$s;
 	
 class MassDelete extends \%1$s\%2$s\Controller\Adminhtml\%3$s {
+	
+	/**
+     * @return void
+     */
 	public function execute() {
 		$itemsIds = $this->getRequest()->getParam(\'id\');
 		if (!is_array($itemsIds)) {
@@ -939,6 +1100,11 @@ namespace %s\%s\Model;
 	
 class %s extends \Magento\Framework\Model\AbstractModel {
 	
+	 /**
+     * Constructor
+     *
+     * @return void
+     */
 		protected function _construct() {
 			parent::_construct();
 			$this->_init(\'%1$s\%2$s\Model\Resource\%3$s\');
@@ -959,6 +1125,12 @@ class %s extends \Magento\Framework\Model\AbstractModel {
 namespace %s\%s\Model\Resource;
 	
 class %s extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb {
+	
+	 /**
+     * Model Initialization
+     *
+     * @return void
+     */
 	protected function _construct() {
 		$this->_init(\'%s_%s_%s\', \'id\');
 	}
@@ -979,6 +1151,12 @@ class %s extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb {
 namespace %s\%s\Model\Resource\%s ;
 	
 class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection {
+  	
+	/**
+     * Define resource model
+     *
+     * @return void
+     */
 	protected function _construct() {
 		$this->_init(\'%1$s\%2$s\Model\%3$s\', \'%1$s\%2$s\Model\Resource\%3$s\');
 	}
@@ -1131,6 +1309,7 @@ class Status implements ArrayInterface {
 		$this->CreateModel ();
 		$this->CreateController ();
 		$this->CreateView ();
+		
 		$this->CreateBackEndModels ();
 	}
 	function __toString() {
