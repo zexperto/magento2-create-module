@@ -101,6 +101,28 @@ class InstallSchema implements InstallSchemaInterface {
 		
 		if ($this->_config ["backend_model"]) {
 			foreach ( $this->_config ["backend_model"] as $model ) {
+				$columns ="";
+				
+				foreach ($model["columns"] as $column){
+				
+					if($column["type"]=="string"):
+					$columns .=sprintf('->addColumn ( \'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_TEXT, \'%3$s\', [\'nullable\' => false ], \'%2$s\' )'
+							,$column["name"],$column["label"],$column["size"]);
+					endif;
+				
+				if($column["type"]=="date"):
+					$columns .=sprintf('->addColumn(\'%1$s\',\Magento\Framework\DB\Ddl\Table::TYPE_DATE,	null,[],\'%2$s\')'
+							,$column["name"],$column["label"]);
+					endif;
+				
+					if($column["type"]=="decimal"):
+					$columns .=sprintf('->addColumn ( \'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_DECIMAL, \'12,4\',  [\'nullable\' => false, \'default\' => \'0.0000\'], \'%2$s\' )'
+							,$column["name"],$column["label"]);
+					endif;
+			
+					$columns .="\n\t\t\t\t";
+				}
+				
 				$txt .= sprintf ( '
 		$table = $setup->getConnection ()
 				->newTable ( $setup->getTable ( \'%s_%s_%s\' ) )
@@ -110,11 +132,12 @@ class InstallSchema implements InstallSchemaInterface {
 						\'nullable\' => false,
 						\'primary\' => true
 						], \'Id\' )
+				%4$s
 				->addColumn ( \'status\', \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER, 1, [
 						\'default\' => null
 						], \'Status\' );
 		$setup->getConnection ()->createTable ( $table );
-						', strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) );
+						', strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ),$columns );
 			}
 		}
 		
@@ -274,7 +297,7 @@ class UpgradeData implements UpgradeDataInterface {
 	
 	
 	function CreateView() {
-		if ($this->_config ["view"]) {
+		if (count($this->_config ["view"])>0) {
 			$this->CreateFolder ( sprintf ( '%s/%s/view', $this->_vendor, $this->_module ) );
 		}
 		
@@ -397,6 +420,42 @@ class %s extends \Magento\Backend\Block\Widget\Grid\Container {
 		$path = sprintf ( '%s/%s/Block/Adminhtml/%s/Grid.php', $this->_vendor, $this->_module, $model ["name"] );
 	
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
+		$columns="";
+		foreach ($model["columns"] as $column){
+				
+			if($column["type"]=="string"):
+			$columns .=sprintf( '$this->addColumn ( \'%1$s\', [ 
+			\'header\' => __ ( \'%2$s\' ),
+			\'index\' => \'%1$s\',
+			\'class\' => \'%1$s\' 
+			] );'
+			,$column["name"],$column["label"],$column["rquired"]);
+			endif;
+				
+			if($column["type"]=="date"):
+			$columns .=sprintf( '$this->addColumn ( \'%1$s\', [ 
+			\'header\' => __ ( \'%2$s\' ),
+			\'type\' => \'date\',
+			\'align\' => \'center\',
+			\'index\' => \'%1$s\',
+			\'default\' => \' ---- \' 
+			] );'
+			,$column["name"],$column["label"],$column["rquired"]);
+			endif;
+				
+			if($column["type"]=="decimal"):
+			$columns .=sprintf( '$this->addColumn ( \'%1$s\', [ 
+			\'header\' => __ ( \'%2$s\' ),
+			\'index\' => \'%1$s\',
+			\'class\' => \'%1$s\' 
+			] );'
+			,$column["name"],$column["label"],$column["rquired"]);
+			endif;
+				
+		
+			$columns .="\n\n\t\t";
+		}
+		
 		$txt = sprintf ( '<?php
 	
 namespace %s\%s\Block\Adminhtml\%s;
@@ -480,6 +539,9 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended {
 			\'header_css_class\' => \'col-id\',
 			\'column_css_class\' => \'col-id\'
 		] );
+		
+		%7$s		
+				
 		$this->addColumn ( \'status\', [
 			\'header\' => __ ( \'Status\' ),
 			\'index\' => \'status\',
@@ -527,7 +589,7 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended {
 			\'id\' => $row->getId ()
 		] );
 	}
-}', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) );
+}', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ),$columns );
 	
 		fwrite ( $file, $txt );
 		fclose ( $file );
@@ -687,7 +749,43 @@ class Tabs extends \Magento\Backend\Block\Widget\Tabs {
 		$path = sprintf ( '%s/%s/Block/Adminhtml/%s/Edit/Tab/Main.php', $this->_vendor, $this->_module, $model ["name"] );
 	
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-	
+		$columns="";
+		foreach ($model["columns"] as $column){
+			
+			if($column["type"]=="string"):
+			$columns .=sprintf( '$fieldset->addField ( \'%1$s\', \'text\', [
+			\'name\' => \'%1$s\',
+			\'required\' => %3$s,
+			\'label\' => __ ( \'%2$s\' ),
+			\'title\' => __ ( \'%2$s\' ),
+			] );',$column["name"],$column["label"],$column["rquired"]);
+			endif;
+			
+			if($column["type"]=="date"):
+			$columns .=sprintf( '$fieldset->addField ( \'%1$s\', \'date\', [
+			\'name\' => \'%1$s\',
+			\'required\' => %3$s,
+			\'label\' => __ ( \'%2$s\' ),
+			\'title\' => __ ( \'%2$s\' ),
+			\'date_format\' => $this->_localeDate->getDateFormat(\IntlDateFormatter::SHORT),
+        	\'class\' => \'validate-date\'
+			] );',$column["name"],$column["label"],$column["rquired"]);
+			endif;
+			
+			if($column["type"]=="decimal"):
+			$columns .=sprintf( '$fieldset->addField ( \'%1$s\', \'text\', [
+			\'name\' => \'%1$s\',
+			\'required\' => %3$s,
+			\'label\' => __ ( \'%2$s\' ),
+			\'title\' => __ ( \'%2$s\' ),
+        	\'class\' => \'validate-zero-or-greater\'
+			] );',$column["name"],$column["label"],$column["rquired"]);
+			endif;
+			
+
+			$columns .="\n\n\t\t";
+		}
+		
 		$txt = sprintf ( '<?php
 	
 namespace %s\%s\Block\Adminhtml\%s\Edit\Tab;
@@ -755,6 +853,9 @@ class Main extends Generic implements TabInterface {
 				\'name\' => \'id\'
 			] );
 		}
+		
+		%7$s
+				
 		$fieldset->addField ( \'status\', \'select\', [
 			\'name\' => \'status\',
 			\'label\' => __ ( \'Status\' ),
@@ -765,7 +866,7 @@ class Main extends Generic implements TabInterface {
 		return parent::_prepareForm ();
 	}
 }
-', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) );
+', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ),$columns );
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
@@ -1286,6 +1387,8 @@ class Status implements ArrayInterface {
 		$this->CreateModelResourceModelCollectionFile ( $model );
 	
 		// Create view Files
+		$this->_config ["view"] ["adminhtml"]=true;
+		$this->CreateView();
 		$this->CreateViewAdminhtmlLayoutIndexFile ( $model );
 		$this->CreateViewAdminhtmlLayoutEditFile ( $model );
 	
