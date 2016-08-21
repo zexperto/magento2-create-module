@@ -4,22 +4,45 @@ How To use this file
 2. This is an example of how to use this class
 
 // --------------------------------------------------------------
-$config_array = [ 
+$config_array = [ \n
 		"helper" => true,
 		"setup" => true,
-		"block" => true,
-		"controller" => true,
-		"model" => true,
-		"api" => true,
+		"block" => false,
+		"controller" => false,
+		"model" => false,
+		"api" => false,
 		"view" => [ 
-				"frontend" => true,
+				"frontend" => false,
 				"adminhtml" => true 
 		],
 		// vernder and module name will add as prefix to table, only id and status will create
 		"backend_model" => [ 
 				[ 
-						"name" => "Box",
-						"table" => "box" 
+						"name" => "Contact",
+						"table" => "Contct",
+						"columns" =>[
+								array(
+									"name" =>"first_name",
+									"label" =>"First Name",
+									"type" => "string",
+									"size" =>"50",
+									"rquired" =>"true"
+								),
+								array(
+										"name" =>"birthday",
+										"label" =>"Birthday",
+										"type" => "date",
+										'class' => 'validate-date',
+										"rquired" =>"true"
+								),
+								array(
+										"name" =>"age",
+										"label" =>"Age",
+										"type" => "decimal",
+										"rquired" =>"true"
+								)
+								
+						]
 				] 
 		] 
 ];
