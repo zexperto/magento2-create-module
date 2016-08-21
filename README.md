@@ -4,7 +4,7 @@ How To use this file
 2. This is an example of how to use this class
 
 // --------------------------------------------------------------
-$config_array = [ \n
+$config_array = [ <br/>
 		"helper" => true,
 		"setup" => true,
 		"block" => false,
