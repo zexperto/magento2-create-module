@@ -4,49 +4,48 @@ How To use this file
 2. This is an example of how to use this class
 
 // --------------------------------------------------------------
-$config_array = [ <br/>
-		"helper" => true,
-		"setup" => true,
-		"block" => false,
-		"controller" => false,
-		"model" => false,
-		"api" => false,
-		"view" => [ 
-				"frontend" => false,
-				"adminhtml" => true 
-		],
-		// vernder and module name will add as prefix to table, only id and status will create
-		"backend_model" => [ 
-				[ 
-						"name" => "Contact",
-						"table" => "Contct",
-						"columns" =>[
-								array(
-									"name" =>"first_name",
-									"label" =>"First Name",
-									"type" => "string",
-									"size" =>"50",
-									"rquired" =>"true"
-								),
-								array(
-										"name" =>"birthday",
-										"label" =>"Birthday",
-										"type" => "date",
-										'class' => 'validate-date',
-										"rquired" =>"true"
-								),
-								array(
-										"name" =>"age",
-										"label" =>"Age",
-										"type" => "decimal",
-										"rquired" =>"true"
-								)
-								
-						]
-				] 
-		] 
-];
+<br/>$config_array = [ <br/>
+		"helper" => true,<br/>
+		"setup" => true,<br/>
+		"block" => false,<br/>
+		"controller" => false,<br/>
+		"model" => false,<br/>
+		"api" => false,<br/>
+		"view" => [ <br/>
+				"frontend" => false,<br/>
+				"adminhtml" => true <br/>
+		],<br/>
+		// vernder and module name will add as prefix to table, only id and status will create<br/>
+		"backend_model" => [ <br/>
+				[<br/> 
+						"name" => "Contact",<br/>
+						"table" => "Contct",<br/>
+						"columns" =>[<br/>
+								array(<br/>
+									"name" =>"first_name",<br/>
+									"label" =>"First Name",<br/>
+									"type" => "string",<br/>
+									"size" =>"50",<br/>
+									"rquired" =>"true"<br/>
+								),<br/>
+								array(<br/>
+										"name" =>"birthday",<br/>
+										"label" =>"Birthday",<br/>
+										"type" => "date",<br/>
+										'class' => 'validate-date',<br/>
+										"rquired" =>"true"<br/>
+								),<br/>
+								array(<br/>
+										"name" =>"age",<br/>
+										"label" =>"Age",<br/>
+										"type" => "decimal",<br/>
+										"rquired" =>"true"<br/>
+								)<br/>
+						]<br/>
+				] <br/>
+		] <br/>
+];<br/>
 
-$mod = new Magento2Module ( "ZEO", "File" );
-$mod->setConfig ( $config_array );
-echo $mod->create ( $config_array );
+$mod = new Magento2Module ( "ZEO", "File" );<br/>
+$mod->setConfig ( $config_array );<br/>
+echo $mod->create ( $config_array );<br/>
