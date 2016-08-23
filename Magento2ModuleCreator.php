@@ -297,7 +297,7 @@ interface %sInterface  {
      * @param \Magento\Framework\Api\SearchCriteriaInterface $searchCriteria
      * @return \Magento\Framework\Api\SearchResultsInterface
      */
-    public function list(\Magento\Framework\Api\SearchCriteriaInterface $searchCriteria);
+    public function getList(\Magento\Framework\Api\SearchCriteriaInterface $searchCriteria);
 	
     /**
      *
@@ -465,10 +465,18 @@ interface %3$sDataInterface  {
 		$path = sprintf ( '%s/%s/Model/Api/%s.php', $this->_vendor, $this->_module, $model ["name"] );
 	
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-	
+		
+		$save_fields ='';
+		foreach ($model["columns"] as $column){
+			$property = str_replace(' ','',ucwords(str_replace('_',' ',$column["name"])));
+			$save_fields .=sprintf('$model->set%1$s($entity->get%1$s());',$property)."\n\t\t";
+		}
+		
+		
+		$save_fields .='$model->save();';
 		$txt = sprintf ( '<?php
 	
-namespace %s\%s\Model;
+namespace %s\%s\Model\APi;
 	
 use %1$s\%2$s\Api\%3$sInterface;
 				
@@ -496,7 +504,7 @@ class %s  implements %3$sInterface {
 	 * {@inheritdoc}
 	 *
 	 */
-    public function list(\Magento\Framework\Api\SearchCriteriaInterface $searchCriteria){
+    public function getList(\Magento\Framework\Api\SearchCriteriaInterface $searchCriteria){
 			
 		$collection = $this->_objectManager->create(\'\%1$s\%2$s\Model\Resource\%3$s\Collection\');
 		$result=$collection->getData();
@@ -523,12 +531,9 @@ class %s  implements %3$sInterface {
 			$model->load($item->getId());
 		}
 			
-		/*
-			$model->setUomEntry($entity->getUomEntry())
-			->setUomCode($entity->getuomCode())
-			->setUomName($entity->getUomName())
-			->save();
-		*/
+		%4$s
+		
+			
 		return $model;				
 	}
 	
@@ -552,31 +557,19 @@ class %s  implements %3$sInterface {
 		return true;
 	}
 	
-}', $this->_vendor, $this->_module, $model ["name"] );
+}', $this->_vendor, $this->_module, $model ["name"] ,$save_fields);
 	
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
 	
-	function CreateApi($model) {
-
-			$this->CreateFolder ( sprintf ( '%s/%s/Api', $this->_vendor, $this->_module ) );
-			$this->CreateFolder ( sprintf ( '%s/%s/Api/Data', $this->_vendor, $this->_module ) );
-			$this->CreateFolder ( sprintf ( '%s/%s/Model/Api', $this->_vendor, $this->_module ) );
-			$this->CreateFolder ( sprintf ( '%s/%s/Model/Api/Data', $this->_vendor, $this->_module ) );
-			$this->CreateApiModelInterface($model);
-			$this->CreateApiModelDataInterface($model);
-			$this->CreateModelApiModel($model);
-			$this->CreateModelApiModelData($model);
-			
-	}
 	function CreateModelApiModelData($model){
 		$path = sprintf ( '%s/%s/Model/Api/Data/%sData.php', $this->_vendor, $this->_module, $model ["name"] );
 	
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 	
 	
-		// Private 
+		// Private
 		$private ="";
 		foreach ($model["columns"] as $column){
 			$private .='private $'.$column["name"].';'."\n\t";
@@ -614,7 +607,7 @@ class %s  implements %3$sInterface {
     public function get%3$s(){
 		return $this->%1$s;
 	}
-					
+			
    /**
 	 *
 	 * {@inheritdoc}
@@ -624,7 +617,7 @@ class %s  implements %3$sInterface {
 		$this->%1$s = $value;
 	}'
 					,$column["name"],$column["label"],$property);
-				
+	
 		}
 	
 		$columns .=sprintf('
@@ -644,7 +637,7 @@ class %s  implements %3$sInterface {
 	 *
 	 */
     public function setStatus($status){
-		$this->status = $value;
+		$this->status = $status;
 	}
 				',$model["name"]);
 	
@@ -656,17 +649,111 @@ class %s  implements %3$sInterface {
 namespace %1$s\%2$s\Model\Api\Data;
 	
 use %1$s\%2$s\Api\Data\%3$sDataInterface;
-
+	
 class %3$sData implements %3$sDataInterface {
-				
+	
 	%4$s
-
+	
 	%5$s
 }', $this->_vendor, $this->_module, $model ["name"],$private,$columns );
 	
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
+	
+	
+	function CreateApi($model) {
+
+			$this->CreateFolder ( sprintf ( '%s/%s/Api', $this->_vendor, $this->_module ) );
+			$this->CreateFolder ( sprintf ( '%s/%s/Api/Data', $this->_vendor, $this->_module ) );
+			$this->CreateFolder ( sprintf ( '%s/%s/Model/Api', $this->_vendor, $this->_module ) );
+			$this->CreateFolder ( sprintf ( '%s/%s/Model/Api/Data', $this->_vendor, $this->_module ) );
+			$this->CreateApiModelInterface($model);
+			$this->CreateApiModelDataInterface($model);
+			$this->CreateModelApiModel($model);
+			$this->CreateModelApiModelData($model);
+			
+	}
+	function CreateDiFile() {
+		$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "etc/adminhtml" );
+	
+		$path = sprintf ( '%s/%s/etc/di.xml', $this->_vendor, $this->_module );
+	
+		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
+	
+		$preference="";
+		foreach ( $this->_config ["backend_model"] as $model ) {
+			$preference .= "\n\t" . sprintf ( ' <preference for="%1$s\%2$s\Api\%3$sInterface" type="%1$s\%2$s\Model\Api\%3$s" />', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) ) . "\n";
+			$preference .= "\n\t" . sprintf ( ' <preference for="%1$s\%2$s\Api\Data\%3$sDataInterface" type="%1$s\%2$s\Model\Api\Data\%3$sData" />', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) ) . "\n";
+			
+		}
+		$txt = sprintf ( '<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+	%1$s				
+</config>',$preference);
+	
+		fwrite ( $file, $txt );
+		fclose ( $file );
+	}
+	
+	
+	function CreateWebapiFile() {
+		$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "etc/adminhtml" );
+	
+		$path = sprintf ( '%s/%s/etc/webapi.xml', $this->_vendor, $this->_module );
+	
+		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
+	
+		$route="";
+		foreach ( $this->_config ["backend_model"] as $model ) {
+			
+			$route .= "\n\t" . sprintf ( '
+	
+	<!-- %3$s API -->
+					
+	<!-- end point = /V1/%4$s/%5$s/%6$s/list -->
+	<route url="/V1/%4$s/%5$s/%6$s/list" method="GET">
+		<service class="%1$s\%2$s\Api\%3$sInterface" method="getList" />
+		<resources>
+			<resource ref="Magento_Backend::admin" />
+		</resources>
+	</route>
+	
+	<!-- end point = /V1/%4$s/%5$s/%6$s/save -->
+	<!-- Json  = "{"entity": json object here }" -->
+	<route url="/V1/%4$s/%5$s/%6$s/save" method="POST">
+		<service class="%1$s\%2$s\Api\%3$sInterface" method="save" />
+		<resources>
+			<resource ref="Magento_Backend::admin" />
+		</resources>
+	</route>
+					
+	<route url="/V1/%4$s/%5$s/%6$s/save" method="PUT">
+		<service class="%1$s\%2$s\Api\%3$sInterface" method="save" />
+		<resources>
+			<resource ref="Magento_Backend::admin" />
+		</resources>
+	</route>
+
+	<!-- end point = /V1/%4$s/%5$s/%6$s/delete/:id -->
+	<route url="/V1/%4$s/%5$s/%6$s/delete/:id" method="DELETE">
+		<service class="%1$s\%2$s\Api\%3$sInterface" method="deleteById" />
+		<resources>
+			<resource ref="Magento_Backend::admin" />
+		</resources>
+	</route>
+					
+		', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) ) . "\n";
+		}
+		$txt = sprintf ( '<?xml version="1.0"?>
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"	xsi:noNamespaceSchemaLocation="../../../../../app/code/Magento/Webapi/etc/webapi.xsd">
+	%1$s
+</routes>',$route);
+	
+		fwrite ( $file, $txt );
+		fclose ( $file );
+	}
+	
 	
 	function CreateModel() {
 		if ($this->_config ["model"]) {
@@ -727,11 +814,13 @@ class %3$sData implements %3$sDataInterface {
 					$this->CreateApi ($model);
 				}
 			}
-			$this->CreateMenuFile ( $model );
-			$this->CreateRoutesFile ( $model );
+			$this->CreateMenuFile (  );
+			$this->CreateRoutesFile (  );
+			$this->CreateDiFile ();
+			$this->CreateWebapiFile();
 		}
 	}
-	function CreateMenuFile($backend_model) {
+	function CreateMenuFile() {
 		$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "etc/adminhtml" );
 		
 		$path = sprintf ( '%s/%s/etc/adminhtml/menu.xml', $this->_vendor, $this->_module );
@@ -754,7 +843,7 @@ class %3$sData implements %3$sDataInterface {
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	function CreateRoutesFile($backend_model) {
+	function CreateRoutesFile() {
 		$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "etc/adminhtml" );
 		
 		$path = sprintf ( '%s/%s/etc/adminhtml/routes.xml', $this->_vendor, $this->_module );
@@ -1809,6 +1898,7 @@ class Status implements ArrayInterface {
 		
 		$this->CreateModuleXmlFile ();
 		$this->CreateRegistrationFile ();
+		
 		
 		$this->CreateHelper ();
 		$this->CreateSetup ();

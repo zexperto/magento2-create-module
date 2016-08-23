@@ -52,6 +52,6 @@ How To use this file
 		] <br/>
 ];<br/>
 
-$mod = new Magento2Module ( "ZEO", "File" );<br/>
+$mod = new Magento2Module ( "ZEO", "WH" );<br/>
 $mod->setConfig ( $config_array );<br/>
 echo $mod->create ( $config_array );<br/>
