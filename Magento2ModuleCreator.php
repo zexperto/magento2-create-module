@@ -5,41 +5,31 @@ class Magento2ModuleCreator {
 	var $_version;
 	var $_config;
 	var $_helper;
-	
-	
 	function __construct($vendor, $module, $version = "1.0.0") {
 		$this->_vendor = $vendor;
 		$this->_module = $module;
 		$this->_version = $version;
 		$this->_config = [ ];
 	}
-	
-	
 	function CreateFolder($path) {
 		if (! file_exists ( $path ))
 			mkdir ( $path );
 	}
-	
-	
 	function setConfig($config) {
 		$this->_config = $config;
 	}
-	
-	
 	function CreateModuleXmlFile() {
 		$path = sprintf ( '%s/%s/etc/module.xml', $this->_vendor, $this->_module );
 		$ext_file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-	
+		
 		$txt = sprintf ( '<?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../lib/internal/Magento/Framework/Module/etc/module.xsd">
 	<module name="%s_%s" setup_version="%s" />
 </config>', $this->_vendor, $this->_module, $this->_version );
-	
+		
 		fwrite ( $ext_file, $txt );
 		fclose ( $ext_file );
 	}
-	
-	
 	function CreateRegistrationFile() {
 		$path = sprintf ( '%s/%s/registration.php', $this->_vendor, $this->_module );
 		$ext_file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
@@ -54,8 +44,6 @@ class Magento2ModuleCreator {
 		fwrite ( $ext_file, $txt );
 		fclose ( $ext_file );
 	}
-	
-	
 	function CreateDataFile() {
 		$path = sprintf ( '%s/%s/Helper/Data.php', $this->_vendor, $this->_module );
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
@@ -73,8 +61,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper {
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	
 	function CreateHelper() {
 		if ($this->_config ["helper"]) {
 			$path = sprintf ( '%s/%s/Helper', $this->_vendor, $this->_module );
@@ -82,7 +68,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper {
 			$this->CreateDataFile ();
 		}
 	}
-	
 	function CreateInstallSchemaFile() {
 		$path = sprintf ( '%s/%s/Setup/InstallSchema.php', $this->_vendor, $this->_module );
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
@@ -101,31 +86,31 @@ class InstallSchema implements InstallSchemaInterface {
 		
 		if ($this->_config ["backend_model"]) {
 			foreach ( $this->_config ["backend_model"] as $model ) {
-				$columns ="";
+				$columns = "";
 				
-				foreach ($model["columns"] as $column){
-				
-					if($column["type"]=="string"):
-					$columns .=sprintf('->addColumn ( \'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_TEXT, \'%3$s\', [\'nullable\' => false ], \'%2$s\' )'
-							,$column["name"],$column["label"],$column["size"]);
+				foreach ( $model ["columns"] as $column ) {
+					
+					if ($column ["type"] == "string") :
+						$columns .= sprintf ( '->addColumn ( \'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_TEXT, \'%3$s\', [\'nullable\' => false ], \'%2$s\' )', $column ["name"], $column ["label"], $column ["size"] );
+					
 					endif;
 					
-					if($column["type"]=="int"):
-					$columns .=sprintf('->addColumn ( \'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER, null, [\'nullable\' => false ], \'%2$s\' )'
-							,$column["name"],$column["label"]);
+					if ($column ["type"] == "int") :
+						$columns .= sprintf ( '->addColumn ( \'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER, null, [\'nullable\' => false ], \'%2$s\' )', $column ["name"], $column ["label"] );
+					
 					endif;
-				
-					if($column["type"]=="date"):
-					$columns .=sprintf('->addColumn( \'%1$s\',\Magento\Framework\DB\Ddl\Table::TYPE_DATE,	null,[],\'%2$s\')'
-							,$column["name"],$column["label"]);
+					
+					if ($column ["type"] == "date") :
+						$columns .= sprintf ( '->addColumn( \'%1$s\',\Magento\Framework\DB\Ddl\Table::TYPE_DATE,	null,[],\'%2$s\')', $column ["name"], $column ["label"] );
+					
 					endif;
-				
-					if($column["type"]=="decimal"):
-					$columns .=sprintf('->addColumn ( \'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_DECIMAL, \'12,4\',  [\'nullable\' => false, \'default\' => \'0.0000\'], \'%2$s\' )'
-							,$column["name"],$column["label"]);
+					
+					if ($column ["type"] == "decimal") :
+						$columns .= sprintf ( '->addColumn ( \'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_DECIMAL, \'12,4\',  [\'nullable\' => false, \'default\' => \'0.0000\'], \'%2$s\' )', $column ["name"], $column ["label"] );
+					
 					endif;
-			
-					$columns .="\n\t\t\t\t";
+					
+					$columns .= "\n\t\t\t\t";
 				}
 				
 				$txt .= sprintf ( '
@@ -142,7 +127,7 @@ class InstallSchema implements InstallSchemaInterface {
 						\'default\' => null
 						], \'Status\' );
 		$setup->getConnection ()->createTable ( $table );
-						', strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ),$columns );
+						', strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ), $columns );
 			}
 		}
 		
@@ -154,8 +139,6 @@ class InstallSchema implements InstallSchemaInterface {
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	
 	function CreateUninstallFile() {
 		$path = sprintf ( '%s/%s/Setup/Uninstall.php', $this->_vendor, $this->_module );
 		
@@ -182,8 +165,6 @@ class Uninstall implements UninstallInterface {
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	
 	function CreateUpgradeSchemaFile() {
 		$path = sprintf ( '%s/%s/Setup/UpgradeSchema.php', $this->_vendor, $this->_module );
 		
@@ -222,8 +203,6 @@ class UpgradeSchema implements UpgradeSchemaInterface {
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	
 	function CreateUpgradeDataFile() {
 		$path = sprintf ( '%s/%s/Setup/UpgradeData.php', $this->_vendor, $this->_module );
 		
@@ -261,8 +240,6 @@ class UpgradeData implements UpgradeDataInterface {
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	
 	function CreateSetup() {
 		if ($this->_config ["setup"]) {
 			
@@ -273,15 +250,12 @@ class UpgradeData implements UpgradeDataInterface {
 			$this->CreateUpgradeDataFile ();
 		}
 	}
-	
-	
 	function CreateBlock() {
 		if ($this->_config ["block"]) {
 			$this->CreateFolder ( sprintf ( '%s/%s/Block', $this->_vendor, $this->_module ) );
 		}
 	}
-	
-	function CreateApiModelInterface($model){
+	function CreateApiModelInterface($model) {
 		$path = sprintf ( '%s/%s/Api/%sInterface.php', $this->_vendor, $this->_module, $model ["name"] );
 		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
@@ -318,15 +292,14 @@ interface %sInterface  {
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	function CreateApiModelDataInterface($model){
+	function CreateApiModelDataInterface($model) {
 		$path = sprintf ( '%s/%s/Api/Data/%sDataInterface.php', $this->_vendor, $this->_module, $model ["name"] );
-	
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-
-	// start columns
+		
+		// start columns
 		$columns = "";
-		$columns .='
+		$columns .= '
 	/**
 	 *
 	 * @api
@@ -342,11 +315,11 @@ interface %sInterface  {
 	 */
 	public function setId($value);
 				';
-		foreach ($model["columns"] as $column){
-			$property = str_replace(' ','',ucwords(str_replace('_',' ',$column["name"])));
-
-if($column["type"]=="string"):
-			$columns .=sprintf( '
+		foreach ( $model ["columns"] as $column ) {
+			$property = str_replace ( ' ', '', ucwords ( str_replace ( '_', ' ', $column ["name"] ) ) );
+			
+			if ($column ["type"] == "string") :
+				$columns .= sprintf ( '
 	/**
      *
      * Get %2$s
@@ -360,12 +333,12 @@ if($column["type"]=="string"):
      * @param string $value.
      * @return null
      */
-    public function set%3$s($value);'
-	,$column["name"],$column["label"],$property);
+    public function set%3$s($value);', $column ["name"], $column ["label"], $property );
+			
 endif;
-
-if($column["type"]=="int"):
-$columns .=sprintf( '
+			
+			if ($column ["type"] == "int") :
+				$columns .= sprintf ( '
 
 	/**
      *
@@ -380,12 +353,12 @@ $columns .=sprintf( '
      * @param int $value
      * @return null
      */
-    public function set%3$s($value);'
-		,$column["name"],$column["label"],$property);
+    public function set%3$s($value);', $column ["name"], $column ["label"], $property );
+			
 endif;
-
-if($column["type"]=="date"):
-$columns .=sprintf( '
+			
+			if ($column ["type"] == "date") :
+				$columns .= sprintf ( '
 	
 	/**
      * Get %2$s
@@ -400,12 +373,12 @@ $columns .=sprintf( '
      * @param string $value
      * @return null
      */
-    public function set%3$s($value);'
-		,$column["name"],$column["label"],$property);
+    public function set%3$s($value);', $column ["name"], $column ["label"], $property );
+			
 endif;
-
-if($column["type"]=="decimal"):
-			$columns .=sprintf( '
+			
+			if ($column ["type"] == "decimal") :
+				$columns .= sprintf ( '
 	
 	/**
      *
@@ -420,14 +393,12 @@ if($column["type"]=="decimal"):
      * @param float $value
      * @return null
      */
-    public function set%3$s($value);'
-					,$column["name"],$column["label"],$property);
-endif;
-
+    public function set%3$s($value);', $column ["name"], $column ["label"], $property );
 			
+endif;
 		}
 		
-		$columns .=sprintf('
+		$columns .= sprintf ( '
 	 
 	/**
      * Get %1$s status
@@ -443,8 +414,7 @@ endif;
      * @return null
      */
     public function setStatus($status);
-				',$model["name"]);
-		
+				', $model ["name"] );
 		
 		// End columns
 		
@@ -455,25 +425,23 @@ namespace %1$s\%2$s\Api\Data;
 interface %3$sDataInterface  {
 	%4$s
 	
-}', $this->_vendor, $this->_module, $model ["name"],$columns );
-	
+}', $this->_vendor, $this->_module, $model ["name"], $columns );
+		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	function CreateModelApiModel($model){
+	function CreateModelApiModel($model) {
 		$path = sprintf ( '%s/%s/Model/Api/%s.php', $this->_vendor, $this->_module, $model ["name"] );
-	
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		
-		$save_fields ='';
-		foreach ($model["columns"] as $column){
-			$property = str_replace(' ','',ucwords(str_replace('_',' ',$column["name"])));
-			$save_fields .=sprintf('$model->set%1$s($entity->get%1$s());',$property)."\n\t\t";
+		$save_fields = '';
+		foreach ( $model ["columns"] as $column ) {
+			$property = str_replace ( ' ', '', ucwords ( str_replace ( '_', ' ', $column ["name"] ) ) );
+			$save_fields .= sprintf ( '$model->set%1$s($entity->get%1$s());', $property ) . "\n\t\t";
 		}
 		
-		
-		$save_fields .='$model->save();';
+		$save_fields .= '$model->save();';
 		$txt = sprintf ( '<?php
 	
 namespace %s\%s\Model\APi;
@@ -557,26 +525,24 @@ class %s  implements %3$sInterface {
 		return true;
 	}
 	
-}', $this->_vendor, $this->_module, $model ["name"] ,$save_fields);
-	
+}', $this->_vendor, $this->_module, $model ["name"], $save_fields );
+		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	function CreateModelApiModelData($model){
+	function CreateModelApiModelData($model) {
 		$path = sprintf ( '%s/%s/Model/Api/Data/%sData.php', $this->_vendor, $this->_module, $model ["name"] );
-	
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-	
-	
+		
 		// Private
-		$private ="";
-		foreach ($model["columns"] as $column){
-			$private .='private $'.$column["name"].';'."\n\t";
+		$private = "";
+		foreach ( $model ["columns"] as $column ) {
+			$private .= 'private $' . $column ["name"] . ';' . "\n\t";
 		}
 		// start columns
 		$columns = "";
-		$columns .='
+		$columns .= '
 	/**
 	 *
 	 * {@inheritdoc}
@@ -595,10 +561,10 @@ class %s  implements %3$sInterface {
     	$this->id = $value;
     }
 				';
-		foreach ($model["columns"] as $column){
-			$property = str_replace(' ','',ucwords(str_replace('_',' ',$column["name"])));
-	
-			$columns .=sprintf( '
+		foreach ( $model ["columns"] as $column ) {
+			$property = str_replace ( ' ', '', ucwords ( str_replace ( '_', ' ', $column ["name"] ) ) );
+			
+			$columns .= sprintf ( '
 	/**
 	 *
 	 * {@inheritdoc}
@@ -615,12 +581,10 @@ class %s  implements %3$sInterface {
 	 */
     public function set%3$s($value){
 		$this->%1$s = $value;
-	}'
-					,$column["name"],$column["label"],$property);
-	
+	}', $column ["name"], $column ["label"], $property );
 		}
-	
-		$columns .=sprintf('
+		
+		$columns .= sprintf ( '
 	
 	/**
 	 *
@@ -639,11 +603,10 @@ class %s  implements %3$sInterface {
     public function setStatus($status){
 		$this->status = $status;
 	}
-				',$model["name"]);
-	
-	
+				', $model ["name"] );
+		
 		// End columns
-	
+		
 		$txt = sprintf ( '<?php
 	
 namespace %1$s\%2$s\Model\Api\Data;
@@ -655,56 +618,49 @@ class %3$sData implements %3$sDataInterface {
 	%4$s
 	
 	%5$s
-}', $this->_vendor, $this->_module, $model ["name"],$private,$columns );
-	
+}', $this->_vendor, $this->_module, $model ["name"], $private, $columns );
+		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	
 	function CreateApi($model) {
-
-			$this->CreateFolder ( sprintf ( '%s/%s/Api', $this->_vendor, $this->_module ) );
-			$this->CreateFolder ( sprintf ( '%s/%s/Api/Data', $this->_vendor, $this->_module ) );
-			$this->CreateFolder ( sprintf ( '%s/%s/Model/Api', $this->_vendor, $this->_module ) );
-			$this->CreateFolder ( sprintf ( '%s/%s/Model/Api/Data', $this->_vendor, $this->_module ) );
-			$this->CreateApiModelInterface($model);
-			$this->CreateApiModelDataInterface($model);
-			$this->CreateModelApiModel($model);
-			$this->CreateModelApiModelData($model);
-			
+		$this->CreateFolder ( sprintf ( '%s/%s/Api', $this->_vendor, $this->_module ) );
+		$this->CreateFolder ( sprintf ( '%s/%s/Api/Data', $this->_vendor, $this->_module ) );
+		$this->CreateFolder ( sprintf ( '%s/%s/Model/Api', $this->_vendor, $this->_module ) );
+		$this->CreateFolder ( sprintf ( '%s/%s/Model/Api/Data', $this->_vendor, $this->_module ) );
+		$this->CreateApiModelInterface ( $model );
+		$this->CreateApiModelDataInterface ( $model );
+		$this->CreateModelApiModel ( $model );
+		$this->CreateModelApiModelData ( $model );
 	}
 	function CreateDiFile() {
 		$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "etc/adminhtml" );
-	
+		
 		$path = sprintf ( '%s/%s/etc/di.xml', $this->_vendor, $this->_module );
-	
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-	
-		$preference="";
+		
+		$preference = "";
 		foreach ( $this->_config ["backend_model"] as $model ) {
 			$preference .= "\n\t" . sprintf ( ' <preference for="%1$s\%2$s\Api\%3$sInterface" type="%1$s\%2$s\Model\Api\%3$s" />', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) ) . "\n";
 			$preference .= "\n\t" . sprintf ( ' <preference for="%1$s\%2$s\Api\Data\%3$sDataInterface" type="%1$s\%2$s\Model\Api\Data\%3$sData" />', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) ) . "\n";
-			
 		}
 		$txt = sprintf ( '<?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
 	%1$s				
-</config>',$preference);
-	
+</config>', $preference );
+		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	
 	function CreateWebapiFile() {
 		$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "etc/adminhtml" );
-	
+		
 		$path = sprintf ( '%s/%s/etc/webapi.xml', $this->_vendor, $this->_module );
-	
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-	
-		$route="";
+		
+		$route = "";
 		foreach ( $this->_config ["backend_model"] as $model ) {
 			
 			$route .= "\n\t" . sprintf ( '
@@ -748,13 +704,11 @@ class %3$sData implements %3$sDataInterface {
 		$txt = sprintf ( '<?xml version="1.0"?>
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"	xsi:noNamespaceSchemaLocation="../../../../../app/code/Magento/Webapi/etc/webapi.xsd">
 	%1$s
-</routes>',$route);
-	
+</routes>', $route );
+		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	
 	function CreateModel() {
 		if ($this->_config ["model"]) {
 			$this->CreateFolder ( sprintf ( '%s/%s/Model', $this->_vendor, $this->_module ) );
@@ -765,10 +719,8 @@ class %3$sData implements %3$sDataInterface {
 			$this->CreateFolder ( sprintf ( '%s/%s/Controller', $this->_vendor, $this->_module ) );
 		}
 	}
-	
-	
 	function CreateView() {
-		if (count($this->_config ["view"])>0) {
+		if (count ( $this->_config ["view"] ) > 0) {
 			$this->CreateFolder ( sprintf ( '%s/%s/view', $this->_vendor, $this->_module ) );
 		}
 		
@@ -784,11 +736,6 @@ class %3$sData implements %3$sDataInterface {
 			$this->CreateFolder ( sprintf ( '%s/%s/view/adminhtml/templates', $this->_vendor, $this->_module ) );
 		}
 	}
-	
-
-	
-	
-
 	function example($model) {
 		$path = sprintf ( '%s/%s/', $this->_vendor, $this->_module );
 		
@@ -801,23 +748,18 @@ class %3$sData implements %3$sDataInterface {
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-
-
-
-
-
 	function CreateBackEndModels() {
 		if ($this->_config ["backend_model"]) {
 			foreach ( $this->_config ["backend_model"] as $model ) {
 				$this->CreateBackEndModel ( $model );
-				if($model["api"]){
-					$this->CreateApi ($model);
+				if ($model ["api"]) {
+					$this->CreateApi ( $model );
 				}
 			}
-			$this->CreateMenuFile (  );
-			$this->CreateRoutesFile (  );
+			$this->CreateMenuFile ();
+			$this->CreateRoutesFile ();
 			$this->CreateDiFile ();
-			$this->CreateWebapiFile();
+			$this->CreateWebapiFile ();
 		}
 	}
 	function CreateMenuFile() {
@@ -862,13 +804,11 @@ class %3$sData implements %3$sDataInterface {
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-
-	
 	function CreateAdminhtmlModelFile($model) {
 		$path = sprintf ( '%s/%s/Block/Adminhtml/%s.php', $this->_vendor, $this->_module, $model ["name"] );
-	
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-	
+		
 		$txt = sprintf ( '<?php
 	
 namespace %s\%s\Block\Adminhtml;
@@ -887,58 +827,56 @@ class %s extends \Magento\Backend\Block\Widget\Grid\Container {
 		parent::_construct ();
 	}
 }', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) );
-	
+		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
 	function CreateAdminhtmlModelGridFile($model) {
 		$path = sprintf ( '%s/%s/Block/Adminhtml/%s/Grid.php', $this->_vendor, $this->_module, $model ["name"] );
-	
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-		$columns="";
-		foreach ($model["columns"] as $column){
-				
-			if($column["type"]=="string"):
-			$columns .=sprintf( '$this->addColumn ( \'%1$s\', [ 
+		$columns = "";
+		foreach ( $model ["columns"] as $column ) {
+			
+			if ($column ["type"] == "string") :
+				$columns .= sprintf ( '$this->addColumn ( \'%1$s\', [ 
 			\'header\' => __ ( \'%2$s\' ),
 			\'index\' => \'%1$s\',
 			\'class\' => \'%1$s\' 
-			] );'
-			,$column["name"],$column["label"],$column["rquired"]);
+			] );', $column ["name"], $column ["label"], $column ["rquired"] );
+			
 			endif;
 			
-			if($column["type"]=="int"):
-			$columns .=sprintf( '$this->addColumn ( \'%1$s\', [
+			if ($column ["type"] == "int") :
+				$columns .= sprintf ( '$this->addColumn ( \'%1$s\', [
 			\'header\' => __ ( \'%2$s\' ),
 			\'index\' => \'%1$s\',
 			\'class\' => \'%1$s\'
-			] );'
-					,$column["name"],$column["label"],$column["rquired"]);
+			] );', $column ["name"], $column ["label"], $column ["rquired"] );
+			
 			endif;
-				
-			if($column["type"]=="date"):
-			$columns .=sprintf( '$this->addColumn ( \'%1$s\', [ 
+			
+			if ($column ["type"] == "date") :
+				$columns .= sprintf ( '$this->addColumn ( \'%1$s\', [ 
 			\'header\' => __ ( \'%2$s\' ),
 			\'type\' => \'date\',
 			\'align\' => \'center\',
 			\'index\' => \'%1$s\',
 			\'default\' => \' ---- \' 
-			] );'
-			,$column["name"],$column["label"],$column["rquired"]);
+			] );', $column ["name"], $column ["label"], $column ["rquired"] );
+			
 			endif;
-				
-			if($column["type"]=="decimal"):
-			$columns .=sprintf( '$this->addColumn ( \'%1$s\', [ 
+			
+			if ($column ["type"] == "decimal") :
+				$columns .= sprintf ( '$this->addColumn ( \'%1$s\', [ 
 			\'header\' => __ ( \'%2$s\' ),
 			\'index\' => \'%1$s\',
 			\'class\' => \'%1$s\' 
-			] );'
-			,$column["name"],$column["label"],$column["rquired"]);
+			] );', $column ["name"], $column ["label"], $column ["rquired"] );
+			
 			endif;
-				
-		
-			$columns .="\n\n\t\t";
+			
+			$columns .= "\n\n\t\t";
 		}
 		
 		$txt = sprintf ( '<?php
@@ -1074,18 +1012,16 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended {
 			\'id\' => $row->getId ()
 		] );
 	}
-}', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ),$columns );
-	
+}', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ), $columns );
+		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	
 	function CreateAdminhtmlModelEditFile($model) {
 		$path = sprintf ( '%s/%s/Block/Adminhtml/%s/Edit.php', $this->_vendor, $this->_module, $model ["name"] );
-	
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-	
+		
 		$txt = sprintf ( '<?php
 	
 namespace ' . $this->_vendor . '\\' . $this->_module . '\Block\Adminhtml\\' . $model ["name"] . ';
@@ -1153,13 +1089,11 @@ class Edit extends \Magento\Backend\Block\Widget\Form\Container {
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	
 	function CreateAdminhtmlModelGridEditFormFile($model) {
 		$path = sprintf ( '%s/%s/Block/Adminhtml/%s/Edit/Form.php', $this->_vendor, $this->_module, $model ["name"] );
-	
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-	
+		
 		$txt = sprintf ( '<?php
 	
 namespace %s\%s\Block\Adminhtml\%s\Edit;
@@ -1197,16 +1131,15 @@ class Form extends \Magento\Backend\Block\Widget\Form\Generic {
 		return parent::_prepareForm ();
 	}
 }', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) );
-	
+		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
 	function CreateAdminhtmlModelGridEditTabsFile($model) {
 		$path = sprintf ( '%s/%s/Block/Adminhtml/%s/Edit/Tabs.php', $this->_vendor, $this->_module, $model ["name"] );
-	
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-	
+		
 		$txt = sprintf ( '<?php
 	
 namespace %s\%s\Block\Adminhtml\%s\Edit;
@@ -1225,59 +1158,61 @@ class Tabs extends \Magento\Backend\Block\Widget\Tabs {
 			$this->setTitle ( __ ( \'%3$s\' ) );
 	}
 }', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) );
-	
+		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
 	function CreateAdminhtmlModelGridEditTabsMainFile($model) {
 		$path = sprintf ( '%s/%s/Block/Adminhtml/%s/Edit/Tab/Main.php', $this->_vendor, $this->_module, $model ["name"] );
-	
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-		$columns="";
-		foreach ($model["columns"] as $column){
+		$columns = "";
+		foreach ( $model ["columns"] as $column ) {
 			
-			if($column["type"]=="string"):
-			$columns .=sprintf( '$fieldset->addField ( \'%1$s\', \'text\', [
+			if ($column ["type"] == "string") :
+				$columns .= sprintf ( '$fieldset->addField ( \'%1$s\', \'text\', [
 			\'name\' => \'%1$s\',
 			\'required\' => %3$s,
 			\'label\' => __ ( \'%2$s\' ),
 			\'title\' => __ ( \'%2$s\' ),
-			] );',$column["name"],$column["label"],$column["rquired"]);
+			] );', $column ["name"], $column ["label"], $column ["rquired"] );
+			
 			endif;
 			
-			if($column["type"]=="int"):
-			$columns .=sprintf( '$fieldset->addField ( \'%1$s\', \'text\', [
+			if ($column ["type"] == "int") :
+				$columns .= sprintf ( '$fieldset->addField ( \'%1$s\', \'text\', [
 			\'name\' => \'%1$s\',
 			\'required\' => %3$s,
 			\'label\' => __ ( \'%2$s\' ),
 			\'title\' => __ ( \'%2$s\' ),
-			] );',$column["name"],$column["label"],$column["rquired"]);
+			] );', $column ["name"], $column ["label"], $column ["rquired"] );
+			
 			endif;
 			
-			if($column["type"]=="date"):
-			$columns .=sprintf( '$fieldset->addField ( \'%1$s\', \'date\', [
+			if ($column ["type"] == "date") :
+				$columns .= sprintf ( '$fieldset->addField ( \'%1$s\', \'date\', [
 			\'name\' => \'%1$s\',
 			\'required\' => %3$s,
 			\'label\' => __ ( \'%2$s\' ),
 			\'title\' => __ ( \'%2$s\' ),
 			\'date_format\' => $this->_localeDate->getDateFormat(\IntlDateFormatter::SHORT),
         	\'class\' => \'validate-date\'
-			] );',$column["name"],$column["label"],$column["rquired"]);
+			] );', $column ["name"], $column ["label"], $column ["rquired"] );
+			
 			endif;
 			
-			if($column["type"]=="decimal"):
-			$columns .=sprintf( '$fieldset->addField ( \'%1$s\', \'text\', [
+			if ($column ["type"] == "decimal") :
+				$columns .= sprintf ( '$fieldset->addField ( \'%1$s\', \'text\', [
 			\'name\' => \'%1$s\',
 			\'required\' => %3$s,
 			\'label\' => __ ( \'%2$s\' ),
 			\'title\' => __ ( \'%2$s\' ),
         	\'class\' => \'validate-zero-or-greater\'
-			] );',$column["name"],$column["label"],$column["rquired"]);
+			] );', $column ["name"], $column ["label"], $column ["rquired"] );
+			
 			endif;
 			
-
-			$columns .="\n\n\t\t";
+			$columns .= "\n\n\t\t";
 		}
 		
 		$txt = sprintf ( '<?php
@@ -1360,16 +1295,15 @@ class Main extends Generic implements TabInterface {
 		return parent::_prepareForm ();
 	}
 }
-', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ),$columns );
+', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ), $columns );
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
 	function CreateControllersAdminhtmlModelFile($model) {
 		$path = sprintf ( "%s/%s/Controller/Adminhtml/%s.php", $this->_vendor, $this->_module, $model ["name"] );
-	
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-	
+		
 		$txt = sprintf ( '<?php
 	
 namespace %s\%s\Controller\Adminhtml;
@@ -1429,17 +1363,16 @@ abstract class %s extends \Magento\Backend\App\Action {
 	protected function _isAllowed() {
 		return $this->_authorization->isAllowed ( \'%1$s_%2$s::%5$s\' );
 	}
-}', $this->_vendor, $this->_module, $model ["name"], strtolower ( $model ["table"] ),strtolower ( $model ["name"] ) );
-	
+}', $this->_vendor, $this->_module, $model ["name"], strtolower ( $model ["table"] ), strtolower ( $model ["name"] ) );
+		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
 	function CreateControllersAdminhtmlModelDeleteFile($model) {
 		$path = sprintf ( "%s/%s/Controller/Adminhtml/%s/Delete.php", $this->_vendor, $this->_module, $model ["name"] );
-	
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-	
+		
 		$txt = sprintf ( '<?php
 	
 namespace %s\%s\Controller\Adminhtml\%s;
@@ -1470,16 +1403,15 @@ class Delete extends \%1$s\%2$s\Controller\Adminhtml\%3$s {
 		$this->_redirect ( \'%4$s_%5$s/*/\' );
 	}
 }', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ) );
-	
+		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
 	function CreateControllersAdminhtmlModelEditFile($model) {
 		$path = sprintf ( "%s/%s/Controller/Adminhtml/%s/Edit.php", $this->_vendor, $this->_module, $model ["name"] );
-	
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-	
+		
 		$txt = sprintf ( '<?php
 	
 namespace %s\%s\Controller\Adminhtml\%s;
@@ -1517,14 +1449,12 @@ class Edit extends \%1$s\%2$s\Controller\Adminhtml\%3$s {
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	
 	function CreateControllersAdminhtmlModelIndexFile($model) {
 		$path = sprintf ( "%s/%s/Controller/Adminhtml/%s/Index.php", $this->_vendor, $this->_module, $model ["name"] );
 		;
-	
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-	
+		
 		$txt = sprintf ( '<?php
 	
 namespace %1$s\%2$s\Controller\Adminhtml\%3$s;
@@ -1546,18 +1476,16 @@ class Index extends \%1$s\%2$s\Controller\Adminhtml\%3$s {
 		return $resultPage;
 	}
 }', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) );
-	
+		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	
 	function CreateControllersAdminhtmlModelMassDeleteFile($model) {
 		$path = sprintf ( "%s/%s/Controller/Adminhtml/%s/MassDelete.php", $this->_vendor, $this->_module, $model ["name"] );
 		;
-	
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-	
+		
 		$txt = sprintf ( '<?php
 	
 namespace %1$s\%2$s\Controller\Adminhtml\%3$s;
@@ -1593,13 +1521,11 @@ class MassDelete extends \%1$s\%2$s\Controller\Adminhtml\%3$s {
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	
 	function CreateControllersAdminhtmlModelNewActionFile($model) {
 		$path = sprintf ( "%s/%s/Controller/Adminhtml/%s/NewAction.php", $this->_vendor, $this->_module, $model ["name"] );
-	
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-	
+		
 		$txt = sprintf ( '<?php
 	
 namespace %s\%s\Controller\Adminhtml\%s;
@@ -1612,14 +1538,12 @@ class NewAction extends \%1$s\%2$s\Controller\Adminhtml\%3$s {
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	
 	function CreateControllersAdminhtmlModelSaveFile($model) {
 		$path = sprintf ( "%s/%s/Controller/Adminhtml/%s/Save.php", $this->_vendor, $this->_module, $model ["name"] );
 		;
-	
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-	
+		
 		$txt = sprintf ( '<?php
 	
 namespace %s\%s\Controller\Adminhtml\%s;
@@ -1678,17 +1602,16 @@ class Save extends \%1$s\%2$s\Controller\Adminhtml\%3$s {
 		$this->_redirect ( \'%4$s_%5$s/*/\' );
 	}
 }', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) );
-	
+		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
 	function CreateModelModelFile($model) {
 		$path = sprintf ( "%s/%s/Model/%s.php", $this->_vendor, $this->_module, $model ["name"] );
 		;
-	
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-	
+		
 		$txt = sprintf ( '<?php
 	
 namespace %s\%s\Model;
@@ -1705,16 +1628,15 @@ class %s extends \Magento\Framework\Model\AbstractModel {
 			$this->_init(\'%1$s\%2$s\Model\Resource\%3$s\');
 		}
 }', $this->_vendor, $this->_module, $model ["name"] );
-	
+		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
 	function CreateModelResourceModelFile($model) {
 		$path = sprintf ( "%s/%s/Model/Resource/%s.php", $this->_vendor, $this->_module, $model ["name"] );
-	
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-	
+		
 		$txt = sprintf ( '<?php
 	
 namespace %s\%s\Model\Resource;
@@ -1730,17 +1652,15 @@ class %s extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb {
 		$this->_init(\'%s_%s_%s\', \'id\');
 	}
 }', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["table"] ) );
-	
+		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	
 	function CreateModelResourceModelCollectionFile($model) {
 		$path = sprintf ( "%s/%s/Model/Resource/%s/Collection.php", $this->_vendor, $this->_module, $model ["name"] );
-	
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-	
+		
 		$txt = sprintf ( '<?php
 	
 namespace %s\%s\Model\Resource\%s ;
@@ -1759,13 +1679,11 @@ class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\Ab
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	
 	function CreateViewAdminhtmlLayoutIndexFile($model) {
 		$path = sprintf ( "%s/%s/view/adminhtml/layout/%s_%s_%s_edit" . ".xml", $this->_vendor, $this->_module, strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) );
-	
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-	
+		
 		$txt = sprintf ( '<?xml version="1.0"?>
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="admin-2columns-left" xsi:noNamespaceSchemaLocation="../../../../../../../lib/internal/Magento/Framework/View/Layout/etc/page_configuration.xsd">
 	<body>
@@ -1783,16 +1701,14 @@ class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\Ab
 		</referenceContainer>
 	</body>
 </page>', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) );
-	
+		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
-	
 	function CreateViewAdminhtmlLayoutEditFile($model) {
 		$path = sprintf ( "%s/%s/view/adminhtml/layout/%s_%s_%s_index" . ".xml", $this->_vendor, $this->_module, strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ) );
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-	
+		
 		$txt = sprintf ( '<?xml version="1.0"?>
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../../lib/internal/Magento/Framework/View/Layout/etc/page_configuration.xsd">
 	<body>
@@ -1801,19 +1717,18 @@ class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\Ab
 		</referenceContainer>
 	</body>
 </page>', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_module ), strtolower ( $model ["name"] ) );
-	
+		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
 	function CreateModelSystemConfigStatusFile($model) {
 		$this->CreateFolder ( sprintf ( '%s/%s/Model/System', $this->_vendor, $this->_module ) );
 		$this->CreateFolder ( sprintf ( '%s/%s/Model/System/Config', $this->_vendor, $this->_module ) );
-	
+		
 		$path = sprintf ( '%s/%s/Model/System/Config/Status.php', $this->_vendor, $this->_module );
-	
+		
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-	
+		
 		$txt = sprintf ( '<?php
 	
 namespace %s\%s\Model\System\Config;
@@ -1831,11 +1746,10 @@ class Status implements ArrayInterface {
 		return $options;
 	}
 }', $this->_vendor, $this->_module );
-	
+		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	
 	function CreateBackEndModel($model) {
 		// Create Block Folder
 		$this->CreateFolder ( sprintf ( '%s/%s/Block', $this->_vendor, $this->_module ) );
@@ -1844,28 +1758,28 @@ class Status implements ArrayInterface {
 		$this->CreateFolder ( sprintf ( '%s/%s/Block/Adminhtml/%s', $this->_vendor, $this->_module, $model ["name"] ) );
 		$this->CreateFolder ( sprintf ( '%s/%s/Block/Adminhtml/%s/Edit', $this->_vendor, $this->_module, $model ["name"] ) );
 		$this->CreateFolder ( sprintf ( '%s/%s/Block/Adminhtml/%s/Edit/Tab', $this->_vendor, $this->_module, $model ["name"] ) );
-	
+		
 		// Create Controller Folder
 		$this->CreateFolder ( sprintf ( '%s/%s/Controller', $this->_vendor, $this->_module ) );
 		$this->CreateFolder ( sprintf ( '%s/%s/Controller/Adminhtml', $this->_vendor, $this->_module ) );
 		$this->CreateFolder ( sprintf ( '%s/%s/Controller/Adminhtml/%s', $this->_vendor, $this->_module, $model ["name"] ) );
-	
+		
 		// Create Model Folder
 		$this->CreateFolder ( sprintf ( '%s/%s/Model', $this->_vendor, $this->_module ) );
 		$this->CreateFolder ( sprintf ( '%s/%s/Model/Resource', $this->_vendor, $this->_module ) );
 		$this->CreateFolder ( sprintf ( '%s/%s/Model/Resource/%s', $this->_vendor, $this->_module, $model ["name"] ) );
-	
+		
 		// Create Block Files
 		// Adminhtml/ {model}.php
 		$this->CreateAdminhtmlModelFile ( $model );
 		$this->CreateAdminhtmlModelGridFile ( $model );
 		$this->CreateAdminhtmlModelEditFile ( $model );
-	
+		
 		$this->CreateAdminhtmlModelGridEditFormFile ( $model );
 		$this->CreateAdminhtmlModelGridEditTabsFile ( $model );
-	
+		
 		$this->CreateAdminhtmlModelGridEditTabsMainFile ( $model );
-	
+		
 		// Create Controllers Files
 		$this->CreateControllersAdminhtmlModelFile ( $model );
 		$this->CreateControllersAdminhtmlModelDeleteFile ( $model );
@@ -1874,100 +1788,92 @@ class Status implements ArrayInterface {
 		$this->CreateControllersAdminhtmlModelMassDeleteFile ( $model );
 		$this->CreateControllersAdminhtmlModelNewActionFile ( $model );
 		$this->CreateControllersAdminhtmlModelSaveFile ( $model );
-	
+		
 		// Create Model Files
 		$this->CreateModelModelFile ( $model );
 		$this->CreateModelResourceModelFile ( $model );
 		$this->CreateModelResourceModelCollectionFile ( $model );
-	
+		
 		// Create view Files
-		$this->_config ["view"] ["adminhtml"]=true;
-		$this->CreateView();
+		$this->_config ["view"] ["adminhtml"] = true;
+		$this->CreateView ();
 		$this->CreateViewAdminhtmlLayoutIndexFile ( $model );
 		$this->CreateViewAdminhtmlLayoutEditFile ( $model );
-	
+		
 		// Create Config Status File
 		$this->CreateModelSystemConfigStatusFile ( $model );
 	}
-	
 	function CreateGlobalEventsXML() {
-			$path = sprintf ( '%s/%s/etc/events.xml', $this->_vendor, $this->_module );
-			$ext_file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-			$events ="";
-			foreach($this->_config["observer"]["global"] as $event){
-				$events .=sprintf('<event name="%5$s">
+		$path = sprintf ( '%s/%s/etc/events.xml', $this->_vendor, $this->_module );
+		$ext_file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
+		$events = "";
+		foreach ( $this->_config ["observer"] ["global"] as $event ) {
+			$events .= sprintf ( '<event name="%5$s">
         <observer name="%3$s_%4$s_%5$s" instance="%1$s\%2$s\Model\Observer\Observer" />
-    </event>',
-						$this->_vendor,$this->_module,strtolower($this->_vendor), strtolower($this->_module),$event);
-			}
+    </event>', $this->_vendor, $this->_module, strtolower ( $this->_vendor ), strtolower ( $this->_module ), $event );
+		}
 		
-			$txt = sprintf ( '<?xml version="1.0"?>
+		$txt = sprintf ( '<?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
     %1$s
 </config>
 		
 				', $events );
 		
-			fwrite ( $ext_file, $txt );
-			fclose ( $ext_file );
+		fwrite ( $ext_file, $txt );
+		fclose ( $ext_file );
 	}
-	
 	function CreateFrontendEventsXML() {
 		$path = sprintf ( '%s/%s/etc/frontend/events.xml', $this->_vendor, $this->_module );
 		$ext_file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-		$events ="";
-		foreach($this->_config["observer"]["frontend"] as $event){
-			$events .=sprintf('<event name="%5$s">
+		$events = "";
+		foreach ( $this->_config ["observer"] ["frontend"] as $event ) {
+			$events .= sprintf ( '<event name="%5$s">
         <observer name="%3$s_%4$s_%5$s" instance="%1$s\%2$s\Model\Observer\Frontend\Observer" />
-    </event>',
-					$this->_vendor,$this->_module,strtolower($this->_vendor), strtolower($this->_module),$event);
+    </event>', $this->_vendor, $this->_module, strtolower ( $this->_vendor ), strtolower ( $this->_module ), $event );
 		}
-	
+		
 		$txt = sprintf ( '<?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
     %1$s
 </config>
 	
 				', $events );
-	
+		
 		fwrite ( $ext_file, $txt );
 		fclose ( $ext_file );
-	
 	}
 	function CreateAdminhtmlEventsXML() {
 		$path = sprintf ( '%s/%s/etc/adminhtml/events.xml', $this->_vendor, $this->_module );
 		$ext_file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-		$events ="";
-		foreach($this->_config["observer"]["adminhtml"] as $event){
-			$events .=sprintf('<event name="%5$s">
+		$events = "";
+		foreach ( $this->_config ["observer"] ["adminhtml"] as $event ) {
+			$events .= sprintf ( '<event name="%5$s">
         <observer name="%3$s_%4$s_%5$s" instance="%1$s\%2$s\Model\Observer\Adminhtml\Observer" />
-    </event>',
-					$this->_vendor,$this->_module,strtolower($this->_vendor), strtolower($this->_module),$event);
+    </event>', $this->_vendor, $this->_module, strtolower ( $this->_vendor ), strtolower ( $this->_module ), $event );
 		}
-	
+		
 		$txt = sprintf ( '<?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
     %1$s
 </config>
 	
 				', $events );
-	
+		
 		fwrite ( $ext_file, $txt );
 		fclose ( $ext_file );
-	
 	}
-	
-	function CreateGlobalEventsObserver(){
+	function CreateGlobalEventsObserver() {
 		$path = sprintf ( '%s/%s/Model/Observer/Observer.php', $this->_vendor, $this->_module );
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-		$events ="";
-		foreach($this->_config ["observer"]["global"] as $event){
-			$events .=sprintf('case "%1$s" :{
+		$events = "";
+		foreach ( $this->_config ["observer"] ["global"] as $event ) {
+			$events .= sprintf ( 'case "%1$s" :{
 				
 				}
 				break;
-					',$event);
-			$events .="\n\t\t\t";
+					', $event );
+			$events .= "\n\t\t\t";
 		}
 		
 		$txt = sprintf ( '<?php
@@ -1988,24 +1894,24 @@ class Observer implements ObserverInterface {
 		}		
 		return $this;
 	}
-}', $this->_vendor, $this->_module,$events );
+}', $this->_vendor, $this->_module, $events );
 		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	function CreateFrontendEventsObserver(){
+	function CreateFrontendEventsObserver() {
 		$path = sprintf ( '%s/%s/Model/Observer/Frontend/Observer.php', $this->_vendor, $this->_module );
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-		$events ="";
-		foreach($this->_config ["observer"]["global"] as $event){
-			$events .=sprintf('case "%1$s" :{
+		$events = "";
+		foreach ( $this->_config ["observer"] ["global"] as $event ) {
+			$events .= sprintf ( 'case "%1$s" :{
 	
 				}
 				break;
-					',$event);
-			$events .="\n\t\t\t";
+					', $event );
+			$events .= "\n\t\t\t";
 		}
-	
+		
 		$txt = sprintf ( '<?php
 	
 namespace %s\%s\Model\Observer\Frontend;
@@ -2024,24 +1930,24 @@ class Observer implements ObserverInterface {
 		}
 		return $this;
 	}
-}', $this->_vendor, $this->_module,$events );
-	
+}', $this->_vendor, $this->_module, $events );
+		
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
-	function CreateAdminhtmlEventsObserver(){
+	function CreateAdminhtmlEventsObserver() {
 		$path = sprintf ( '%s/%s/Model/Observer/Adminhtml/Observer.php', $this->_vendor, $this->_module );
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
-		$events ="";
-		foreach($this->_config ["observer"]["global"] as $event){
-			$events .=sprintf('case "%1$s" :{
+		$events = "";
+		foreach ( $this->_config ["observer"] ["global"] as $event ) {
+			$events .= sprintf ( 'case "%1$s" :{
 	
 				}
 				break;
-					',$event);
-			$events .="\n\t\t\t";
+					', $event );
+			$events .= "\n\t\t\t";
 		}
-	
+		
 		$txt = sprintf ( '<?php
 	
 namespace %s\%s\Model\Observer\Frontend;
@@ -2060,53 +1966,56 @@ class Observer implements ObserverInterface {
 		}
 		return $this;
 	}
-}', $this->_vendor, $this->_module,$events );
-	
+}', $this->_vendor, $this->_module, $events );
+		
 		fwrite ( $file, $txt );
 		fclose ( $file );
-	}	
-	
-	function CreateObserver(){
-		if(count($this->_config ["observer"])==0)
+	}
+	function CreateObserver() {
+		if (count ( $this->_config ["observer"] ) == 0)
 			return;
-		if($this->_config ["observer"]){
+		if ($this->_config ["observer"]) {
 			$this->CreateFolder ( sprintf ( '%s/%s/Model/Observer', $this->_vendor, $this->_module ) );
 			$this->CreateGlobalEventsXML ();
 			$this->CreateGlobalEventsObserver ();
 		}
-		if(isset($this->_config ["observer"] ["frontend"])){
+		if (isset ( $this->_config ["observer"] ["frontend"] )) {
 			$this->CreateFolder ( sprintf ( '%s/%s/etc/frontend', $this->_vendor, $this->_module ) );
 			$this->CreateFolder ( sprintf ( '%s/%s/Model/Observer/Frontend', $this->_vendor, $this->_module ) );
 			$this->CreateFrontendEventsXML ();
 			$this->CreateFrontendEventsObserver ();
 		}
-		if(isset($this->_config ["observer"] ["adminhtml"])){
+		if (isset ( $this->_config ["observer"] ["adminhtml"] )) {
 			$this->CreateFolder ( sprintf ( '%s/%s/etc/adminhtml', $this->_vendor, $this->_module ) );
 			$this->CreateFolder ( sprintf ( '%s/%s/Model/Observer/Adminhtml', $this->_vendor, $this->_module ) );
 			$this->CreateAdminhtmlEventsXML ();
 			$this->CreateAdminhtmlEventsObserver ();
 		}
-		
 	}
-	
 	function create() {
-		$this->CreateFolder ( $this->_vendor );
-		$this->CreateFolder ( $this->_vendor . "/" . $this->_module );
-		$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "etc" );
-		
-		$this->CreateModuleXmlFile ();
-		$this->CreateRegistrationFile ();
-		
-		
-		$this->CreateHelper ();
-		$this->CreateSetup ();
-		$this->CreateBlock ();
-		$this->CreateModel ();
-		$this->CreateController ();
-		$this->CreateView ();
-		
-		$this->CreateBackEndModels ();
-		$this->CreateObserver ();
+		try {
+			if (strlen ( $this->_module ) < 3) {
+				throw new Exception ( 'The module name should me more than three Characters' );
+			}
+			$this->CreateFolder ( $this->_vendor );
+			$this->CreateFolder ( $this->_vendor . "/" . $this->_module );
+			$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "etc" );
+			
+			$this->CreateModuleXmlFile ();
+			$this->CreateRegistrationFile ();
+			
+			$this->CreateHelper ();
+			$this->CreateSetup ();
+			$this->CreateBlock ();
+			$this->CreateModel ();
+			$this->CreateController ();
+			$this->CreateView ();
+			
+			$this->CreateBackEndModels ();
+			$this->CreateObserver ();
+		} catch ( Exception $ex ) {
+			echo $ex->getMessage ();
+		}
 	}
 	function __toString() {
 		return $this->_vendor . " - " . $this->_module . " - " . $this->_version;
