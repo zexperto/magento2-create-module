@@ -10,7 +10,6 @@ How To use this file
 		"block" => false,<br/>
 		"controller" => false,<br/>
 		"model" => false,<br/>
-		"api" => false,<br/>
 		"view" => [ <br/>
 				"frontend" => false,<br/>
 				"adminhtml" => true <br/>
@@ -18,6 +17,7 @@ How To use this file
 		// vernder and module name will add as prefix to table, only id and status will create<br/>
 		"backend_model" => [ <br/>
 				[<br/> 
+						"api" => true,<br/>
 						"name" => "Contact",<br/>
 						"table" => "Contct",<br/>
 						"columns" =>[<br/>
