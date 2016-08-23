@@ -19,28 +19,34 @@ How To use this file
 				[<br/> 
 						"api" => true,<br/>
 						"name" => "Contact",<br/>
-						"table" => "Contct",<br/>
+						"table" => "contacts",<br/>
 						"columns" =>[<br/>
 								array(<br/>
-									"name" =>"first_name",<br/>
-									"label" =>"First Name",<br/>
+									"name" =>"full_name",<br/>
+									"label" =>"Full Name",<br/>
 									"type" => "string",<br/>
-									"size" =>"50",<br/>
+									"size" =>"64",<br/>
 									"rquired" =>"true"<br/>
 								),<br/>
 								array(<br/>
-										"name" =>"birthday",<br/>
-										"label" =>"Birthday",<br/>
+										"name" =>"age",<br/>
+										"label" =>"Age",<br/>
+										"type" => "int",<br/>
+										"rquired" =>"true"<br/>
+								),<br/>
+								array(<br/>
+										"name" =>"birth_date",<br/>
+										"label" =>"Birth Date",<br/>
 										"type" => "date",<br/>
 										'class' => 'validate-date',<br/>
 										"rquired" =>"true"<br/>
 								),<br/>
 								array(<br/>
-										"name" =>"age",<br/>
-										"label" =>"Age",<br/>
+										"name" =>"balance",<br/>
+										"label" =>"Balance",<br/>
 										"type" => "decimal",<br/>
 										"rquired" =>"true"<br/>
-								)<br/>
+								)<br/>								
 						]<br/>
 				] <br/>
 		] <br/>
