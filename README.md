@@ -5,6 +5,11 @@ How To use this file
 
 // --------------------------------------------------------------
 <br/>$config_array = [ <br/>
+		"observer" => array(<br/>
+				"global"=>array("sales_order_place_after"),<br/>
+				"frontend"=>array("catalog_product_load_after"),<br/>
+				"adminhtml"=>array(),<br/>
+				),<br/>
 		"helper" => true,<br/>
 		"setup" => true,<br/>
 		"block" => false,<br/>
