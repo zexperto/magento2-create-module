@@ -54,6 +54,6 @@ $config_array = [
 		] 
 ];
 
-$mod = new Magento2ModuleCreator ( "ITM", "WH" );
+$mod = new Magento2ModuleCreator ( "ITM", "WHH" );
 $mod->setConfig ( $config_array );
 echo $mod->create ( $config_array );

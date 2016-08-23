@@ -1903,7 +1903,7 @@ class Observer implements ObserverInterface {
 		$path = sprintf ( '%s/%s/Model/Observer/Frontend/Observer.php', $this->_vendor, $this->_module );
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		$events = "";
-		foreach ( $this->_config ["observer"] ["global"] as $event ) {
+		foreach ( $this->_config ["observer"] ["frontend"] as $event ) {
 			$events .= sprintf ( 'case "%1$s" :{
 	
 				}
@@ -1939,7 +1939,7 @@ class Observer implements ObserverInterface {
 		$path = sprintf ( '%s/%s/Model/Observer/Adminhtml/Observer.php', $this->_vendor, $this->_module );
 		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
 		$events = "";
-		foreach ( $this->_config ["observer"] ["global"] as $event ) {
+		foreach ( $this->_config ["observer"] ["adminhtml"] as $event ) {
 			$events .= sprintf ( 'case "%1$s" :{
 	
 				}
