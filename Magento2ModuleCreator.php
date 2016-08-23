@@ -1890,6 +1890,204 @@ class Status implements ArrayInterface {
 		$this->CreateModelSystemConfigStatusFile ( $model );
 	}
 	
+	function CreateGlobalEventsXML() {
+			$path = sprintf ( '%s/%s/etc/events.xml', $this->_vendor, $this->_module );
+			$ext_file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
+			$events ="";
+			foreach($this->_config["observer"]["global"] as $event){
+				$events .=sprintf('<event name="%5$s">
+        <observer name="%3$s_%4$s_%5$s" instance="%1$s\%2$s\Model\Observer\Observer" />
+    </event>',
+						$this->_vendor,$this->_module,strtolower($this->_vendor), strtolower($this->_module),$event);
+			}
+		
+			$txt = sprintf ( '<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    %1$s
+</config>
+		
+				', $events );
+		
+			fwrite ( $ext_file, $txt );
+			fclose ( $ext_file );
+	}
+	
+	function CreateFrontendEventsXML() {
+		$path = sprintf ( '%s/%s/etc/frontend/events.xml', $this->_vendor, $this->_module );
+		$ext_file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
+		$events ="";
+		foreach($this->_config["observer"]["frontend"] as $event){
+			$events .=sprintf('<event name="%5$s">
+        <observer name="%3$s_%4$s_%5$s" instance="%1$s\%2$s\Model\Observer\Frontend\Observer" />
+    </event>',
+					$this->_vendor,$this->_module,strtolower($this->_vendor), strtolower($this->_module),$event);
+		}
+	
+		$txt = sprintf ( '<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    %1$s
+</config>
+	
+				', $events );
+	
+		fwrite ( $ext_file, $txt );
+		fclose ( $ext_file );
+	
+	}
+	function CreateAdminhtmlEventsXML() {
+		$path = sprintf ( '%s/%s/etc/adminhtml/events.xml', $this->_vendor, $this->_module );
+		$ext_file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
+		$events ="";
+		foreach($this->_config["observer"]["adminhtml"] as $event){
+			$events .=sprintf('<event name="%5$s">
+        <observer name="%3$s_%4$s_%5$s" instance="%1$s\%2$s\Model\Observer\Adminhtml\Observer" />
+    </event>',
+					$this->_vendor,$this->_module,strtolower($this->_vendor), strtolower($this->_module),$event);
+		}
+	
+		$txt = sprintf ( '<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    %1$s
+</config>
+	
+				', $events );
+	
+		fwrite ( $ext_file, $txt );
+		fclose ( $ext_file );
+	
+	}
+	
+	function CreateGlobalEventsObserver(){
+		$path = sprintf ( '%s/%s/Model/Observer/Observer.php', $this->_vendor, $this->_module );
+		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
+		$events ="";
+		foreach($this->_config ["observer"]["global"] as $event){
+			$events .=sprintf('case "%1$s" :{
+				
+				}
+				break;
+					',$event);
+			$events .="\n\t\t\t";
+		}
+		
+		$txt = sprintf ( '<?php
+		
+namespace %s\%s\Model\Observer;
+
+use Magento\Framework\Event\ObserverInterface;
+				
+class Observer implements ObserverInterface {
+				
+	public function execute(\Magento\Framework\Event\Observer $observer) {
+		
+		$event_name = $observer->getEvent ()->getName ();
+		switch ($event_name) {
+			
+			%3$s
+				
+		}		
+		return $this;
+	}
+}', $this->_vendor, $this->_module,$events );
+		
+		fwrite ( $file, $txt );
+		fclose ( $file );
+	}
+	function CreateFrontendEventsObserver(){
+		$path = sprintf ( '%s/%s/Model/Observer/Frontend/Observer.php', $this->_vendor, $this->_module );
+		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
+		$events ="";
+		foreach($this->_config ["observer"]["global"] as $event){
+			$events .=sprintf('case "%1$s" :{
+	
+				}
+				break;
+					',$event);
+			$events .="\n\t\t\t";
+		}
+	
+		$txt = sprintf ( '<?php
+	
+namespace %s\%s\Model\Observer\Frontend;
+	
+use Magento\Framework\Event\ObserverInterface;
+	
+class Observer implements ObserverInterface {
+	
+	public function execute(\Magento\Framework\Event\Observer $observer) {
+	
+		$event_name = $observer->getEvent ()->getName ();
+		switch ($event_name) {
+		
+			%3$s
+	
+		}
+		return $this;
+	}
+}', $this->_vendor, $this->_module,$events );
+	
+		fwrite ( $file, $txt );
+		fclose ( $file );
+	}
+	function CreateAdminhtmlEventsObserver(){
+		$path = sprintf ( '%s/%s/Model/Observer/Adminhtml/Observer.php', $this->_vendor, $this->_module );
+		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
+		$events ="";
+		foreach($this->_config ["observer"]["global"] as $event){
+			$events .=sprintf('case "%1$s" :{
+	
+				}
+				break;
+					',$event);
+			$events .="\n\t\t\t";
+		}
+	
+		$txt = sprintf ( '<?php
+	
+namespace %s\%s\Model\Observer\Frontend;
+	
+use Magento\Framework\Event\ObserverInterface;
+	
+class Observer implements ObserverInterface {
+	
+	public function execute(\Magento\Framework\Event\Observer $observer) {
+	
+		$event_name = $observer->getEvent ()->getName ();
+		switch ($event_name) {
+	
+			%3$s
+	
+		}
+		return $this;
+	}
+}', $this->_vendor, $this->_module,$events );
+	
+		fwrite ( $file, $txt );
+		fclose ( $file );
+	}	
+	
+	function CreateObserver(){
+		if(count($this->_config ["observer"])==0)
+			return;
+		if($this->_config ["observer"]){
+			$this->CreateFolder ( sprintf ( '%s/%s/Model/Observer', $this->_vendor, $this->_module ) );
+			$this->CreateGlobalEventsXML ();
+			$this->CreateGlobalEventsObserver ();
+		}
+		if(isset($this->_config ["observer"] ["frontend"])){
+			$this->CreateFolder ( sprintf ( '%s/%s/etc/frontend', $this->_vendor, $this->_module ) );
+			$this->CreateFolder ( sprintf ( '%s/%s/Model/Observer/Frontend', $this->_vendor, $this->_module ) );
+			$this->CreateFrontendEventsXML ();
+			$this->CreateFrontendEventsObserver ();
+		}
+		if(isset($this->_config ["observer"] ["adminhtml"])){
+			$this->CreateFolder ( sprintf ( '%s/%s/etc/adminhtml', $this->_vendor, $this->_module ) );
+			$this->CreateFolder ( sprintf ( '%s/%s/Model/Observer/Adminhtml', $this->_vendor, $this->_module ) );
+			$this->CreateAdminhtmlEventsXML ();
+			$this->CreateAdminhtmlEventsObserver ();
+		}
+		
+	}
 	
 	function create() {
 		$this->CreateFolder ( $this->_vendor );
@@ -1908,6 +2106,7 @@ class Status implements ArrayInterface {
 		$this->CreateView ();
 		
 		$this->CreateBackEndModels ();
+		$this->CreateObserver ();
 	}
 	function __toString() {
 		return $this->_vendor . " - " . $this->_module . " - " . $this->_version;

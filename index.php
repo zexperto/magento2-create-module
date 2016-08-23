@@ -2,6 +2,11 @@
 include_once 'Magento2ModuleCreator.php';
 // --------------------------------------------------------------
 $config_array = [ 
+		"observer" => array(
+				"global"=>array("sales_order_place_after"),
+				"frontend"=>array("catalog_product_load_after"),
+				"adminhtml"=>array(),
+				), //  in progress
 		"helper" => true,
 		"setup" => true,
 		"block" => false,
