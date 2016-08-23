@@ -7,7 +7,6 @@ $config_array = [
 		"block" => false,
 		"controller" => false,
 		"model" => false,
-		"api" => false,
 		"view" => [ 
 				"frontend" => false,
 				"adminhtml" => false 
@@ -15,6 +14,7 @@ $config_array = [
 		// vernder and module name will add as prefix to table, only id and status will create
 		"backend_model" => [ 
 				[ 
+						"api" => true,
 						"name" => "Pricing",
 						"table" => "pricing",
 						"columns" =>[
@@ -24,6 +24,12 @@ $config_array = [
 									"type" => "string",
 									"size" =>"20",
 									"rquired" =>"true"
+								),
+								array(
+										"name" =>"product_id",
+										"label" =>"Product Id",
+										"type" => "int",
+										"rquired" =>"true"
 								),
 								array(
 										"name" =>"start_date",

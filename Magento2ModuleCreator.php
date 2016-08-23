@@ -109,9 +109,14 @@ class InstallSchema implements InstallSchemaInterface {
 					$columns .=sprintf('->addColumn ( \'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_TEXT, \'%3$s\', [\'nullable\' => false ], \'%2$s\' )'
 							,$column["name"],$column["label"],$column["size"]);
 					endif;
+					
+					if($column["type"]=="int"):
+					$columns .=sprintf('->addColumn ( \'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER, null, [\'nullable\' => false ], \'%2$s\' )'
+							,$column["name"],$column["label"]);
+					endif;
 				
-				if($column["type"]=="date"):
-					$columns .=sprintf('->addColumn(\'%1$s\',\Magento\Framework\DB\Ddl\Table::TYPE_DATE,	null,[],\'%2$s\')'
+					if($column["type"]=="date"):
+					$columns .=sprintf('->addColumn( \'%1$s\',\Magento\Framework\DB\Ddl\Table::TYPE_DATE,	null,[],\'%2$s\')'
 							,$column["name"],$column["label"]);
 					endif;
 				
@@ -276,13 +281,392 @@ class UpgradeData implements UpgradeDataInterface {
 		}
 	}
 	
+	function CreateApiModelInterface($model){
+		$path = sprintf ( '%s/%s/Api/%sInterface.php', $this->_vendor, $this->_module, $model ["name"] );
+		
+		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
+		
+		$txt = sprintf ( '<?php
+		
+namespace %s\%s\Api;
+		
+interface %sInterface  {
+	/**
+     * Get list
+     *
+     * @param \Magento\Framework\Api\SearchCriteriaInterface $searchCriteria
+     * @return \Magento\Framework\Api\SearchResultsInterface
+     */
+    public function list(\Magento\Framework\Api\SearchCriteriaInterface $searchCriteria);
 	
-	function CreateApi() {
-		if ($this->_config ["api"]) {
-			$this->CreateFolder ( sprintf ( '%s/%s/Api', $this->_vendor, $this->_module ) );
-		}
+    /**
+     *
+     * @api
+     * @param %1$s\%2$s\Api\Data\%3$sDataInterface $entity.
+     * @return %1$s\%2$s\Api\Data\%3$sDataInterface
+     */
+    public function save($entity);
+    
+    /**
+     * @param int $id
+     * @return bool Will returned true if deleted
+     */
+    public function deleteById($id);
+
+}', $this->_vendor, $this->_module, $model ["name"] );
+		
+		fwrite ( $file, $txt );
+		fclose ( $file );
 	}
 	
+	function CreateApiModelDataInterface($model){
+		$path = sprintf ( '%s/%s/Api/Data/%sDataInterface.php', $this->_vendor, $this->_module, $model ["name"] );
+	
+		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
+
+	// start columns
+		$columns = "";
+		$columns .='
+	/**
+	 *
+	 * @api
+	 * @return int id.
+	 */
+	public function getId();
+	
+	/**
+	 *
+	 * @api
+	 * @param $value id.
+	 * @return null
+	 */
+	public function setId($value);
+				';
+		foreach ($model["columns"] as $column){
+			$property = str_replace(' ','',ucwords(str_replace('_',' ',$column["name"])));
+
+if($column["type"]=="string"):
+			$columns .=sprintf( '
+	/**
+     *
+     * Get %2$s
+     * @return string|null.
+     */
+    public function get%3$s();
+
+    /**
+     *
+     * Set %2$s
+     * @param string $value.
+     * @return null
+     */
+    public function set%3$s($value);'
+	,$column["name"],$column["label"],$property);
+endif;
+
+if($column["type"]=="int"):
+$columns .=sprintf( '
+
+	/**
+     *
+     * Get %2$s
+     * @return int|null.
+     */
+    public function get%3$s();
+
+    /**
+     *
+     * Set %2$s
+     * @param int $value
+     * @return null
+     */
+    public function set%3$s($value);'
+		,$column["name"],$column["label"],$property);
+endif;
+
+if($column["type"]=="date"):
+$columns .=sprintf( '
+	
+	/**
+     * Get %2$s
+     *
+     * @return string|null
+     */
+    public function get%3$s();
+
+    /**
+     * Set %2$s
+     *
+     * @param string $value
+     * @return null
+     */
+    public function set%3$s($value);'
+		,$column["name"],$column["label"],$property);
+endif;
+
+if($column["type"]=="decimal"):
+			$columns .=sprintf( '
+	
+	/**
+     *
+     * Get %2$s
+     * @return float|null.
+     */
+    public function get%3$s();
+			
+    /**
+     *
+     * Set %2$s
+     * @param float $value
+     * @return null
+     */
+    public function set%3$s($value);'
+					,$column["name"],$column["label"],$property);
+endif;
+
+			
+		}
+		
+		$columns .=sprintf('
+	 
+	/**
+     * Get %1$s status
+     *
+     * @return int|null
+     */
+    public function getStatus();
+
+    /**
+     * Set %1$s status
+     *
+     * @param int $status
+     * @return null
+     */
+    public function setStatus($status);
+				',$model["name"]);
+		
+		
+		// End columns
+		
+		$txt = sprintf ( '<?php
+	
+namespace %1$s\%2$s\Api\Data;
+	
+interface %3$sDataInterface  {
+	%4$s
+	
+}', $this->_vendor, $this->_module, $model ["name"],$columns );
+	
+		fwrite ( $file, $txt );
+		fclose ( $file );
+	}
+	
+	function CreateModelApiModel($model){
+		$path = sprintf ( '%s/%s/Model/Api/%s.php', $this->_vendor, $this->_module, $model ["name"] );
+	
+		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
+	
+		$txt = sprintf ( '<?php
+	
+namespace %s\%s\Model;
+	
+use %1$s\%2$s\Api\%3$sInterface;
+				
+class %s  implements %3$sInterface {
+	
+	/**
+	 *
+	 * @var \Magento\Framework\Api\SearchResultsInterfaceFactory
+	 */
+	protected $_searchResultsFactory;
+	protected $_objectManager;
+	
+	/**
+	 *
+	 * @param \Magento\Framework\Api\SearchResultsInterfaceFactory $searchResultsFactory        	
+	 */
+	public function __construct(\Magento\Framework\Api\SearchResultsInterfaceFactory $searchResultsFactory) 
+	{
+		$this->_searchResultsFactory = $searchResultsFactory;
+		$this->_objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+	}
+				
+	/**
+	 *
+	 * {@inheritdoc}
+	 *
+	 */
+    public function list(\Magento\Framework\Api\SearchCriteriaInterface $searchCriteria){
+			
+		$collection = $this->_objectManager->create(\'\%1$s\%2$s\Model\Resource\%3$s\Collection\');
+		$result=$collection->getData();
+		$searchResult = $this->_searchResultsFactory->create ();
+		$searchResult->setSearchCriteria ( $searchCriteria );
+		$searchResult->setItems ( $result );
+		$searchResult->setTotalCount ( count ( $result ) );
+		return $searchResult;
+	}
+	
+    /**
+	 *
+	 * {@inheritdoc}
+	 *
+	 */
+    public function save($entity){
+				
+		$collection = $this->_objectManager->create(\'\%1$s\%2$s\Model\Resource\%3$s\Collection\');
+		$collection->addFieldToFilter("id",$entity->getId());
+		$item = $collection->getFirstItem();
+		$model = $this->_objectManager->create(\'%1$s\%2$s\Model\%3$s\');
+		
+		if($item->getId()){
+			$model->load($item->getId());
+		}
+			
+		/*
+			$model->setUomEntry($entity->getUomEntry())
+			->setUomCode($entity->getuomCode())
+			->setUomName($entity->getUomName())
+			->save();
+		*/
+		return $model;				
+	}
+	
+    /**
+	 *
+	 * {@inheritdoc}
+	 *
+	 */
+    public function deleteById($id){
+		try {
+			
+			$model = $this->_objectManager->create(\'%1$s\%2$s\Model\%3$s\');
+			$model->load($id);
+			$model->delete();
+			return true;
+		
+		} catch (\Exception $e) {
+			return $e->getMessage();
+		}
+		
+		return true;
+	}
+	
+}', $this->_vendor, $this->_module, $model ["name"] );
+	
+		fwrite ( $file, $txt );
+		fclose ( $file );
+	}
+	
+	function CreateApi($model) {
+
+			$this->CreateFolder ( sprintf ( '%s/%s/Api', $this->_vendor, $this->_module ) );
+			$this->CreateFolder ( sprintf ( '%s/%s/Api/Data', $this->_vendor, $this->_module ) );
+			$this->CreateFolder ( sprintf ( '%s/%s/Model/Api', $this->_vendor, $this->_module ) );
+			$this->CreateFolder ( sprintf ( '%s/%s/Model/Api/Data', $this->_vendor, $this->_module ) );
+			$this->CreateApiModelInterface($model);
+			$this->CreateApiModelDataInterface($model);
+			$this->CreateModelApiModel($model);
+			$this->CreateModelApiModelData($model);
+			
+	}
+	function CreateModelApiModelData($model){
+		$path = sprintf ( '%s/%s/Model/Api/Data/%sData.php', $this->_vendor, $this->_module, $model ["name"] );
+	
+		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
+	
+	
+		// Private 
+		$private ="";
+		foreach ($model["columns"] as $column){
+			$private .='private $'.$column["name"].';'."\n\t";
+		}
+		// start columns
+		$columns = "";
+		$columns .='
+	/**
+	 *
+	 * {@inheritdoc}
+	 *
+	 */
+	public function getId() {
+    	return $this->id;
+    }
+	
+	/**
+	 *
+	 * {@inheritdoc}
+	 *
+	 */
+	public function setId($value) {
+    	$this->id = $value;
+    }
+				';
+		foreach ($model["columns"] as $column){
+			$property = str_replace(' ','',ucwords(str_replace('_',' ',$column["name"])));
+	
+			$columns .=sprintf( '
+	/**
+	 *
+	 * {@inheritdoc}
+	 *
+	 */
+    public function get%3$s(){
+		return $this->%1$s;
+	}
+					
+   /**
+	 *
+	 * {@inheritdoc}
+	 *
+	 */
+    public function set%3$s($value){
+		$this->%1$s = $value;
+	}'
+					,$column["name"],$column["label"],$property);
+				
+		}
+	
+		$columns .=sprintf('
+	
+	/**
+	 *
+	 * {@inheritdoc}
+	 *
+	 */
+    public function getStatus(){
+		return $this->status;
+	}
+	
+   /**
+	 *
+	 * {@inheritdoc}
+	 *
+	 */
+    public function setStatus($status){
+		$this->status = $value;
+	}
+				',$model["name"]);
+	
+	
+		// End columns
+	
+		$txt = sprintf ( '<?php
+	
+namespace %1$s\%2$s\Model\Api\Data;
+	
+use %1$s\%2$s\Api\Data\%3$sDataInterface;
+
+class %3$sData implements %3$sDataInterface {
+				
+	%4$s
+
+	%5$s
+}', $this->_vendor, $this->_module, $model ["name"],$private,$columns );
+	
+		fwrite ( $file, $txt );
+		fclose ( $file );
+	}
 	
 	function CreateModel() {
 		if ($this->_config ["model"]) {
@@ -339,6 +723,9 @@ class UpgradeData implements UpgradeDataInterface {
 		if ($this->_config ["backend_model"]) {
 			foreach ( $this->_config ["backend_model"] as $model ) {
 				$this->CreateBackEndModel ( $model );
+				if($model["api"]){
+					$this->CreateApi ($model);
+				}
 			}
 			$this->CreateMenuFile ( $model );
 			$this->CreateRoutesFile ( $model );
@@ -430,6 +817,15 @@ class %s extends \Magento\Backend\Block\Widget\Grid\Container {
 			\'class\' => \'%1$s\' 
 			] );'
 			,$column["name"],$column["label"],$column["rquired"]);
+			endif;
+			
+			if($column["type"]=="int"):
+			$columns .=sprintf( '$this->addColumn ( \'%1$s\', [
+			\'header\' => __ ( \'%2$s\' ),
+			\'index\' => \'%1$s\',
+			\'class\' => \'%1$s\'
+			] );'
+					,$column["name"],$column["label"],$column["rquired"]);
 			endif;
 				
 			if($column["type"]=="date"):
@@ -753,6 +1149,15 @@ class Tabs extends \Magento\Backend\Block\Widget\Tabs {
 		foreach ($model["columns"] as $column){
 			
 			if($column["type"]=="string"):
+			$columns .=sprintf( '$fieldset->addField ( \'%1$s\', \'text\', [
+			\'name\' => \'%1$s\',
+			\'required\' => %3$s,
+			\'label\' => __ ( \'%2$s\' ),
+			\'title\' => __ ( \'%2$s\' ),
+			] );',$column["name"],$column["label"],$column["rquired"]);
+			endif;
+			
+			if($column["type"]=="int"):
 			$columns .=sprintf( '$fieldset->addField ( \'%1$s\', \'text\', [
 			\'name\' => \'%1$s\',
 			\'required\' => %3$s,
@@ -1408,7 +1813,6 @@ class Status implements ArrayInterface {
 		$this->CreateHelper ();
 		$this->CreateSetup ();
 		$this->CreateBlock ();
-		$this->CreateApi ();
 		$this->CreateModel ();
 		$this->CreateController ();
 		$this->CreateView ();
