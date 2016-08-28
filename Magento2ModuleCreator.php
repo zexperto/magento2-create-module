@@ -1992,6 +1992,41 @@ class Observer implements ObserverInterface {
 			$this->CreateAdminhtmlEventsObserver ();
 		}
 	}
+	function CreateComposerFile() {
+		$path = sprintf ( '%s/%s/composer.json', $this->_vendor, $this->_module );
+		$file = fopen ( $path, "w" ) or die ( "Unable to open file!" );
+	
+		$txt = sprintf ( '{
+    "name": "%4$s/%5$s",
+    "description": "",
+    "require": {
+        "magento/project-community-edition": "*",
+        "magento/magento-composer-installer": "*"
+    },
+    "type": "magento2-module",
+    "version": "%3$s",
+    "extra": {
+        "map": [
+            [
+                "*",
+                "%1$s/%2$s/"
+            ]
+        ]
+    },
+    "authors": [
+        {
+            "name": "WISAM HAKIM",
+            "homepage": "https://www.zexperto.com/",
+            "role": "Developer"
+        }
+    ]
+}
+				
+				', $this->_vendor, $this->_module,$this->_version,strtolower($this->_vendor),strtolower($this->_module));
+		
+		fwrite ( $file, $txt );
+		fclose ( $file );
+	}
 	function create() {
 		try {
 			if (strlen ( $this->_module ) < 3) {
@@ -2013,6 +2048,7 @@ class Observer implements ObserverInterface {
 			
 			$this->CreateBackEndModels ();
 			$this->CreateObserver ();
+			$this->CreateComposerFile ();
 		} catch ( Exception $ex ) {
 			echo $ex->getMessage ();
 		}
