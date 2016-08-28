@@ -2027,11 +2027,15 @@ class Observer implements ObserverInterface {
 		fwrite ( $file, $txt );
 		fclose ( $file );
 	}
+	function validateExtension(){
+		if (strlen ( $this->_module ) < 3) {
+			throw new Exception ( 'The module name should me more than three Characters' );
+		}
+	}
 	function create() {
 		try {
-			if (strlen ( $this->_module ) < 3) {
-				throw new Exception ( 'The module name should me more than three Characters' );
-			}
+			$this->validateExtension();
+				
 			$this->CreateFolder ( $this->_vendor );
 			$this->CreateFolder ( $this->_vendor . "/" . $this->_module );
 			$this->CreateFolder ( $this->_vendor . "/" . $this->_module . "/" . "etc" );
