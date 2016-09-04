@@ -49,7 +49,8 @@ class Magento2ModuleCreator
 \Magento\Framework\Component\ComponentRegistrar::register(
 	\Magento\Framework\Component\ComponentRegistrar::MODULE,
 	'%s_%s',
-	__DIR__);", $this->_vendor, $this->_module);
+	__DIR__
+);", $this->_vendor, $this->_module);
 		
 		$this->saveFileData($path, $txt);
 	}
@@ -523,16 +524,16 @@ namespace %s\%s\Model\APi;
 	
 use %1$s\%2$s\Api\%3$sInterface;
 				
-class %s  implements %3$sInterface
+class %s implements %3$sInterface
 {
-
 	
 	/**
 	 *
 	 * @var \Magento\Framework\Api\SearchResultsInterfaceFactory
 	 */
 	protected $_searchResultsFactory;
-	protected $_objectManager;
+	
+    protected $_objectManager;
 	
 	/**
 	 *
@@ -544,44 +545,41 @@ class %s  implements %3$sInterface
 		$this->_objectManager = \Magento\Framework\App\ObjectManager::getInstance();
 	}
 				
-	/**
+    /**
 	 *
 	 *
-{
-@inheritdoc}
+     * {@inheritdoc}
 	 *
 	 */
-    public function getList(\Magento\Framework\Api\SearchCriteriaInterface $searchCriteria){
-			
-		$collection = $this->_objectManager->create(\'\%1$s\%2$s\Model\Resource\%3$s\Collection\');
+    public function getList(\Magento\Framework\Api\SearchCriteriaInterface $searchCriteria)
+    {
+		$collection = $this->_objectManager->create(\'\%1$s\%2$s\Model\ResourceModel\%3$s\Collection\');
 		$result=$collection->getData();
 		$searchResult = $this->_searchResultsFactory->create();
 		$searchResult->setSearchCriteria($searchCriteria);
 		$searchResult->setItems($result);
-		$searchResult->setTotalCount(count($result ));
+		$searchResult->setTotalCount(count($result));
 		return $searchResult;
 	}
 	
     /**
 	 *
 	 *
-{
-@inheritdoc}
+     * {@inheritdoc}
 	 *
 	 */
-    public function save($entity){
-				
-		$collection = $this->_objectManager->create(\'\%1$s\%2$s\Model\Resource\%3$s\Collection\');
-		$collection->addFieldToFilter("id",$entity->getId());
+    public function save($entity)
+    {
+		$collection = $this->_objectManager->create(\'\%1$s\%2$s\Model\ResourceModel\%3$s\Collection\');
+		$collection->addFieldToFilter("id", $entity->getId());
 		$item = $collection->getFirstItem();
 		$model = $this->_objectManager->create(\'%1$s\%2$s\Model\%3$s\');
 		
-		if ($item->getId()){
+		if ($item->getId()) {
 			$model->load($item->getId());
 		}
 			
 		%4$s
-		
 			
 		return $model;
 	}
@@ -589,29 +587,22 @@ class %s  implements %3$sInterface
     /**
 	 *
 	 *
-{
-@inheritdoc}
+     * {@inheritdoc}
 	 *
 	 */
-    public function deleteById($id){
-		try
-{
-
-			
+    public function deleteById($id)
+    {
+        try {
 			$model = $this->_objectManager->create(\'%1$s\%2$s\Model\%3$s\');
 			$model->load($id);
 			$model->delete();
 			return true;
-		
-		} catch (\Exception $e)
-{
-
+		} catch (\Exception $e) {
 			return $e->getMessage();
 		}
-		
-		return true;
+        return true;
 	}
-	}', $this->_vendor, $this->_module, $model ["name"], $save_fields);
+}', $this->_vendor, $this->_module, $model ["name"], $save_fields);
 		
 		$this->saveFileData($path, $txt);
 	}
@@ -629,31 +620,31 @@ class %s  implements %3$sInterface
 
 			$private .= 'private $' . $column ["name"] . ';' . "\n\t";
 		}
+		$private =trim ($private,"\t");
+		$private =trim ($private,"\n");
 		// start columns
 		$columns = "";
 		$columns .= '
-	/**
+    /**
 	 *
 	 *
-{
-@inheritdoc}
+     * {@inheritdoc}
 	 *
 	 */
 	public function getId()
-{
-	return $this->id;
+    {
+        return $this->id;
     }
 	
-	/**
+    /**
 	 *
 	 *
-{
-@inheritdoc}
+     * {@inheritdoc}
 	 *
 	 */
 	public function setId($value)
-{
-	$this->id = $value;
+    {
+        $this->id = $value;
     }
 				';
 		foreach($model ["columns"] as $column )
@@ -662,25 +653,25 @@ class %s  implements %3$sInterface
 			$property = str_replace(' ', '', ucwords(str_replace('_', ' ', $column ["name"] ) ));
 			
 			$columns .= sprintf('
-	/**
+    /**
 	 *
 	 *
-{
-@inheritdoc}
+     * {@inheritdoc}
 	 *
 	 */
-    public function get%3$s(){
+    public function get%3$s()
+    {
 		return $this->%1$s;
 	}
 			
-   /**
+    /**
 	 *
 	 *
-{
-@inheritdoc}
+     * {@inheritdoc}
 	 *
 	 */
-    public function set%3$s($value){
+    public function set%3$s($value)
+    {
 		$this->%1$s = $value;
 	}', $column ["name"], $column ["label"], $property);
 		}
@@ -690,27 +681,29 @@ class %s  implements %3$sInterface
 	/**
 	 *
 	 *
-{
-@inheritdoc}
+     * {@inheritdoc}
 	 *
 	 */
-    public function getStatus(){
+    public function getStatus()
+    {
 		return $this->status;
 	}
 	
-   /**
+    /**
 	 *
 	 *
-{
-@inheritdoc}
+     * {@inheritdoc}
 	 *
 	 */
-    public function setStatus($status){
+    public function setStatus($status)
+    {
 		$this->status = $status;
 	}
 				', $model ["name"]);
 		
 		// End columns
+		$columns =trim ($columns,"\t");
+		$columns =trim ($columns,"\n");
 		
 		$txt = sprintf('<?php
 	
@@ -721,10 +714,9 @@ use %1$s\%2$s\Api\Data\%3$sDataInterface;
 class %3$sData implements %3$sDataInterface
 {
 
-	
 	%4$s
-	
-	%5$s}', $this->_vendor, $this->_module, $model ["name"], $private, $columns);
+	%5$s
+}', $this->_vendor, $this->_module, $model ["name"], $private, $columns);
 		
 		$this->saveFileData($path, $txt);
 	}
@@ -1061,7 +1053,7 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended
 	/**
      * @param \Magento\Backend\Block\Template\Context $context
      * @param \Magento\Backend\Helper\Data $backendHelper
-     * @param \Magento\Eav\Model\ResourceModel\Entity\Attribute\Set\CollectionFactory $setsFactory
+     * @param \Magento\Eav\Model\ResourceModelModel\Entity\Attribute\Set\CollectionFactory $setsFactory
      * @param \Magento\Catalog\Model\Product\Attribute\Source\Status $status
      * @param array $data
      *
@@ -1070,7 +1062,7 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended
 	public function __construct(
 		\Magento\Backend\Block\Template\Context $context,
 		\Magento\Backend\Helper\Data $backendHelper,
-		\%1$s\%2$s\Model\Resource\%3$s\Collection $collectionFactory,
+		\%1$s\%2$s\Model\ResourceModel\%3$s\Collection $collectionFactory,
 		Status $status,
 		array $data = []
 	) {
@@ -1880,74 +1872,71 @@ namespace %s\%s\Model;
 class %s extends \Magento\Framework\Model\AbstractModel
 {
 
-	
-	 /**
+    /**
      * Constructor
      *
      * @return void
      */
-		protected function _construct()
-{
-
-			parent::_construct();
-			$this->_init(\'%1$s\%2$s\Model\Resource\%3$s\');
-		}}', $this->_vendor, $this->_module, $model ["name"]);
+    protected function _construct()
+    {
+        parent::_construct();
+        $this->_init(\'%1$s\%2$s\Model\ResourceModel\%3$s\');
+	}
+}', $this->_vendor, $this->_module, $model ["name"]);
 		
 		$this->saveFileData($path, $txt);
 	}
-	function CreateModelResourceModelFile($model)
+	function CreateModelResourceModelModelFile($model)
 {
 
-		$path = sprintf("%s/%s/Model/Resource/%s.php", $this->_vendor, $this->_module, $model ["name"]);
+		$path = sprintf("%s/%s/Model/ResourceModel/%s.php", $this->_vendor, $this->_module, $model ["name"]);
 		
 		
 		
 		$txt = sprintf('<?php
 	
-namespace %s\%s\Model\Resource;
+namespace %s\%s\Model\ResourceModel;
 	
-class %s extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
+class %s extends \Magento\Framework\Model\ResourceModelModel\Db\AbstractDb
 {
 
-	
-	 /**
+    /**
      * Model Initialization
      *
      * @return void
      */
 	protected function _construct()
-{
-
+    {
 		$this->_init(\'%s_%s_%s\', \'id\');
-	}}', $this->_vendor, $this->_module, $model ["name"], strtolower($this->_vendor), strtolower($this->_module), strtolower($model ["table"] ));
+	}
+}', $this->_vendor, $this->_module, $model ["name"], strtolower($this->_vendor), strtolower($this->_module), strtolower($model ["table"] ));
 		
 		$this->saveFileData($path, $txt);
 	}
-	function CreateModelResourceModelCollectionFile($model)
+	function CreateModelResourceModelModelCollectionFile($model)
 {
 
-		$path = sprintf("%s/%s/Model/Resource/%s/Collection.php", $this->_vendor, $this->_module, $model ["name"]);
+		$path = sprintf("%s/%s/Model/ResourceModel/%s/Collection.php", $this->_vendor, $this->_module, $model ["name"]);
 		
 		
 		
 		$txt = sprintf('<?php
 	
-namespace %s\%s\Model\Resource\%s ;
+namespace %s\%s\Model\ResourceModel\%s ;
 	
-class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection
+class Collection extends \Magento\Framework\Model\ResourceModelModel\Db\Collection\AbstractCollection
 {
 
-  	
 	/**
      * Define resource model
      *
      * @return void
      */
 	protected function _construct()
-{
-
-		$this->_init(\'%1$s\%2$s\Model\%3$s\', \'%1$s\%2$s\Model\Resource\%3$s\');
-	}}', $this->_vendor, $this->_module, $model ["name"]);
+    {
+		$this->_init(\'%1$s\%2$s\Model\%3$s\', \'%1$s\%2$s\Model\ResourceModel\%3$s\');
+	}
+}', $this->_vendor, $this->_module, $model ["name"]);
 		$this->saveFileData($path, $txt);
 	}
 	function CreateViewAdminhtmlLayoutIndexFile($model)
@@ -2016,14 +2005,14 @@ class Status implements ArrayInterface
 	const ENABLED = 1;
 	const DISABLED = 0;
 	public function toOptionArray()
-{
-
+    {
 		$options = [
 			self::ENABLED => __(\'Enabled\'),
-			self::DISABLED => __(\'Disabled\' )
+			self::DISABLED => __(\'Disabled\')
 		];
 		return $options;
-	}}', $this->_vendor, $this->_module);
+	}
+}', $this->_vendor, $this->_module);
 		
 		$this->saveFileData($path, $txt);
 	}
@@ -2045,8 +2034,8 @@ class Status implements ArrayInterface
 		
 		// Create Model Folder
 		$this->CreateFolder(sprintf('%s/%s/Model', $this->_vendor, $this->_module ));
-		$this->CreateFolder(sprintf('%s/%s/Model/Resource', $this->_vendor, $this->_module ));
-		$this->CreateFolder(sprintf('%s/%s/Model/Resource/%s', $this->_vendor, $this->_module, $model ["name"] ));
+		$this->CreateFolder(sprintf('%s/%s/Model/ResourceModel', $this->_vendor, $this->_module ));
+		$this->CreateFolder(sprintf('%s/%s/Model/ResourceModel/%s', $this->_vendor, $this->_module, $model ["name"] ));
 		
 		// Create Block Files
 		// Adminhtml/{model}.php
@@ -2070,8 +2059,8 @@ class Status implements ArrayInterface
 		
 		// Create Model Files
 		$this->CreateModelModelFile($model);
-		$this->CreateModelResourceModelFile($model);
-		$this->CreateModelResourceModelCollectionFile($model);
+		$this->CreateModelResourceModelModelFile($model);
+		$this->CreateModelResourceModelModelCollectionFile($model);
 		
 		// Create view Files
 		$this->_config ["view"] ["adminhtml"] = true;
@@ -2163,12 +2152,11 @@ class Status implements ArrayInterface
 		foreach($this->_config ["observer"] ["global"] as $event )
 {
 
-			$events .= sprintf('case "%1$s" :{
-				
-				}
-				break;
-					', $event);
+	$events .= sprintf('case "%1$s":
+                break;', $event);
 			$events .= "\n\t\t\t";
+			$events =trim ($events,"\t");
+			$events =trim ($events,"\n");
 		}
 		
 		$txt = sprintf('<?php
@@ -2180,21 +2168,15 @@ use Magento\Framework\Event\ObserverInterface;
 class Observer implements ObserverInterface
 {
 
-				
 	public function execute(\Magento\Framework\Event\Observer $observer)
-{
-
-		
+    {
 		$event_name = $observer->getEvent()->getName();
-		switch($event_name)
-{
-
-			
-			%3$s
-				
+		switch ($event_name) {
+            %3$s
 		}
 		return $this;
-	}}', $this->_vendor, $this->_module, $events);
+	}
+}', $this->_vendor, $this->_module, $events);
 		
 		$this->saveFileData($path, $txt);
 	}
@@ -2207,12 +2189,11 @@ class Observer implements ObserverInterface
 		foreach($this->_config ["observer"] ["frontend"] as $event )
 {
 
-			$events .= sprintf('case "%1$s" :{
-	
-				}
-				break;
-					', $event);
+			$events .= sprintf('case "%1$s":
+                break;', $event);
 			$events .= "\n\t\t\t";
+			$events =trim ($events,"\t");
+			$events =trim ($events,"\n");
 		}
 		
 		$txt = sprintf('<?php
@@ -2224,21 +2205,16 @@ use Magento\Framework\Event\ObserverInterface;
 class Observer implements ObserverInterface
 {
 
-	
 	public function execute(\Magento\Framework\Event\Observer $observer)
-{
+    {
 
-	
 		$event_name = $observer->getEvent()->getName();
-		switch($event_name)
-{
-
-		
-			%3$s
-	
+		switch ($event_name) {
+            %3$s
 		}
 		return $this;
-	}}', $this->_vendor, $this->_module, $events);
+	}
+}', $this->_vendor, $this->_module, $events);
 		
 		$this->saveFileData($path, $txt);
 	}
@@ -2251,12 +2227,11 @@ class Observer implements ObserverInterface
 		foreach($this->_config ["observer"] ["adminhtml"] as $event )
 {
 
-			$events .= sprintf('case "%1$s" :{
-	
-				}
-				break;
-					', $event);
+		$events .= sprintf('case "%1$s":
+                break;', $event);
 			$events .= "\n\t\t\t";
+			$events =trim ($events,"\t");
+			$events =trim ($events,"\n");
 		}
 		
 		$txt = sprintf('<?php
@@ -2267,22 +2242,17 @@ use Magento\Framework\Event\ObserverInterface;
 	
 class Observer implements ObserverInterface
 {
-
 	
 	public function execute(\Magento\Framework\Event\Observer $observer)
-{
-
+    {
 	
 		$event_name = $observer->getEvent()->getName();
-		switch($event_name)
-{
-
-	
-			%3$s
-	
+		switch ($event_name) {
+            %3$s
 		}
 		return $this;
-	}}', $this->_vendor, $this->_module, $events);
+	}
+}', $this->_vendor, $this->_module, $events);
 		
 		$this->saveFileData($path, $txt);
 	}
