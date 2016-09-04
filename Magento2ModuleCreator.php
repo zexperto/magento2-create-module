@@ -66,11 +66,11 @@ namespace %s\%s\Helper;
 class Data extends \Magento\Framework\App\Helper\AbstractHelper
 {
 
-	public function __construct(\Magento\Framework\App\Helper\Context $context)
-{
-
-		parent::__construct($context);
-	}}', $this->_vendor, $this->_module);
+    public function isDisable()
+    {
+        return $module_status = (boolean) $this->_scopeConfig->getValue(\'advanced/modules_disable_output/%1$s_%2$s\');
+    }
+}', $this->_vendor, $this->_module);
 		
 		$this->saveFileData($path, $txt);
 	}
@@ -103,7 +103,7 @@ class InstallSchema implements InstallSchemaInterface
 {
 
 	public function install(SchemaSetupInterface $setup, ModuleContextInterface $context)
-{
+    {
 
 		$setup->startSetup();', $this->_vendor, $this->_module);
 		
@@ -112,7 +112,6 @@ class InstallSchema implements InstallSchemaInterface
 
 			foreach($this->_config ["backend_model"] as $model )
 {
-
 				$columns = "";
 				
 				foreach($model ["columns"] as $column )
@@ -120,49 +119,69 @@ class InstallSchema implements InstallSchemaInterface
 
 					
 					if ($column ["type"] == "string") :
-						$columns .= sprintf('->addColumn(\'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_TEXT, \'%3$s\', [\'nullable\' => false ], \'%2$s\' )', $column ["name"], $column ["label"], $column ["size"]);
+						$columns .= sprintf('->addColumn(
+                \'%1$s\',
+                \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                \'%3$s\',
+                [\'nullable\' => false ],
+                \'%2$s\'
+            )', $column ["name"], $column ["label"], $column ["size"]);
 					
 					endif;
 					
 					if ($column ["type"] == "int") :
-						$columns .= sprintf('->addColumn(\'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER, null, [\'nullable\' => false ], \'%2$s\' )', $column ["name"], $column ["label"]);
+						$columns .= sprintf('->addColumn(\'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER, null, [\'nullable\' => false ], \'%2$s\')', $column ["name"], $column ["label"]);
 					
 					endif;
 					
 					if ($column ["type"] == "date") :
-						$columns .= sprintf('->addColumn(\'%1$s\',\Magento\Framework\DB\Ddl\Table::TYPE_DATE,	null,[],\'%2$s\')', $column ["name"], $column ["label"]);
+						$columns .= sprintf('->addColumn(\'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_DATE, null, [], \'%2$s\')', $column ["name"], $column ["label"]);
 					
 					endif;
 					
 					if ($column ["type"] == "decimal") :
-						$columns .= sprintf('->addColumn(\'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_DECIMAL, \'12,4\',  [\'nullable\' => false, \'default\' => \'0.0000\'], \'%2$s\' )', $column ["name"], $column ["label"]);
+						$columns .= sprintf('->addColumn(
+                \'%1$s\',
+                \Magento\Framework\DB\Ddl\Table::TYPE_DECIMAL,
+                \'12,4\',
+				[\'nullable\' => false,
+				\'default\' => \'0.0000\'],
+				\'%2$s\'
+			)', $column ["name"], $column ["label"]);
 					
 					endif;
 					
-					$columns .= "\n\t\t\t\t";
+					$columns .= "\n\t\t\t";
 				}
+				$columns =trim ($columns,"\t");
+				$columns =trim ($columns,"\n");
 				
 				$txt .= sprintf('
 		$table = $setup->getConnection()
-				->newTable($setup->getTable(\'%s_%s_%s\' ) )
-				->addColumn(\'id\', \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER, null, [
-						\'identity\' => true,
-						\'unsigned\' => true,
-						\'nullable\' => false,
-						\'primary\' => true
-						], \'Id\' )
-				%4$s
-				->addColumn(\'status\', \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER, 1, [
-						\'default\' => null
-						], \'Status\');
+            ->newTable($setup->getTable(\'%s_%s_%s\'))
+			->addColumn(
+				\'id\',
+				\Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+				null,
+                [
+				\'identity\' => true,
+				\'unsigned\' => true,
+				\'nullable\' => false,
+				\'primary\' => true
+				],
+				\'Id\'
+            )
+			%4$s
+			->addColumn(\'status\', \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER, 1, [\'default\' => null], \'Status\');
 		$setup->getConnection()->createTable($table);
 						', strtolower($this->_vendor), strtolower($this->_module), strtolower($model ["name"]), $columns);
 			}
 		}
 		
 		$txt .= '// your code here
-				$setup->endSetup();
-	}}';
+		$setup->endSetup();
+	}
+}';
 		
 		$this->saveFileData($path, $txt);
 	}
@@ -184,13 +203,14 @@ use Magento\Framework\Setup\ModuleContextInterface;
 class Uninstall implements UninstallInterface
 {
 
-	public function uninstall(SchemaSetupInterface $setup, ModuleContextInterface $context){
-		
+	public function uninstall(SchemaSetupInterface $setup, ModuleContextInterface $context)
+	{
 		// php bin/magento module:uninstall %1$s_%2$s
 		$setup->startSetup();
 		// your code here"
 		$setup->endSetup();
-	}}', $this->_vendor, $this->_module);
+	}
+}', $this->_vendor, $this->_module);
 		
 		$this->saveFileData($path, $txt);
 	}
@@ -212,31 +232,28 @@ use Magento\Framework\Setup\ModuleContextInterface;
 class UpgradeSchema implements UpgradeSchemaInterface
 {
 
-
-	public function upgrade(SchemaSetupInterface $setup, ModuleContextInterface $context){
+	public function upgrade(SchemaSetupInterface $setup, ModuleContextInterface $context)
+	{
 		$setup->startSetup();
-				
-		if (!$context->getVersion())
-{
-
+	
+		if (!$context->getVersion()) {
 			// your code here" . "\n";
+			return null;
 		}
-
 		
-		if (version_compare($context->getVersion(), \'1.0.1\') < 0)
-{
-
+		if (version_compare($context->getVersion(), \'1.0.1\') < 0) {
 			//code to upgrade to 1.0.1" . "\n";
+			return null;
 		}
 
-		if (version_compare($context->getVersion(), \'1.0.2\') < 0)
-{
-
+		if (version_compare($context->getVersion(), \'1.0.2\') < 0) {
 			 //code to upgrade to 1.0.2" . "\n";
+			 return null;
 		}
 
 		$setup->endSetup();
-	}}', $this->_vendor, $this->_module);
+	}
+}', $this->_vendor, $this->_module);
 		
 		
 		$this->saveFileData($path, $txt);
@@ -261,27 +278,23 @@ use Magento\Framework\Setup\ModuleDataSetupInterface;
 class UpgradeData implements UpgradeDataInterface
 {
 
-
 	public function __construct(EavSetupFactory $eavSetupFactory)
-{
-
+    {
 		$this->eavSetupFactory = $eavSetupFactory;
 	}
 
 	public function upgrade(ModuleDataSetupInterface $setup, ModuleContextInterface $context)
-{
-
+    {
 		$eavSetup = $this->eavSetupFactory->create([
 			\'setup\' => $setup
 		]);
 
-		if (version_compare($context->getVersion(), \'1.0.1\' ) < 0)
-{
-
+		if (version_compare($context->getVersion(), \'1.0.1\') < 0) {
 			//your code here" . "\n";
+			return null;
 		}
-
-	}}', $this->_vendor, $this->_module);
+	}
+}', $this->_vendor, $this->_module);
 		
 		$this->saveFileData($path, $txt);
 	}
@@ -1533,8 +1546,7 @@ namespace %s\%s\Controller\Adminhtml;
 abstract class %s extends \Magento\Backend\App\Action
 {
 
-
-	 /**
+	/**
      * Core registry
      *
      * @var \Magento\Framework\Registry
@@ -1546,14 +1558,13 @@ abstract class %s extends \Magento\Backend\App\Action
      */
 	protected $resultForwardFactory;
 	
-	
 	/**
      * @var \Magento\Framework\View\Result\PageFactory
      */
 	protected $resultPageFactory;
 	
 				
-	 /**
+	/**
      * Initialize Group Controller
      *
      * @param \Magento\Backend\App\Action\Context $context
@@ -1561,8 +1572,12 @@ abstract class %s extends \Magento\Backend\App\Action
      * @param \Magento\Backend\Model\View\Result\ForwardFactory $resultForwardFactory
      * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
      */
-	public function __construct(\Magento\Backend\App\Action\Context $context, \Magento\Framework\Registry $coreRegistry, \Magento\Backend\Model\View\Result\ForwardFactory $resultForwardFactory, \Magento\Framework\View\Result\PageFactory $resultPageFactory)
-{
+	public function __construct(
+        \Magento\Backend\App\Action\Context $context,
+        \Magento\Framework\Registry $coreRegistry,
+        \Magento\Backend\Model\View\Result\ForwardFactory $resultForwardFactory,
+        \Magento\Framework\View\Result\PageFactory $resultPageFactory
+    ) {
 
 		$this->_coreRegistry = $coreRegistry;
 		parent::__construct($context);
@@ -1570,16 +1585,15 @@ abstract class %s extends \Magento\Backend\App\Action
 		$this->resultPageFactory = $resultPageFactory;
 	}
 	
-	  /**
+	/**
      * Initiate action
      *
      * @return this
      */
 	protected function _initAction()
-{
-
+    {
 		$this->_view->loadLayout();
-		$this->_setActiveMenu(\'%1$s_%2$s::%4$s\' )->_addBreadcrumb(__(\'%3$s\'), __(\'%3$s\' ));
+		$this->_setActiveMenu(\'%1$s_%2$s::%4$s\')->_addBreadcrumb(__(\'%3$s\'), __(\'%3$s\'));
 		return $this;
 	}
 	
@@ -1589,10 +1603,10 @@ abstract class %s extends \Magento\Backend\App\Action
      * @return bool
      */
 	protected function _isAllowed()
-{
-
+    {
 		return $this->_authorization->isAllowed(\'%1$s_%2$s::%5$s\');
-	}}', $this->_vendor, $this->_module, $model ["name"], strtolower($model ["table"]), strtolower($model ["name"] ));
+	}
+}', $this->_vendor, $this->_module, $model ["name"], strtolower($model ["table"]), strtolower($model ["name"] ));
 		
 		$this->saveFileData($path, $txt);
 	}
@@ -1611,39 +1625,33 @@ class Delete extends \%1$s\%2$s\Controller\Adminhtml\%3$s
 {
 
 	public function execute()
-{
-
-		$id = $this->getRequest()->getParam(\'id\');
-		if ($id)
-{
-
-			try
-{
-
+    {
+        $id = $this->getRequest()->getParam(\'id\');
+		if ($id) {
+			try {
 				$model = $this->_objectManager->create(\'%1$s\%2$s\Model\%3$s\');
 				$model->load($id);
 				$model->delete();
-				$this->messageManager->addSuccess(__(\'You deleted the item.\' ));
+				$this->messageManager->addSuccess(__(\'You deleted the item.\'));
 				$this->_redirect(\'%s_%s/*/\');
 				return;
-			} catch (\Magento\Framework\Exception\LocalizedException $e )
-{
-
+			} catch (\Magento\Framework\Exception\LocalizedException $e) {
 				$this->messageManager->addError($e->getMessage());
-			} catch (\Exception $e )
-{
-
-				$this->messageManager->addError(__(\'We can\\\'t delete item right now. Please review the log and try again.\' ));
-				$this->_objectManager->get(\'Psr\Log\LoggerInterface\' )->critical($e);
+			} catch (\Exception $e) {
+				$this->messageManager->addError(
+                    __(\'We can\\\'t delete item right now. Please review the log and try again.\')
+                );
+				$this->_objectManager->get(\'Psr\Log\LoggerInterface\')->critical($e);
 				$this->_redirect(\'%4$s_%5$s/*/edit\', [
-						\'id\' => $this->getRequest()->getParam(\'id\' )
+						\'id\' => $this->getRequest()->getParam(\'id\')
 				]);
 				return;
 			}
 		}
-		$this->messageManager->addError(__(\'We can\\\'t find a item to delete.\' ));
+		$this->messageManager->addError(__(\'We can\\\'t find a item to delete.\'));
 		$this->_redirect(\'%4$s_%5$s/*/\');
-	}}', $this->_vendor, $this->_module, $model ["name"], strtolower($this->_vendor), strtolower($this->_module ));
+	}
+}', $this->_vendor, $this->_module, $model ["name"], strtolower($this->_vendor), strtolower($this->_module ));
 		
 		$this->saveFileData($path, $txt);
 	}
@@ -1660,37 +1668,27 @@ namespace %s\%s\Controller\Adminhtml\%s;
 	
 class Edit extends \%1$s\%2$s\Controller\Adminhtml\%3$s
 {
-
 	
 	public function execute()
-{
-
+    {
 		$id = $this->getRequest()->getParam(\'id\');
 		$model = $this->_objectManager->create(\'%1$s\%2$s\Model\%3$s\');
-		if ($id)
-{
-
-			$model->load($id);
-			if (!$model->getId())
-{
-
+		if ($id) {
+            $model->load($id);
+			if (!$model->getId()) {
 				$this->messageManager->addError(__(\'This item no longer exists.\'));
 				$this->_redirect(\'%s_%s/*\');
 				return;
 			}
 		}
 		$data = $this->_objectManager->get(\'Magento\Backend\Model\Session\')->getPageData(true);
-		if (!empty($data))
-{
-
+		if (!empty($data)) {
 			$model->addData($data);
 		}
 		$resultPage = $this->resultPageFactory->create();
-		if ($id)
-{
-
+		if ($id) {
 			$resultPage->getConfig()->getTitle()->prepend(__(\'Edit Items Entry\'));
-		}else{
+		} else {
 			$resultPage->getConfig()->getTitle()->prepend(__(\'Add Items Entry\'));
 		}
 	
@@ -1698,7 +1696,8 @@ class Edit extends \%1$s\%2$s\Controller\Adminhtml\%3$s
 		$this->_initAction();
 		$this->_view->getLayout()->getBlock(\'%6$s_%6$s_edit\');
 		$this->_view->renderLayout();
-	}}', $this->_vendor, $this->_module, $model ["name"], strtolower($this->_vendor), strtolower($this->_module), strtolower($model ["name"] ));
+	}
+}', $this->_vendor, $this->_module, $model ["name"], strtolower($this->_vendor), strtolower($this->_module), strtolower($model ["name"] ));
 		$this->saveFileData($path, $txt);
 	}
 	function CreateControllersAdminhtmlModelIndexFile($model)
@@ -1715,7 +1714,6 @@ namespace %1$s\%2$s\Controller\Adminhtml\%3$s;
 	
 class Index extends \%1$s\%2$s\Controller\Adminhtml\%3$s
 {
-
 	
 	/**
      * %3$s list.
@@ -1723,8 +1721,7 @@ class Index extends \%1$s\%2$s\Controller\Adminhtml\%3$s
      * @return \Magento\Backend\Model\View\Result\Page
      */
 	public function execute()
-{
-
+    {
 		/** @var \Magento\Backend\Model\View\Result\Page $resultPage */
 		$resultPage = $this->resultPageFactory->create();
 		$resultPage->setActiveMenu(\'%1$s_%2$s::%5$s\');
@@ -1732,7 +1729,8 @@ class Index extends \%1$s\%2$s\Controller\Adminhtml\%3$s
 		$resultPage->addBreadcrumb(__(\'%1$s\'), __(\'%1$s\'));
 		$resultPage->addBreadcrumb(__(\'%3$s\'), __(\'%3$s\'));
 		return $resultPage;
-	}}', $this->_vendor, $this->_module, $model ["name"], strtolower($this->_vendor), strtolower($this->_module), strtolower($model ["name"] ));
+	}
+}', $this->_vendor, $this->_module, $model ["name"], strtolower($this->_vendor), strtolower($this->_module), strtolower($model ["name"] ));
 		
 		$this->saveFileData($path, $txt);
 	}
@@ -1750,47 +1748,34 @@ namespace %1$s\%2$s\Controller\Adminhtml\%3$s;
 	
 class MassDelete extends \%1$s\%2$s\Controller\Adminhtml\%3$s
 {
-
 	
 	/**
      * @return void
      */
 	public function execute()
-{
-
+    {
 		$itemsIds = $this->getRequest()->getParam(\'id\');
-		if (!is_array($itemsIds))
-{
-
+		if (!is_array($itemsIds)) {
 			$this->messageManager->addError(__(\'Please select item(s).\'));
-		} else
-{
-
-				try
-{
-
-					foreach($itemsIds as $itemId)
-{
-
-						$model = $this->_objectManager->create(\'%1$s\%2$s\Model\%3$s\');
-						$model->load($itemId);
-						$model->delete();
-					}
-					$this->messageManager->addSuccess(
-						__(\'A total of %1 record(s) have been deleted.\', count($itemsIds))
-					);
-				} catch (\Magento\Framework\Exception\LocalizedException $e)
-{
-
-					$this->messageManager->addError($e->getMessage());
-				} catch (\Exception $e)
-{
-
-					$this->messageManager->addException($e, __(\'An error occurred while deleting record(s).\'));
+		} else {
+            try {
+                foreach ($itemsIds as $itemId) {
+                    $model = $this->_objectManager->create(\'%1$s\%2$s\Model\%3$s\');
+					$model->load($itemId);
+					$model->delete();
 				}
+				$this->messageManager->addSuccess(
+					__(\'A total of %1 record(s) have been deleted.\', count($itemsIds))
+				);
+			} catch (\Magento\Framework\Exception\LocalizedException $e) {
+				$this->messageManager->addError($e->getMessage());
+			} catch (\Exception $e) {
+				$this->messageManager->addException($e, __(\'An error occurred while deleting record(s).\'));
+			}
 		}
 		$this->_redirect(\'%4$s_%5$s/*/\');
-	}}', $this->_vendor, $this->_module, $model ["name"], strtolower($this->_vendor), strtolower($this->_module), strtolower($model ["name"] ));
+	}
+}', $this->_vendor, $this->_module, $model ["name"], strtolower($this->_vendor), strtolower($this->_module), strtolower($model ["name"] ));
 		$this->saveFileData($path, $txt);
 	}
 	function CreateControllersAdminhtmlModelNewActionFile($model)
@@ -1808,10 +1793,10 @@ class NewAction extends \%1$s\%2$s\Controller\Adminhtml\%3$s
 {
 
 	public function execute()
-{
-
+    {
 		$this->_forward(\'edit\');
-	}}', $this->_vendor, $this->_module, $model ["name"]);
+	}
+}', $this->_vendor, $this->_module, $model ["name"]);
 		$this->saveFileData($path, $txt);
 	}
 	function CreateControllersAdminhtmlModelSaveFile($model)
@@ -1821,86 +1806,62 @@ class NewAction extends \%1$s\%2$s\Controller\Adminhtml\%3$s
 		;
 		
 		
-		
 		$txt = sprintf('<?php
 	
 namespace %s\%s\Controller\Adminhtml\%s;
 	
 class Save extends \%1$s\%2$s\Controller\Adminhtml\%3$s
 {
-
 	
 	public function execute()
-{
-
-		if ($this->getRequest()->getPostValue())
-{
-
-			try
-{
-
+    {
+		if ($this->getRequest()->getPostValue()) {
+            try {
 				$model = $this->_objectManager->create(\'%1$s\%2$s\Model\%3$s\');
 				$data = $this->getRequest()->getPostValue();
 				$inputFilter = new \Zend_Filter_Input([ ], [ ], $data);
 				$data = $inputFilter->getUnescaped();
 				$id = $this->getRequest()->getParam(\'id\');
-				if ($id)
-{
-
+				if ($id) {
 					$model->load($id);
-					if ($id != $model->getId())
-{
-
-						throw new \Magento\Framework\Exception\LocalizedException(__(\'The wrong item is specified.\' ));
+					if ($id != $model->getId()) {
+						throw new \Magento\Framework\Exception\LocalizedException(__(\'The wrong item is specified.\'));
 					}
 				}
 				$model->setData($data);
 				$session = $this->_objectManager->get(\'Magento\Backend\Model\Session\');
 				$session->setPageData($model->getData());
 				$model->save();
-				$this->messageManager->addSuccess(__(\'You saved the item.\' ));
+				$this->messageManager->addSuccess(__(\'You saved the item.\'));
 				$session->setPageData(false);
-				if ($this->getRequest()->getParam(\'back\' ))
-{
-
-					$this->_redirect(\'%s_%s/*/edit\', [
-						\'id\' => $model->getId()
-					]);
-				return;
+				if ($this->getRequest()->getParam(\'back\')) {
+					$this->_redirect(\'%s_%s/*/edit\', [\'id\' => $model->getId()]);
+				    return;
 				}
 				$this->_redirect(\'%4$s_%5$s/*/\');
 				return;
-			} catch (\Magento\Framework\Exception\LocalizedException $e )
-{
-
+			} catch (\Magento\Framework\Exception\LocalizedException $e) {
 				$this->messageManager->addError($e->getMessage());
 				$id =(int ) $this->getRequest()->getParam(\'id\');
-				if (! empty($id ))
-{
-
-					$this->_redirect(\'%4$s_%5$s/*/edit\', [
-						\'id\' => $id
-					]);
-				} else
-{
-
+				if (! empty($id)) {
+					$this->_redirect(\'%4$s_%5$s/*/edit\', [\'id\' => $id]);
+				} else {
 					$this->_redirect(\'%4$s_%5$s/*/new\');
 				}
 				return;
-			} catch (\Exception $e )
-{
-
-				$this->messageManager->addError(__(\'Something went wrong while saving the item data. Please review the error log.\' ));
-				$this->_objectManager->get(\'Psr\Log\LoggerInterface\' )->critical($e);
-				$this->_objectManager->get(\'Magento\Backend\Model\Session\' )->setPageData($data);
-				$this->_redirect(\'%4$s_%5$s/*/edit\', [
-					\'id\' => $this->getRequest()->getParam(\'id\' )
-				]);
+			} catch (\Exception $e) {
+				$this->messageManager->addError(
+                    __(\'Something went wrong while saving the item data. Please review the error log.\')
+		        );
+				$this->_objectManager->get(\'Psr\Log\LoggerInterface\')->critical($e);
+				$this->_objectManager->get(\'Magento\Backend\Model\Session\')->setPageData($data);
+				$this->_redirect(\'%4$s_%5$s/*/edit\', [\'id\' => $this->getRequest()->getParam(\'id\')]);
 				return;
 			}
 		}
 		$this->_redirect(\'%4$s_%5$s/*/\');
-	}}', $this->_vendor, $this->_module, $model ["name"], strtolower($this->_vendor), strtolower($this->_module), strtolower($model ["name"] ));
+	}
+}', $this->_vendor, $this->_module, $model ["name"], strtolower($this->_vendor), strtolower($this->_module), strtolower($model ["name"] ));
 		
 		$this->saveFileData($path, $txt);
 	}
