@@ -155,9 +155,9 @@ use Magento\Framework\Setup\ModuleContextInterface;
 class Uninstall implements UninstallInterface {
 	public function uninstall(SchemaSetupInterface $setup, ModuleContextInterface $context){
 		
-		// php bin/magento module:uninstall %1$s_%2$s		
+		// php bin/magento module:uninstall %1$s_%2$s
 		$setup->startSetup ();
-		// your code here" 
+		// your code here"
 		$setup->endSetup ();
 	}
 }', $this->_vendor, $this->_module );
@@ -459,9 +459,9 @@ class %s  implements %3$sInterface {
 	
 	/**
 	 *
-	 * @param \Magento\Framework\Api\SearchResultsInterfaceFactory $searchResultsFactory        	
+	 * @param \Magento\Framework\Api\SearchResultsInterfaceFactory $searchResultsFactory
 	 */
-	public function __construct(\Magento\Framework\Api\SearchResultsInterfaceFactory $searchResultsFactory) 
+	public function __construct(\Magento\Framework\Api\SearchResultsInterfaceFactory $searchResultsFactory)
 	{
 		$this->_searchResultsFactory = $searchResultsFactory;
 		$this->_objectManager = \Magento\Framework\App\ObjectManager::getInstance();
@@ -502,7 +502,7 @@ class %s  implements %3$sInterface {
 		%4$s
 		
 			
-		return $model;				
+		return $model;
 	}
 	
     /**
@@ -647,7 +647,7 @@ class %3$sData implements %3$sDataInterface {
 		}
 		$txt = sprintf ( '<?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-	%1$s				
+	%1$s
 </config>', $preference );
 		
 		fwrite ( $file, $txt );
@@ -839,39 +839,49 @@ class %s extends \Magento\Backend\Block\Widget\Grid\Container {
 		foreach ( $model ["columns"] as $column ) {
 			
 			if ($column ["type"] == "string") :
-				$columns .= sprintf ( '$this->addColumn ( \'%1$s\', [ 
+				$columns .= sprintf ( '$this->addColumn (
+		    \'%1$s\',
+            [
 			\'header\' => __ ( \'%2$s\' ),
 			\'index\' => \'%1$s\',
-			\'class\' => \'%1$s\' 
-			] );', $column ["name"], $column ["label"], $column ["rquired"] );
+			\'class\' => \'%1$s\'
+			]
+        );', $column ["name"], $column ["label"], $column ["rquired"] );
 			
 			endif;
 			
 			if ($column ["type"] == "int") :
-				$columns .= sprintf ( '$this->addColumn ( \'%1$s\', [
+				$columns .= sprintf ( '$this->addColumn (
+		    \'%1$s\',
+            [
 			\'header\' => __ ( \'%2$s\' ),
 			\'index\' => \'%1$s\',
 			\'class\' => \'%1$s\'
-			] );', $column ["name"], $column ["label"], $column ["rquired"] );
+			]
+        );', $column ["name"], $column ["label"], $column ["rquired"] );
 			
 			endif;
 			
 			if ($column ["type"] == "date") :
-				$columns .= sprintf ( '$this->addColumn ( \'%1$s\', [ 
+				$columns .= sprintf ( '$this->addColumn (
+		    \'%1$s\',
+            [
 			\'header\' => __ ( \'%2$s\' ),
 			\'type\' => \'date\',
 			\'align\' => \'center\',
 			\'index\' => \'%1$s\',
-			\'default\' => \' ---- \' 
+			\'default\' => \' ---- \'
 			] );', $column ["name"], $column ["label"], $column ["rquired"] );
 			
 			endif;
 			
 			if ($column ["type"] == "decimal") :
-				$columns .= sprintf ( '$this->addColumn ( \'%1$s\', [ 
+				$columns .= sprintf ( '$this->addColumn (
+			\'%1$s\',
+            [
 			\'header\' => __ ( \'%2$s\' ),
 			\'index\' => \'%1$s\',
-			\'class\' => \'%1$s\' 
+			\'class\' => \'%1$s\'
 			] );', $column ["name"], $column ["label"], $column ["rquired"] );
 			
 			endif;
@@ -884,10 +894,11 @@ class %s extends \Magento\Backend\Block\Widget\Grid\Container {
 namespace %s\%s\Block\Adminhtml\%s;
 	
 use %1$s\%2$s\Model\System\Config\Status;
+use Magento\Framework\Exception;
 	
 class Grid extends \Magento\Backend\Block\Widget\Grid\Extended {
 	 
-	/**
+     /**
      * @var \Magento\Catalog\Model\Product\Attribute\Source\Status
      */
 	protected $_status;
@@ -903,11 +914,11 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended {
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
 	public function __construct(
-			\Magento\Backend\Block\Template\Context $context,
-			\Magento\Backend\Helper\Data $backendHelper,
-			\%1$s\%2$s\Model\Resource\%3$s\Collection $collectionFactory,
-			Status $status,
-			array $data = []
+		\Magento\Backend\Block\Template\Context $context,
+		\Magento\Backend\Helper\Data $backendHelper,
+		\%1$s\%2$s\Model\Resource\%3$s\Collection $collectionFactory,
+		Status $status,
+		array $data = []
 	) {
 		$this->_status = $status;
 		$this->_collectionFactory = $collectionFactory;
@@ -955,23 +966,29 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended {
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
 	protected function _prepareColumns() {
-		$this->addColumn ( \'id\', [
+		$this->addColumn (
+		    \'id\',
+            [
 			\'header\' => __ ( \'ID\' ),
 			\'type\' => \'number\',
 			\'index\' => \'id\',
 			\'header_css_class\' => \'col-id\',
 			\'column_css_class\' => \'col-id\'
-		] );
+		    ]
+        );
 		
-		%7$s		
+		%7$s
 				
-		$this->addColumn ( \'status\', [
+		$this->addColumn (
+		    \'status\',
+            [
 			\'header\' => __ ( \'Status\' ),
 			\'index\' => \'status\',
 			\'class\' => \'status\',
 			\'type\' => \'options\',
 			\'options\' => $this->_status->toOptionArray ()
-		] );
+            ]
+        );
 		$block = $this->getLayout ()->getBlock ( \'grid.bottom.links\' );
 		if ($block) {
 			$this->setChild ( \'grid.bottom.links\', $block );
@@ -985,11 +1002,14 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended {
 	protected function _prepareMassaction() {
 		$this->setMassactionIdField ( \'id\' );
 		$this->getMassactionBlock ()->setFormFieldName ( \'id\' );
-		$this->getMassactionBlock ()->addItem ( \'delete\', array(
-			\'label\' => __ ( \'Delete\' ),
+		$this->getMassactionBlock ()->addItem (
+		    \'delete\',
+            [
+            \'label\' => __ ( \'Delete\' ),
 			\'url\' => $this->getUrl ( \'%4$s_%5$s/*/massDelete\' ),
 			\'confirm\' => __ ( \'Are you sure?\' )
-		) );
+            ]
+        );
 		return $this;
 	}
 	
@@ -997,9 +1017,7 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended {
      * @return string
      */
 	public function getGridUrl() {
-		return $this->getUrl ( \'%4$s_%5$s/*/index\', [
-			\'_current\' => true
-		] );
+		return $this->getUrl (\'%4$s_%5$s/*/index\', [\'_current\' => true]);
 	}
 	
 	/**
@@ -1007,10 +1025,13 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended {
      * @return string
      */
 	public function getRowUrl($row) {
-		return $this->getUrl ( \'%4$s_%5$s/*/edit\', [
+		return $this->getUrl (
+            \'%4$s_%5$s/*/edit\',
+            [
 			\'store\' => $this->getRequest ()->getParam ( \'store\' ),
 			\'id\' => $row->getId ()
-		] );
+            ]
+        );
 	}
 }', $this->_vendor, $this->_module, $model ["name"], strtolower ( $this->_vendor ), strtolower ( $this->_module ), strtolower ( $model ["name"] ), $columns );
 		
@@ -1257,7 +1278,7 @@ class Main extends Generic implements TabInterface {
 				
 	 /**
      * {@inheritdoc}
-     */				
+     */
 	public function isHidden() {
 		return false;
 	}
@@ -1268,7 +1289,7 @@ class Main extends Generic implements TabInterface {
      * @return $this
      * @SuppressWarnings(PHPMD.NPathComplexity)
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
-     */			
+     */
 	protected function _prepareForm() {
 		$model = $this->_coreRegistry->registry ( \'current_%s_%s_%s\' );
 		/** @var \Magento\Framework\Data\Form $form */
@@ -1319,7 +1340,7 @@ abstract class %s extends \Magento\Backend\App\Action {
 
 	/**
      * @var \Magento\Backend\Model\View\Result\ForwardFactory
-     */			
+     */
 	protected $resultForwardFactory;
 	
 	
@@ -1336,7 +1357,7 @@ abstract class %s extends \Magento\Backend\App\Action {
      * @param \Magento\Framework\Registry $coreRegistry
      * @param \Magento\Backend\Model\View\Result\ForwardFactory $resultForwardFactory
      * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
-     */			
+     */
 	public function __construct(\Magento\Backend\App\Action\Context $context, \Magento\Framework\Registry $coreRegistry, \Magento\Backend\Model\View\Result\ForwardFactory $resultForwardFactory, \Magento\Framework\View\Result\PageFactory $resultPageFactory) {
 		$this->_coreRegistry = $coreRegistry;
 		parent::__construct ( $context );
@@ -1891,7 +1912,7 @@ class Observer implements ObserverInterface {
 			
 			%3$s
 				
-		}		
+		}
 		return $this;
 	}
 }', $this->_vendor, $this->_module, $events );
