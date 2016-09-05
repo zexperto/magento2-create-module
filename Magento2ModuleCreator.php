@@ -1053,7 +1053,7 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended
 	/**
      * @param \Magento\Backend\Block\Template\Context $context
      * @param \Magento\Backend\Helper\Data $backendHelper
-     * @param \Magento\Eav\Model\ResourceModelModel\Entity\Attribute\Set\CollectionFactory $setsFactory
+     * @param \Magento\Eav\Model\ResourceModel\Entity\Attribute\Set\CollectionFactory $setsFactory
      * @param \Magento\Catalog\Model\Product\Attribute\Source\Status $status
      * @param array $data
      *
@@ -1897,7 +1897,7 @@ class %s extends \Magento\Framework\Model\AbstractModel
 	
 namespace %s\%s\Model\ResourceModel;
 	
-class %s extends \Magento\Framework\Model\ResourceModelModel\Db\AbstractDb
+class %s extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
 {
 
     /**
@@ -1924,7 +1924,7 @@ class %s extends \Magento\Framework\Model\ResourceModelModel\Db\AbstractDb
 	
 namespace %s\%s\Model\ResourceModel\%s ;
 	
-class Collection extends \Magento\Framework\Model\ResourceModelModel\Db\Collection\AbstractCollection
+class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection
 {
 
 	/**
