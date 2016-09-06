@@ -981,52 +981,40 @@ class %s extends \Magento\Backend\Block\Widget\Grid\Container
 
 			
 			if ($column ["type"] == "string") :
-				$columns .= sprintf('$this->addColumn(
-		    \'%1$s\',
-            [
+				$columns .= sprintf('$this->addColumn(\'%1$s\', [
 			\'header\' => __(\'%2$s\'),
 			\'index\' => \'%1$s\',
 			\'class\' => \'%1$s\'
-			]
-        );', $column ["name"], $column ["label"], $column ["rquired"]);
+			]);', $column ["name"], $column ["label"], $column ["rquired"]);
 			
 			endif;
 			
 			if ($column ["type"] == "int") :
-				$columns .= sprintf('$this->addColumn(
-		    \'%1$s\',
-            [
+				$columns .= sprintf('$this->addColumn(\'%1$s\', [
 			\'header\' => __(\'%2$s\'),
 			\'index\' => \'%1$s\',
 			\'class\' => \'%1$s\'
-			]
-        );', $column ["name"], $column ["label"], $column ["rquired"]);
+			]);', $column ["name"], $column ["label"], $column ["rquired"]);
 			
 			endif;
 			
 			if ($column ["type"] == "date") :
-				$columns .= sprintf('$this->addColumn(
-		    \'%1$s\',
-            [
+				$columns .= sprintf('$this->addColumn(\'%1$s\', [
 			\'header\' => __(\'%2$s\'),
 			\'type\' => \'date\',
 			\'align\' => \'center\',
 			\'index\' => \'%1$s\',
 			\'default\' => \' ---- \'
-			]
-        );', $column ["name"], $column ["label"], $column ["rquired"]);
+            ]);', $column ["name"], $column ["label"], $column ["rquired"]);
 			
 			endif;
 			
 			if ($column ["type"] == "decimal") :
-				$columns .= sprintf('$this->addColumn(
-			\'%1$s\',
-            [
+				$columns .= sprintf('$this->addColumn(\'%1$s\', [
 			\'header\' => __(\'%2$s\'),
 			\'index\' => \'%1$s\',
 			\'class\' => \'%1$s\'
-			]
-        );', $column ["name"], $column ["label"], $column ["rquired"]);
+            ]);', $column ["name"], $column ["label"], $column ["rquired"]);
 			
 			endif;
 			
@@ -1119,29 +1107,23 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended
 	protected function _prepareColumns()
     {
 
-		$this->addColumn(
-		    \'id\',
-            [
+		$this->addColumn(\'id\', [
 			\'header\' => __(\'ID\'),
 			\'type\' => \'number\',
 			\'index\' => \'id\',
 			\'header_css_class\' => \'col-id\',
 			\'column_css_class\' => \'col-id\'
-		    ]
-        );
+        ]);
 		
 		%7$s
 		        
-		$this->addColumn(
-		    \'status\',
-            [
+		$this->addColumn(\'status\', [
 			\'header\' => __(\'Status\'),
 			\'index\' => \'status\',
 			\'class\' => \'status\',
 			\'type\' => \'options\',
 			\'options\' => $this->_status->toOptionArray()
-            ]
-        );
+        ]);
 		$block = $this->getLayout()->getBlock(\'grid.bottom.links\');
 		if ($block) {
 			$this->setChild(\'grid.bottom.links\', $block);
@@ -1157,14 +1139,11 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended
 
 		$this->setMassactionIdField(\'id\');
 		$this->getMassactionBlock()->setFormFieldName(\'id\');
-		$this->getMassactionBlock()->addItem(
-		    \'delete\',
-            [
+		$this->getMassactionBlock()->addItem(\'delete\', [
             \'label\' => __(\'Delete\'),
 			\'url\' => $this->getUrl(\'%4$s_%5$s/*/massDelete\'),
 			\'confirm\' => __(\'Are you sure?\')
-            ]
-        );
+        ]);
 		return $this;
 	}
 	
@@ -1182,13 +1161,10 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended
      */
 	public function getRowUrl($row)
     {
-		return $this->getUrl(
-            \'%4$s_%5$s/*/edit\',
-            [
+		return $this->getUrl(\'%4$s_%5$s/*/edit\', [
 			\'store\' => $this->getRequest()->getParam(\'store\'),
 			\'id\' => $row->getId()
-            ]
-        );
+        ]);
 	}
 }', $this->_vendor, $this->_module, $model ["name"], strtolower($this->_vendor), strtolower($this->_module), strtolower($model ["name"]), $columns);
 		
@@ -1502,20 +1478,18 @@ class Main extends Generic implements TabInterface
 			\'legend\' => __(\'Item Information\')
 		]);
 		if ($model->getId()) {
-			$fieldset->addField(\'id\', \'hidden\', [\'name\' => \'id\']);
+			$fieldset->addField(\'id\', \'hidden\', [
+		      \'name\' => \'id\'
+             ]);
 		}
 		
 		%7$s
 				
-		$fieldset->addField(
-            \'status\',
-            \'select\',
-            [
+		$fieldset->addField(\'status\', \'select\', [
 			\'name\' => \'status\',
 			\'label\' => __(\'Status\'),
 			\'options\' => $this->_status->toOptionArray()
-			]
-        );
+        ]);
 		        
 		$form->setValues($model->getData());
 		$this->setForm($form);
@@ -2152,12 +2126,25 @@ class Status implements ArrayInterface
 		foreach($this->_config ["observer"] ["global"] as $event )
 {
 
-	$events .= sprintf('case "%1$s":
+	$events .= sprintf('
+	        case "%1$s":
                 break;', $event);
-			$events .= "\n\t\t\t";
-			$events =trim ($events,"\t");
-			$events =trim ($events,"\n");
+			//$events .= "\t\t";
+			
 		}
+		
+		$events =trim ($events,"\t");
+		$events =trim ($events,"\n");
+		
+		$switch ="" ;
+if(count($this->_config ["observer"] ["global"]) > 0){
+    $switch  = sprintf('
+        switch ($event_name) {%1$s
+        }',$events);
+    
+}
+$switch =trim ($switch,"\t");
+$switch =trim ($switch,"\n");
 		
 		$txt = sprintf('<?php
 		
@@ -2171,12 +2158,10 @@ class Observer implements ObserverInterface
 	public function execute(\Magento\Framework\Event\Observer $observer)
     {
 		$event_name = $observer->getEvent()->getName();
-		switch ($event_name) {
             %3$s
-		}
 		return $this;
 	}
-}', $this->_vendor, $this->_module, $events);
+}', $this->_vendor, $this->_module, $switch);
 		
 		$this->saveFileData($path, $txt);
 	}
@@ -2184,17 +2169,29 @@ class Observer implements ObserverInterface
 {
 
 		$path = sprintf('%s/%s/Model/Observer/Frontend/Observer.php', $this->_vendor, $this->_module);
-		
 		$events = "";
 		foreach($this->_config ["observer"] ["frontend"] as $event )
-{
-
-			$events .= sprintf('case "%1$s":
+		{
+		
+		    $events .= sprintf('
+	        case "%1$s":
                 break;', $event);
-			$events .= "\n\t\t\t";
-			$events =trim ($events,"\t");
-			$events =trim ($events,"\n");
+		    //$events .= "\t\t";
+		    	
 		}
+		
+		$events =trim ($events,"\t");
+		$events =trim ($events,"\n");
+		
+		$switch ="" ;
+		if(count($this->_config ["observer"] ["frontend"]) > 0){
+		    $switch  = sprintf('
+        switch ($event_name) {%1$s
+        }',$events);
+		
+		}
+		$switch =trim ($switch,"\t");
+		$switch =trim ($switch,"\n");
 		
 		$txt = sprintf('<?php
 	
@@ -2209,12 +2206,10 @@ class Observer implements ObserverInterface
     {
 
 		$event_name = $observer->getEvent()->getName();
-		switch ($event_name) {
             %3$s
-		}
 		return $this;
 	}
-}', $this->_vendor, $this->_module, $events);
+}', $this->_vendor, $this->_module, $switch);
 		
 		$this->saveFileData($path, $txt);
 	}
@@ -2225,18 +2220,32 @@ class Observer implements ObserverInterface
 		
 		$events = "";
 		foreach($this->_config ["observer"] ["adminhtml"] as $event )
-{
-
-		$events .= sprintf('case "%1$s":
+		{
+		
+		    $events .= sprintf('
+	        case "%1$s":
                 break;', $event);
-			$events .= "\n\t\t\t";
-			$events =trim ($events,"\t");
-			$events =trim ($events,"\n");
+		    //$events .= "\t\t";
+		    	
 		}
+		
+		$events =trim ($events,"\t");
+		$events =trim ($events,"\n");
+		
+		$switch ="" ;
+		if(count($this->_config ["observer"] ["adminhtml"]) > 0){
+		    $switch  = sprintf('
+        switch ($event_name) {%1$s
+        }',$events);
+		
+		}
+		$switch =trim ($switch,"\t");
+		$switch =trim ($switch,"\n");
+		
 		
 		$txt = sprintf('<?php
 	
-namespace %s\%s\Model\Observer\Frontend;
+namespace %s\%s\Model\Observer\Adminhtml;
 	
 use Magento\Framework\Event\ObserverInterface;
 	
@@ -2247,9 +2256,7 @@ class Observer implements ObserverInterface
     {
 	
 		$event_name = $observer->getEvent()->getName();
-		switch ($event_name) {
             %3$s
-		}
 		return $this;
 	}
 }', $this->_vendor, $this->_module, $events);
