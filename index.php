@@ -1,9 +1,9 @@
 <?php
 
-/**
+ /**
   * User Module Creator Class
   * PHP version 5.6 and later
-  *  
+  *
   * @category  PHP_Script
   * @package   ZEO
   * @author    wisam hakim <zexperto@hotmail.com>
@@ -28,14 +28,14 @@ $config_array = [
     "attributes" => [
         "customer" => [
             [
-                "code"=>"zeo_test",
+                "code"=>"zeo_test1",
                 'type' => 'varchar',
                 'backend' => '',
                 'frontend' => '',
-                'label' => 'UOM Group',
+                'label' => 'Test1',
                 'input' => 'select',
                 'class' => '',
-                'source' => 'ITM\Pricing\Model\System\Config\UomGroup',
+                'source' => '',
                 'global' => 'GLOBAL',
                 'visible' => true,
                 'required' => false,
@@ -47,12 +47,12 @@ $config_array = [
                 'visible_on_front' => false,
                 'used_in_product_listing' => true,
                 'unique' => false,
-                'apply_to' => 'simple,virtual,downloadable' 
+                'apply_to' => 'simple,virtual,downloadable'
             ],
             [
-                "code"=>"zeo_test",
+                "code"=>"zeo_test2",
                 'type' => 'varchar',
-                'label' => 'UOM Group',
+                'label' => 'Test2',
                 'input' => 'text',
             ],
         ], // processing
@@ -108,4 +108,4 @@ $config_array = [
 
 $mod = new Magento2ModuleCreator("ZEO", "WHH");
 $mod->setConfig($config_array);
-echo $mod->create($config_array);
+$mod->create($config_array);

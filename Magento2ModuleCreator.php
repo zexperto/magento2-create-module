@@ -721,7 +721,7 @@ class %s implements %3$sInterface
 		// start columns
 		$columns = "";
 		$columns .= '
-    /**
+/**
 	 *
 	 *
      * {@inheritdoc}
