@@ -18,7 +18,7 @@ require_once 'Magento2ModuleCreator.php';
 $config_array = [
     "observer" => [
         "global" => [
-            "sales_order_place_after"
+            "sales_order_place_after","sales_order_place_after"
         ],
         "frontend" => [
             "catalog_product_load_after"
@@ -26,7 +26,36 @@ $config_array = [
         "adminhtml" => []
     ],
     "attributes" => [
-        "customer" => [], // processing
+        "customer" => [
+            [
+                "code"=>"zeo_test",
+                'type' => 'varchar',
+                'backend' => '',
+                'frontend' => '',
+                'label' => 'UOM Group',
+                'input' => 'select',
+                'class' => '',
+                'source' => 'ITM\Pricing\Model\System\Config\UomGroup',
+                'global' => 'GLOBAL',
+                'visible' => true,
+                'required' => false,
+                'user_defined' => true,
+                'default' => 0,
+                'searchable' => false,
+                'filterable' => false,
+                'comparable' => false,
+                'visible_on_front' => false,
+                'used_in_product_listing' => true,
+                'unique' => false,
+                'apply_to' => 'simple,virtual,downloadable' 
+            ],
+            [
+                "code"=>"zeo_test",
+                'type' => 'varchar',
+                'label' => 'UOM Group',
+                'input' => 'text',
+            ],
+        ], // processing
         "product" => [],  // processing
         "category" => []  // processing
     ],

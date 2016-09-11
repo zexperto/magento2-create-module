@@ -259,13 +259,104 @@ class UpgradeSchema implements UpgradeSchemaInterface
 		
 		$this->saveFileData($path, $txt);
 	}
+	
+	function getAttribues($entity_type){
+	    
+	    $scope_global = '\Magento\Catalog\Model\ResourceModel\Eav\Attribute::SCOPE_GLOBAL'; 
+	    $scope_website = '\Magento\Catalog\Model\ResourceModel\Eav\Attribute::SCOPE_WEBSITE';
+	    $scope_store = '\Magento\Catalog\Model\ResourceModel\Eav\Attribute::SCOPE_STORE';
+	    
+	    $txt = "";
+	    
+	    if($entity_type == "category"){
+	        $entity = '\Magento\Catalog\Model\Category::ENTITY';
+	        $attributes = $this->_config["attributes"]["category"];
+	        $txt = "//Category attributes"."\n\t\t\t";
+	    } elseif($entity_type == "product"){
+	        $entity = '\Magento\Catalog\Model\Product::ENTITY';
+	        $attributes = $this->_config["attributes"]["product"];
+	        $txt = "//Product attributes"."\n\t\t\t";
+	    } elseif($entity_type == "customer"){
+            $entity = '\Magento\Customer\Model\Customer::ENTITY';
+            $attributes = $this->_config["attributes"]["customer"];
+            $txt = "//Customer attributes"."\n\t\t\t";
+	    }
+	    
+	    
+	    
+	    
+	    
+	    // $entity_type attributes
+	    foreach ($attributes as $attribute) {
+	        $scope = $scope_global;
+	       
+	        $global = isset($attribute["global"])?$attribute["global"] : "global" ;
+	        
+	        if(strtolower($global) == "store"){
+	            $scope = $scope_store;
+	        } elseif(strtolower($global) == "website") {
+	            $scope = $scope_website;
+	        }
+	        
+	        
+	        $code = $attribute["code"];
+	        $type = isset($attribute["type"])?$attribute["type"] : "varchar" ;
+	        $backend = isset($attribute["backend"])?$attribute["backend"] : "" ;
+	        $frontend = isset($attribute["frontend"])?$attribute["frontend"] : "" ;
+	        $label = isset($attribute["label"])?$attribute["label"] : $code;
+	        $input = isset($attribute["input"])?$attribute["input"] : "text" ;
+	        $class = isset($attribute["class"])?$attribute["class"] : "" ;
+	        $source = isset($attribute["source"])?$attribute["source"] : "" ;
+	        $visible =(string) isset($attribute["visible"])?$attribute["visible"] : 'true' ;
+	        $required = isset($attribute["required"])?$attribute["required"] : 'true' ;
+	        $user_defined = isset($attribute["user_defined"])?$attribute["user_defined"] : 'true' ;
+	        $default = isset($attribute["default"])?$attribute["default"] : "''" ;
+	        $searchable = isset($attribute["searchable"])?$attribute["searchable"] : 'true' ;
+	        $filterable = isset($attribute["filterable"])?$attribute["filterable"] : 'true' ;
+	        $comparable = isset($attribute["comparable"])?$attribute["comparable"] : 'true' ;
+	        $visible_on_front = isset($attribute["visible_on_front"])?$attribute["visible_on_front"] : 'true' ;
+	        $used_in_product_listing = isset($attribute["used_in_product_listing"])?$attribute["used_in_product_listing"] : 'true' ;
+	        $unique = isset($attribute["unique"])?$attribute["unique"] : 'true' ;
+	        $apply_to = isset($attribute["apply_to"])?$attribute["apply_to"] : "''" ;
+	        
+	        
+	        $txt .= '$eavSetup->addAttribute'."($entity, '$code', [
+                    'type' => '$type',
+                    'backend' => '$backend',
+                    'frontend' => '$frontend',
+                    'label' => '$label',
+                    'input' => '$input',
+                    'class' => '$class',
+                    'source' => '$source',
+                    'global' => $scope,
+                    'visible' => ".($visible? 'true' : 'false').",
+                    'required' => ".($required? 'true' : 'false').",
+                    'user_defined' => ".($user_defined? 'true' : 'false').",
+                    'default' => $default,
+                    'searchable' => ".($searchable? 'true' : 'false').",
+                    'filterable' => ".($filterable? 'true' : 'false').",
+                    'comparable' => ".($comparable? 'true' : 'false').",
+                    'visible_on_front' => ".($visible_on_front? 'true' : 'false').",
+                    'used_in_product_listing' => ".($used_in_product_listing? 'true' : 'false').",
+                    'unique' => ".($unique? 'true' : 'false').",
+                    'apply_to' => $apply_to
+                ]);";
+	        
+	        if(end($attributes) != $attribute){
+	            $txt .= "\n\t\t\t";
+	        }
+	        
+	    }
+	    
+	    return $txt;
+	}
 	function CreateUpgradeDataFile()
 {
 
-		$path = sprintf('%s/%s/Setup/UpgradeData.php', $this->_vendor, $this->_module);
-		
-		
-		
+        $category_attribue = $this->getAttribues("category");
+        $product_attribue = $this->getAttribues("product");
+        $customer_attribue = $this->getAttribues("customer");
+        
 		$txt = sprintf('<?php
 
 namespace %s\%s\Setup;
@@ -291,12 +382,16 @@ class UpgradeData implements UpgradeDataInterface
 		]);
 
 		if (version_compare($context->getVersion(), \'1.0.1\') < 0) {
-			//your code here" . "\n";
+			%3$s
+		    %3$s
+		    %5$s
+		        
 			return null;
 		}
 	}
-}', $this->_vendor, $this->_module);
+}', $this->_vendor, $this->_module, $category_attribue, $product_attribue, $customer_attribue);
 		
+		$path = sprintf('%s/%s/Setup/UpgradeData.php', $this->_vendor, $this->_module);
 		$this->saveFileData($path, $txt);
 	}
 	function CreateSetup()
@@ -622,6 +717,7 @@ class %s implements %3$sInterface
 		}
 		$private =trim ($private,"\t");
 		$private =trim ($private,"\n");
+	
 		// start columns
 		$columns = "";
 		$columns .= '
@@ -2125,21 +2221,18 @@ class Status implements ArrayInterface
 		$events = "";
 		foreach($this->_config ["observer"] ["global"] as $event )
 {
-
-	$events .= sprintf('
-	        case "%1$s":
-                break;', $event);
-			//$events .= "\t\t";
-			
-		}
-		
-		$events =trim ($events,"\t");
-		$events =trim ($events,"\n");
+    
+    $events .=  "
+            case \"$event\":
+                break;";
+}
+		//$events =trim ($events,"\t");
+		//$events =trim ($events,"\n");
 		
 		$switch ="" ;
 if(count($this->_config ["observer"] ["global"]) > 0){
     $switch  = sprintf('
-        switch ($event_name) {%1$s
+switch ($event_name) {%1$s
         }',$events);
     
 }
@@ -2158,7 +2251,7 @@ class Observer implements ObserverInterface
 	public function execute(\Magento\Framework\Event\Observer $observer)
     {
 		$event_name = $observer->getEvent()->getName();
-            %3$s
+        %3$s
 		return $this;
 	}
 }', $this->_vendor, $this->_module, $switch);
@@ -2173,20 +2266,18 @@ class Observer implements ObserverInterface
 		foreach($this->_config ["observer"] ["frontend"] as $event )
 		{
 		
-		    $events .= sprintf('
-	        case "%1$s":
-                break;', $event);
+		    $events .=  "
+            case \"$event\":
+                break;";
 		    //$events .= "\t\t";
 		    	
 		}
 		
-		$events =trim ($events,"\t");
-		$events =trim ($events,"\n");
 		
 		$switch ="" ;
 		if(count($this->_config ["observer"] ["frontend"]) > 0){
-		    $switch  = sprintf('
-        switch ($event_name) {%1$s
+    $switch  = sprintf('
+switch ($event_name) {%1$s
         }',$events);
 		
 		}
@@ -2206,7 +2297,7 @@ class Observer implements ObserverInterface
     {
 
 		$event_name = $observer->getEvent()->getName();
-            %3$s
+        %3$s
 		return $this;
 	}
 }', $this->_vendor, $this->_module, $switch);
@@ -2222,20 +2313,18 @@ class Observer implements ObserverInterface
 		foreach($this->_config ["observer"] ["adminhtml"] as $event )
 		{
 		
-		    $events .= sprintf('
-	        case "%1$s":
-                break;', $event);
-		    //$events .= "\t\t";
+		   $events .=  "
+            case \"$event\":
+                break;";
 		    	
 		}
 		
-		$events =trim ($events,"\t");
-		$events =trim ($events,"\n");
+		
 		
 		$switch ="" ;
 		if(count($this->_config ["observer"] ["adminhtml"]) > 0){
-		    $switch  = sprintf('
-        switch ($event_name) {%1$s
+    $switch  = sprintf('
+switch ($event_name) {%1$s
         }',$events);
 		
 		}
