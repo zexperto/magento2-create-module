@@ -28,12 +28,13 @@ class Magento2ModuleCreator
 	}
 	function CreateModuleXmlFile()
 {
-
 	    
-		$txt = sprintf('<?xml version="1.0"?>
+$txt = sprintf(
+'<?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../lib/internal/Magento/Framework/Module/etc/module.xsd">
 	<module name="%s_%s" setup_version="%s" />
-</config>', $this->_vendor, $this->_module, $this->_version);
+</config>'
+, $this->_vendor, $this->_module, $this->_version);
 		
 		$path = sprintf('%s/%s/etc/module.xml', $this->_vendor, $this->_module);
 		$this->saveFileData($path, $txt);
@@ -42,9 +43,9 @@ class Magento2ModuleCreator
 	function CreateRegistrationFile()
 {
 
-		$path = sprintf('%s/%s/registration.php', $this->_vendor, $this->_module);
 		
-		$txt = sprintf("<?php
+		$txt = sprintf(
+"<?php
 
 \Magento\Framework\Component\ComponentRegistrar::register(
 	\Magento\Framework\Component\ComponentRegistrar::MODULE,
@@ -52,15 +53,15 @@ class Magento2ModuleCreator
 	__DIR__
 );", $this->_vendor, $this->_module);
 		
+		$path = sprintf('%s/%s/registration.php', $this->_vendor, $this->_module);
 		$this->saveFileData($path, $txt);
 	}
+	
+	
 	function CreateDataFile()
-{
-
-		$path = sprintf('%s/%s/Helper/Data.php', $this->_vendor, $this->_module);
-		
-		
-		$txt = sprintf('<?php
+    {
+		$txt = sprintf(
+'<?php
 				
 namespace %s\%s\Helper;
 		
@@ -73,6 +74,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 }', $this->_vendor, $this->_module);
 		
+		$path = sprintf('%s/%s/Helper/Data.php', $this->_vendor, $this->_module);
 		$this->saveFileData($path, $txt);
 	}
 	function CreateHelper()
@@ -89,10 +91,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 	function CreateInstallSchemaFile()
 {
 
-		$path = sprintf('%s/%s/Setup/InstallSchema.php', $this->_vendor, $this->_module);
-		
-		
-		$txt = sprintf('<?php
+		$txt = sprintf(
+'<?php
 
 namespace %s\%s\Setup;
 
@@ -109,14 +109,14 @@ class InstallSchema implements InstallSchemaInterface
 		$setup->startSetup();', $this->_vendor, $this->_module);
 		
 		if ($this->_config ["backend_model"])
-{
+        {
 
 			foreach($this->_config ["backend_model"] as $model )
-{
+            {
 				$columns = "";
 				
 				foreach($model ["columns"] as $column )
-{
+                {
 
 					
 					if ($column ["type"] == "string") :
@@ -184,8 +184,11 @@ class InstallSchema implements InstallSchemaInterface
 	}
 }';
 		
+		$path = sprintf('%s/%s/Setup/InstallSchema.php', $this->_vendor, $this->_module);
 		$this->saveFileData($path, $txt);
 	}
+	
+	
 	function CreateUninstallFile()
 {
 
