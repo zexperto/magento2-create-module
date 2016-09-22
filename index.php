@@ -12,10 +12,11 @@
   * @link      [//www.zexperto.com/magento2x/magento2-module-creator-script] [Description in the URL]
   */
 
-require_once 'Magento2ModuleCreator.php';
+require_once 'Magento2ModuleCreatorID.php';
 
 // --------------------------------------------------------------
 $config_array = [
+    "primary_key" =>"entity_id",
     "observer" => [
         "global" => [
             "sales_order_place_after","sales_order_place_after"
@@ -106,6 +107,6 @@ $config_array = [
     ]
 ];
 
-$mod = new Magento2ModuleCreator("ZEO", "WHH");
+$mod = new Magento2ModuleCreator("ZEO", "Whh");
 $mod->setConfig($config_array);
 $mod->create($config_array);
