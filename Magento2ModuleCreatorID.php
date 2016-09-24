@@ -91,58 +91,39 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     private function createInstallSchemaFile()
     {
-        $txt = sprintf(
-                '<?php
-
-namespace %s\%s\Setup;
-
-use Magento\Framework\Setup\InstallSchemaInterface;
-use Magento\Framework\Setup\SchemaSetupInterface;
-use Magento\Framework\Setup\ModuleContextInterface;
-
-class InstallSchema implements InstallSchemaInterface
-{
-
-	public function install(SchemaSetupInterface $setup, ModuleContextInterface $context)
-    {
-
-		$setup->startSetup();', $this->_vendor, $this->_module);
-        
+        $tables_modules = "";
         if ($this->_config["backend_model"]) {
-            
+        
             foreach ($this->_config["backend_model"] as $model) {
                 $columns = "";
-                
+        
                 foreach ($model["columns"] as $column) {
-                    
+        
                     if ($column["type"] == "string") :
-                        $columns .= sprintf(
-                                '->addColumn(
+                    $columns .= sprintf(
+                            '->addColumn(
                 \'%1$s\',
                 \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
                 \'%3$s\',
                 [\'nullable\' => false ],
                 \'%2$s\'
             )', $column["name"], $column["label"], $column["size"]);
-                    
-                    
-                    
-                    
-					
-					endif;
-                    
+        
+        
+                    endif;
+        
                     if ($column["type"] == "int") {
                         $columns .= sprintf(
-                                '->addColumn(\'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER, null, [\'nullable\' => false ], \'%2$s\')', 
+                                '->addColumn(\'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER, null, [\'nullable\' => false ], \'%2$s\')',
                                 $column["name"], $column["label"]);
                     }
-                    
+        
                     if ($column["type"] == "date") {
                         $columns .= sprintf(
-                                '->addColumn(\'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_DATE, null, [], \'%2$s\')', 
+                                '->addColumn(\'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_DATE, null, [], \'%2$s\')',
                                 $column["name"], $column["label"]);
                     }
-                    
+        
                     if ($column["type"] == "decimal") {
                         $columns .= sprintf(
                                 '->addColumn(
@@ -154,13 +135,13 @@ class InstallSchema implements InstallSchemaInterface
 				\'%2$s\'
 			)', $column["name"], $column["label"]);
                     }
-                    
+        
                     $columns .= "\n\t\t\t";
                 }
                 $columns = trim($columns, "\t");
                 $columns = trim($columns, "\n");
-                
-                $txt .= sprintf(
+        
+                $tables_modules .= sprintf(
                         '
 		$table = $setup->getConnection()
             ->newTable($setup->getTable(\'%s_%s_%s\'))
@@ -182,11 +163,33 @@ class InstallSchema implements InstallSchemaInterface
 						', strtolower($this->_vendor), strtolower($this->_module), strtolower($model["name"]), $columns);
             }
         }
+       
+        $txt = sprintf(
+            '<?php
+
+namespace %s\%s\Setup;
+
+use Magento\Framework\Setup\InstallSchemaInterface;
+use Magento\Framework\Setup\SchemaSetupInterface;
+use Magento\Framework\Setup\ModuleContextInterface;
+
+class InstallSchema implements InstallSchemaInterface
+{
+
+	public function install(SchemaSetupInterface $setup, ModuleContextInterface $context)
+    {
+
+		$setup->startSetup();
         
-        $txt .= '// your code here
+        %3$s 
+        
 		$setup->endSetup();
 	}
-}';
+}',
+            $this->_vendor,
+            $this->_module,
+            $tables_modules
+        );
         
         $path = sprintf('%s/%s/Setup/InstallSchema.php', $this->_vendor, $this->_module);
         $this->saveFileData($path, $txt);
@@ -197,7 +200,7 @@ class InstallSchema implements InstallSchemaInterface
         $path = sprintf('%s/%s/Setup/Uninstall.php', $this->_vendor, $this->_module);
         
         $txt = sprintf(
-                '<?php
+            '<?php
 
 namespace %s\%s\Setup;
 
@@ -215,7 +218,10 @@ class Uninstall implements UninstallInterface
 		// your code here"
 		$setup->endSetup();
 	}
-}', $this->_vendor, $this->_module);
+}',
+            $this->_vendor,
+            $this->_module
+        );
         
         $this->saveFileData($path, $txt);
     }
@@ -2053,7 +2059,7 @@ class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\Ab
                 strtolower($this->_vendor), strtolower($this->_module), strtolower($model["name"]));
         
         $txt = sprintf(
-                '<?xml version="1.0"?>
+            '<?xml version="1.0"?>
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="admin-2columns-left" xsi:noNamespaceSchemaLocation="../../../../../../../lib/internal/Magento/Framework/View/Layout/etc/page_configuration.xsd">
 	<body>
 		<referenceContainer name="left">
@@ -2071,26 +2077,44 @@ class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\Ab
                          strtolower($this->_module) . '_' . strtolower($model["name"]) . '_edit"/>
 		</referenceContainer>
 	</body>
-</page>', $this->_vendor, $this->_module, $model["name"], strtolower($this->_vendor), strtolower($this->_module), 
-                        strtolower($model["name"]));
+</page>',
+            $this->_vendor,
+            $this->_module,
+            $model["name"],
+            strtolower($this->_vendor),
+            strtolower($this->_module),
+            strtolower($model["name"])
+        );
         
         $this->saveFileData($path, $txt);
     }
 
     private function createViewAdminhtmlLayoutEditFile($model)
     {
-        $path = sprintf("%s/%s/view/adminhtml/layout/%s_%s_%s_index" . ".xml", $this->_vendor, $this->_module, 
-                strtolower($this->_vendor), strtolower($this->_module), strtolower($model["name"]));
+        $path = sprintf(
+            "%s/%s/view/adminhtml/layout/%s_%s_%s_index" . ".xml",
+            $this->_vendor,
+            $this->_module,
+            strtolower($this->_vendor),
+            strtolower($this->_module),
+            strtolower($model["name"])
+        );
         
         $txt = sprintf(
-                '<?xml version="1.0"?>
+            '<?xml version="1.0"?>
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../../lib/internal/Magento/Framework/View/Layout/etc/page_configuration.xsd">
 	<body>
 		<referenceContainer name="content">
 			<block class="%s\%s\Block\Adminhtml\%s" name="%s_%s_container"/>
 		</referenceContainer>
 	</body>
-</page>', $this->_vendor, $this->_module, $model["name"], strtolower($this->_module), strtolower($model["name"]));
+</page>',
+            $this->_vendor,
+            $this->_module,
+            $model["name"],
+            strtolower($this->_module),
+            strtolower($model["name"])
+        );
         
         $this->saveFileData($path, $txt);
     }
@@ -2103,7 +2127,7 @@ class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\Ab
         $path = sprintf('%s/%s/Model/System/Config/Status.php', $this->_vendor, $this->_module);
         
         $txt = sprintf(
-                '<?php
+            '<?php
 	
 namespace %s\%s\Model\System\Config;
 	
@@ -2122,7 +2146,10 @@ class Status implements ArrayInterface
 		];
 		return $options;
 	}
-}', $this->_vendor, $this->_module);
+}',
+            $this->_vendor,
+            $this->_module
+        );
         
         $this->saveFileData($path, $txt);
     }
@@ -2190,20 +2217,26 @@ class Status implements ArrayInterface
         $ext_file = fopen($path, "w") or die("Unable to open file!");
         $events = "";
         foreach ($this->_config["observer"]["global"] as $event) {
-            
             $events .= sprintf(
-                    '<event name="%5$s">
+                '<event name="%5$s">
         <observer name="%3$s_%4$s_%5$s" instance="%1$s\%2$s\Model\Observer\Observer" />
-    </event>', $this->_vendor, $this->_module, strtolower($this->_vendor), strtolower($this->_module), $event);
+    </event>
+    ',
+                $this->_vendor,
+                $this->_module,
+                strtolower($this->_vendor),
+                strtolower($this->_module),
+                $event
+            );
         }
         
         $txt = sprintf(
-                '<?xml version="1.0"?>
+            '<?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
     %1$s
-</config>
-		
-				', $events);
+</config>',
+            $events
+        );
         
         fwrite($ext_file, $txt);
         fclose($ext_file);
@@ -2215,20 +2248,26 @@ class Status implements ArrayInterface
         $ext_file = fopen($path, "w") or die("Unable to open file!");
         $events = "";
         foreach ($this->_config["observer"]["frontend"] as $event) {
-            
             $events .= sprintf(
-                    '<event name="%5$s">
+                '<event name="%5$s">
         <observer name="%3$s_%4$s_%5$s" instance="%1$s\%2$s\Model\Observer\Frontend\Observer" />
-    </event>', $this->_vendor, $this->_module, strtolower($this->_vendor), strtolower($this->_module), $event);
+    </event>',
+                $this->_vendor,
+                $this->_module,
+                strtolower($this->_vendor),
+                strtolower($this->_module),
+                $event
+            );
         }
         
         $txt = sprintf(
-                '<?xml version="1.0"?>
+            '<?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
     %1$s
 </config>
-	
-				', $events);
+    ',
+            $events
+        );
         
         fwrite($ext_file, $txt);
         fclose($ext_file);
@@ -2240,21 +2279,26 @@ class Status implements ArrayInterface
         $ext_file = fopen($path, "w") or die("Unable to open file!");
         $events = "";
         foreach ($this->_config["observer"]["adminhtml"] as $event) {
-            
             $events .= sprintf(
-                    '<event name="%5$s">
+                '<event name="%5$s">
         <observer name="%3$s_%4$s_%5$s" instance="%1$s\%2$s\Model\Observer\Adminhtml\Observer" />
-    </event>', $this->_vendor, $this->_module, strtolower($this->_vendor), strtolower($this->_module), $event);
+    </event>
+    ',
+                $this->_vendor,
+                $this->_module,
+                strtolower($this->_vendor),
+                strtolower($this->_module),
+                $event
+            );
         }
         
         $txt = sprintf(
-                '<?xml version="1.0"?>
+            '<?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
     %1$s
-</config>
-	
-				', $events);
-        
+</config>',
+            $events
+        );
         fwrite($ext_file, $txt);
         fclose($ext_file);
     }
@@ -2265,14 +2309,11 @@ class Status implements ArrayInterface
         
         $events = "";
         foreach ($this->_config["observer"]["global"] as $event) {
-            
             $events .= "
             case \"$event\":
                 break;";
         }
-        // $events =trim ($events,"\t");
-        // $events =trim ($events,"\n");
-        
+
         $switch = "";
         if (count($this->_config["observer"]["global"]) > 0) {
             $switch = sprintf('
@@ -2283,7 +2324,7 @@ switch ($event_name) {%1$s
         $switch = trim($switch, "\n");
         
         $txt = sprintf(
-                '<?php
+            '<?php
 		
 namespace %s\%s\Model\Observer;
 
@@ -2298,17 +2339,19 @@ class Observer implements ObserverInterface
         %3$s
 		return $this;
 	}
-}', $this->_vendor, $this->_module, $switch);
+}',
+            $this->_vendor,
+            $this->_module,
+            $switch
+        );
         
         $this->saveFileData($path, $txt);
     }
 
     private function createFrontendEventsObserver()
     {
-        $path = sprintf('%s/%s/Model/Observer/Frontend/Observer.php', $this->_vendor, $this->_module);
         $events = "";
         foreach ($this->_config["observer"]["frontend"] as $event) {
-            
             $events .= "
             case \"$event\":
                 break;";
@@ -2325,7 +2368,7 @@ switch ($event_name) {%1$s
         $switch = trim($switch, "\n");
         
         $txt = sprintf(
-                '<?php
+            '<?php
 	
 namespace %s\%s\Model\Observer\Frontend;
 	
@@ -2341,8 +2384,12 @@ class Observer implements ObserverInterface
         %3$s
 		return $this;
 	}
-}', $this->_vendor, $this->_module, $switch);
-        
+}',
+            $this->_vendor,
+            $this->_module,
+            $switch
+        );
+        $path = sprintf('%s/%s/Model/Observer/Frontend/Observer.php', $this->_vendor, $this->_module);
         $this->saveFileData($path, $txt);
     }
 
@@ -2352,7 +2399,6 @@ class Observer implements ObserverInterface
         
         $events = "";
         foreach ($this->_config["observer"]["adminhtml"] as $event) {
-            
             $events .= "
             case \"$event\":
                 break;";
@@ -2368,7 +2414,7 @@ switch ($event_name) {%1$s
         $switch = trim($switch, "\n");
         
         $txt = sprintf(
-                '<?php
+            '<?php
 	
 namespace %s\%s\Model\Observer\Adminhtml;
 	
@@ -2384,30 +2430,32 @@ class Observer implements ObserverInterface
             %3$s
 		return $this;
 	}
-}', $this->_vendor, $this->_module, $events);
+}',
+            $this->_vendor,
+            $this->_module,
+            $events
+        );
         
         $this->saveFileData($path, $txt);
     }
 
     private function createObserver()
     {
-        if (count($this->_config["observer"]) == 0)
+        if (count($this->_config["observer"]) == 0) {
             return;
+        }
         if ($this->_config["observer"]) {
-            
             $this->createFolder(sprintf('%s/%s/Model/Observer', $this->_vendor, $this->_module));
             $this->CreateGlobalEventsXML();
             $this->CreateGlobalEventsObserver();
         }
         if (isset($this->_config["observer"]["frontend"])) {
-            
             $this->createFolder(sprintf('%s/%s/etc/frontend', $this->_vendor, $this->_module));
             $this->createFolder(sprintf('%s/%s/Model/Observer/Frontend', $this->_vendor, $this->_module));
             $this->CreateFrontendEventsXML();
             $this->CreateFrontendEventsObserver();
         }
         if (isset($this->_config["observer"]["adminhtml"])) {
-            
             $this->createFolder(sprintf('%s/%s/etc/adminhtml', $this->_vendor, $this->_module));
             $this->createFolder(sprintf('%s/%s/Model/Observer/Adminhtml', $this->_vendor, $this->_module));
             $this->CreateAdminhtmlEventsXML();
@@ -2420,7 +2468,7 @@ class Observer implements ObserverInterface
         $path = sprintf('%s/%s/composer.json', $this->_vendor, $this->_module);
         
         $txt = sprintf(
-                '{
+            '{
     "name": "%4$s/%5$s",
     "description": "",
     "require":
@@ -2448,7 +2496,13 @@ class Observer implements ObserverInterface
         }
     ]}
 				
-				', $this->_vendor, $this->_module, $this->_version, strtolower($this->_vendor), strtolower($this->_module));
+				',
+            $this->_vendor,
+            $this->_module,
+            $this->_version,
+            strtolower($this->_vendor),
+            strtolower($this->_module)
+        );
         
         $this->saveFileData($path, $txt);
     }
