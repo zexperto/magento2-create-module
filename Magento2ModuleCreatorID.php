@@ -449,7 +449,7 @@ interface %sInterface
      * @param int $entity_id
      * @return bool Will returned true if deleted
      */
-    public function deleteByEntityId($entity_id`);
+    public function deleteByEntityId($entity_id);
 }', $this->_vendor, $this->_module, $model["name"]);
         
         $this->saveFileData($path, $txt);
@@ -698,7 +698,7 @@ class %s implements %3$sInterface
      * {@inheritdoc}
 	 *
 	 */
-    public function deleteById($entity_id)
+    public function deleteByEntityId($entity_id)
     {
         try {
 			$model = $this->_objectManager->create(\'%1$s\%2$s\Model\%3$s\');
@@ -908,7 +908,7 @@ class %3$sData implements %3$sDataInterface
 
 	<!-- end point = /V1/%4$s/%5$s/%6$s/delete/:entity_id -->
 	<route url="/V1/%4$s/%5$s/%6$s/delete/:entity_id" method="DELETE">
-		<service class="%1$s\%2$s\Api\%3$sInterface" method="deleteById" />
+		<service class="%1$s\%2$s\Api\%3$sInterface" method="deleteByEntityId" />
 		<resources>
 			<resource ref="Magento_Backend::admin" />
 		</resources>
@@ -1336,7 +1336,7 @@ class Edit extends \Magento\Backend\Block\Widget\Form\Container
      */
 	protected function _construct()
     {
-		$this->_objectId = \'entity_id\';
+		$this->_objectId = \'id\';
 		$this->_controller = \'adminhtml_' . strtolower($model["name"]) . '\';
 		$this->_blockGroup = \'' . $this->_vendor . '_' . $this->_module . '\';
 		parent::_construct();
@@ -1732,7 +1732,7 @@ class Delete extends \%1$s\%2$s\Controller\Adminhtml\%3$s
 
 	public function execute()
     {
-        $id = $this->getRequest()->getParam(\'entity_id\');
+        $id = $this->getRequest()->getParam(\'id\');
 		if ($id) {
 			try {
 				$model = $this->_objectManager->create(\'%1$s\%2$s\Model\%3$s\');
