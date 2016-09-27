@@ -2213,8 +2213,6 @@ class Status implements ArrayInterface
 
     private function createGlobalEventsXML()
     {
-        $path = sprintf('%s/%s/etc/events.xml', $this->_vendor, $this->_module);
-        $ext_file = fopen($path, "w") or die("Unable to open file!");
         $events = "";
         foreach ($this->_config["observer"]["global"] as $event) {
             $events .= sprintf(
@@ -2237,15 +2235,17 @@ class Status implements ArrayInterface
 </config>',
             $events
         );
-        
-        fwrite($ext_file, $txt);
-        fclose($ext_file);
+        if (count($this->_config["observer"]["global"])>0) {
+            $path = sprintf('%s/%s/etc/events.xml', $this->_vendor, $this->_module);
+            $ext_file = fopen($path, "w") or die("Unable to open file!");
+            fwrite($ext_file, $txt);
+            fclose($ext_file);
+        }
     }
 
     private function createFrontendEventsXML()
     {
-        $path = sprintf('%s/%s/etc/frontend/events.xml', $this->_vendor, $this->_module);
-        $ext_file = fopen($path, "w") or die("Unable to open file!");
+        
         $events = "";
         foreach ($this->_config["observer"]["frontend"] as $event) {
             $events .= sprintf(
@@ -2268,15 +2268,16 @@ class Status implements ArrayInterface
     ',
             $events
         );
-        
-        fwrite($ext_file, $txt);
-        fclose($ext_file);
+        if (count($this->_config["observer"]["frontend"])>0) {
+            $path = sprintf('%s/%s/etc/frontend/events.xml', $this->_vendor, $this->_module);
+            $ext_file = fopen($path, "w") or die("Unable to open file!");
+            fwrite($ext_file, $txt);
+            fclose($ext_file);
+        }
     }
 
     private function createAdminhtmlEventsXML()
     {
-        $path = sprintf('%s/%s/etc/adminhtml/events.xml', $this->_vendor, $this->_module);
-        $ext_file = fopen($path, "w") or die("Unable to open file!");
         $events = "";
         foreach ($this->_config["observer"]["adminhtml"] as $event) {
             $events .= sprintf(
@@ -2299,13 +2300,17 @@ class Status implements ArrayInterface
 </config>',
             $events
         );
-        fwrite($ext_file, $txt);
-        fclose($ext_file);
+        if (count($this->_config["observer"]["adminhtml"])>0) {
+            $path = sprintf('%s/%s/etc/adminhtml/events.xml', $this->_vendor, $this->_module);
+            $ext_file = fopen($path, "w") or die("Unable to open file!");
+            fwrite($ext_file, $txt);
+            fclose($ext_file);
+        }
     }
 
     private function createGlobalEventsObserver()
     {
-        $path = sprintf('%s/%s/Model/Observer/Observer.php', $this->_vendor, $this->_module);
+       
         
         $events = "";
         foreach ($this->_config["observer"]["global"] as $event) {
@@ -2344,8 +2349,10 @@ class Observer implements ObserverInterface
             $this->_module,
             $switch
         );
-        
-        $this->saveFileData($path, $txt);
+        if (count($this->_config["observer"]["global"]) > 0) {
+            $path = sprintf('%s/%s/Model/Observer/Observer.php', $this->_vendor, $this->_module);
+            $this->saveFileData($path, $txt);
+        }
     }
 
     private function createFrontendEventsObserver()
@@ -2389,14 +2396,14 @@ class Observer implements ObserverInterface
             $this->_module,
             $switch
         );
-        $path = sprintf('%s/%s/Model/Observer/Frontend/Observer.php', $this->_vendor, $this->_module);
-        $this->saveFileData($path, $txt);
+        if (count($this->_config["observer"]["frontend"]) > 0) {
+            $path = sprintf('%s/%s/Model/Observer/Frontend/Observer.php', $this->_vendor, $this->_module);
+            $this->saveFileData($path, $txt);
+        }
     }
 
     private function createAdminhtmlEventsObserver()
     {
-        $path = sprintf('%s/%s/Model/Observer/Adminhtml/Observer.php', $this->_vendor, $this->_module);
-        
         $events = "";
         foreach ($this->_config["observer"]["adminhtml"] as $event) {
             $events .= "
@@ -2435,8 +2442,10 @@ class Observer implements ObserverInterface
             $this->_module,
             $events
         );
-        
-        $this->saveFileData($path, $txt);
+        if (count($this->_config["observer"]["adminhtml"]) > 0) {
+            $path = sprintf('%s/%s/Model/Observer/Adminhtml/Observer.php', $this->_vendor, $this->_module);
+            $this->saveFileData($path, $txt);
+        }
     }
 
     private function createObserver()
@@ -2450,16 +2459,20 @@ class Observer implements ObserverInterface
             $this->CreateGlobalEventsObserver();
         }
         if (isset($this->_config["observer"]["frontend"])) {
-            $this->createFolder(sprintf('%s/%s/etc/frontend', $this->_vendor, $this->_module));
-            $this->createFolder(sprintf('%s/%s/Model/Observer/Frontend', $this->_vendor, $this->_module));
-            $this->CreateFrontendEventsXML();
-            $this->CreateFrontendEventsObserver();
+            if (count($this->_config["observer"]["frontend"]) > 0) {
+                $this->createFolder(sprintf('%s/%s/etc/frontend', $this->_vendor, $this->_module));
+                $this->createFolder(sprintf('%s/%s/Model/Observer/Frontend', $this->_vendor, $this->_module));
+                $this->CreateFrontendEventsXML();
+                $this->CreateFrontendEventsObserver();
+            }
         }
         if (isset($this->_config["observer"]["adminhtml"])) {
-            $this->createFolder(sprintf('%s/%s/etc/adminhtml', $this->_vendor, $this->_module));
-            $this->createFolder(sprintf('%s/%s/Model/Observer/Adminhtml', $this->_vendor, $this->_module));
-            $this->CreateAdminhtmlEventsXML();
-            $this->CreateAdminhtmlEventsObserver();
+            if (count($this->_config["observer"]["adminhtml"]) > 0) {
+                $this->createFolder(sprintf('%s/%s/etc/adminhtml', $this->_vendor, $this->_module));
+                $this->createFolder(sprintf('%s/%s/Model/Observer/Adminhtml', $this->_vendor, $this->_module));
+                $this->CreateAdminhtmlEventsXML();
+                $this->CreateAdminhtmlEventsObserver();
+            }
         }
     }
 
