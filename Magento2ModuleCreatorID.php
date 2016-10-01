@@ -320,7 +320,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
             $visible_on_front = isset($attribute["visible_on_front"]) ? $attribute["visible_on_front"] : 'true';
             $used_in_product_listing = isset($attribute["used_in_product_listing"]) ? $attribute["used_in_product_listing"] : 'true';
             $unique = isset($attribute["unique"]) ? $attribute["unique"] : 'true';
-            $apply_to = isset($attribute["apply_to"]) ? $attribute["apply_to"] : "''";
+            $apply_to = isset($attribute["apply_to"]) ? "'".$attribute["apply_to"]."'" : "''";
             
             $txt .= '$eavSetup->addAttribute' . "($entity, '$code', [
                     'type' => '$type',
@@ -351,7 +351,49 @@ class UpgradeSchema implements UpgradeSchemaInterface
         
         return $txt;
     }
+    private function CreateInstallDataFile()
+    {
+        $category_attribue = $this->getAttribues("category");
+        $product_attribue = $this->getAttribues("product");
+        $customer_attribue = $this->getAttribues("customer");
+        
+        $txt = sprintf(
+                '<?php
+        
+namespace %s\%s\Setup;
+        
+use Magento\Eav\Setup\EavSetup;
+use Magento\Eav\Setup\EavSetupFactory;
+use Magento\Framework\Setup\UpgradeDataInterface;
+use Magento\Framework\Setup\ModuleContextInterface;
+use Magento\Framework\Setup\ModuleDataSetupInterface;
+        
+/**
+ * @codeCoverageIgnore
+ */
+class InstallData implements InstallDataInterface
+{
 
+    /**
+     * {@inheritdoc}
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
+     */
+    public function install(ModuleDataSetupInterface $setup, ModuleContextInterface $context)
+    {
+        $eavSetup = $this->eavSetupFactory->create([
+    	   \'setup\' => $setup
+    	]);
+        %3$s
+    	%3$s
+    	%5$s
+    }
+}', $this->_vendor, $this->_module, $category_attribue, $product_attribue, $customer_attribue);
+        
+        $path = sprintf('%s/%s/Setup/InstallData.php', $this->_vendor, $this->_module);
+        $this->saveFileData($path, $txt);
+    }
     private function createUpgradeDataFile()
     {
         $category_attribue = $this->getAttribues("category");
@@ -379,15 +421,9 @@ class UpgradeData implements UpgradeDataInterface
 
 	public function upgrade(ModuleDataSetupInterface $setup, ModuleContextInterface $context)
     {
-		$eavSetup = $this->eavSetupFactory->create([
-			\'setup\' => $setup
-		]);
+		
 
 		if (version_compare($context->getVersion(), \'1.0.1\') < 0) {
-			%3$s
-		    %3$s
-		    %5$s
-		        
 			return null;
 		}
 	}
@@ -405,6 +441,7 @@ class UpgradeData implements UpgradeDataInterface
             $this->CreateInstallSchemaFile();
             $this->CreateUninstallFile();
             $this->CreateUpgradeSchemaFile();
+            $this->CreateInstallDataFile();
             $this->CreateUpgradeDataFile();
         }
     }
