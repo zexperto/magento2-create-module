@@ -446,10 +446,10 @@ interface %sInterface
     public function save($entity);
     
     /**
-     * @param int $entity_id
+     * @param int $id
      * @return bool Will returned true if deleted
      */
-    public function deleteByEntityId($entity_id);
+    public function deleteByEntityId($id);
 }', $this->_vendor, $this->_module, $model["name"]);
         
         $this->saveFileData($path, $txt);
@@ -465,17 +465,17 @@ interface %sInterface
 	/**
 	 *
 	 * @api
-	 * @return int entity_id.
+	 * @return int id.
 	 */
-	public function getEntityId();
+	public function getId();
 	
 	/**
 	 *
 	 * @api
-	 * @param $value entity_id.
+	 * @param $value id.
 	 * @return null
 	 */
-	public function setEntityId($value);
+	public function setId($value);
 				';
         foreach ($model["columns"] as $column) {
             
@@ -679,7 +679,7 @@ class %s implements %3$sInterface
     public function save($entity)
     {
 		$collection = $this->_objectManager->create(\'\%1$s\%2$s\Model\ResourceModel\%3$s\Collection\');
-		$collection->addFieldToFilter("entity_id", $entity->getEntityId());
+		$collection->addFieldToFilter("entity_id", $entity->getId());
 		$item = $collection->getFirstItem();
 		$model = $this->_objectManager->create(\'%1$s\%2$s\Model\%3$s\');
 		
@@ -698,11 +698,11 @@ class %s implements %3$sInterface
      * {@inheritdoc}
 	 *
 	 */
-    public function deleteByEntityId($entity_id)
+    public function deleteByEntityId($id)
     {
         try {
 			$model = $this->_objectManager->create(\'%1$s\%2$s\Model\%3$s\');
-			$model->load($entity_id);
+			$model->load($id);
 			$model->delete();
 			return true;
 		} catch (\Exception $e) {
@@ -721,10 +721,12 @@ class %s implements %3$sInterface
         
         // Private
         $private = "";
+        $private .= 'private $id;' . "\n\t";
         foreach ($model["columns"] as $column) {
             
             $private .= 'private $' . $column["name"] . ';' . "\n\t";
         }
+        $private .= 'private $status;' . "\n\t";
         $private = trim($private, "\t");
         $private = trim($private, "\n");
         
@@ -737,9 +739,9 @@ class %s implements %3$sInterface
      * {@inheritdoc}
 	 *
 	 */
-	public function getEntityId()
+	public function getId()
     {
-        return $this->entity_id;
+        return $this->id;
     }
 	
     /**
@@ -748,9 +750,9 @@ class %s implements %3$sInterface
      * {@inheritdoc}
 	 *
 	 */
-	public function setEntityId($value)
+	public function setId($value)
     {
-        $this->entity_id = $value;
+        $this->id = $value;
     }
 				';
         foreach ($model["columns"] as $column) {
@@ -906,8 +908,8 @@ class %3$sData implements %3$sDataInterface
 		</resources>
 	</route>
 
-	<!-- end point = /V1/%4$s/%5$s/%6$s/delete/:entity_id -->
-	<route url="/V1/%4$s/%5$s/%6$s/delete/:entity_id" method="DELETE">
+	<!-- end point = /V1/%4$s/%5$s/%6$s/delete/:id -->
+	<route url="/V1/%4$s/%5$s/%6$s/delete/:id" method="DELETE">
 		<service class="%1$s\%2$s\Api\%3$sInterface" method="deleteByEntityId" />
 		<resources>
 			<resource ref="Magento_Backend::admin" />
