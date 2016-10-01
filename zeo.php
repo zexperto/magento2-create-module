@@ -48,7 +48,7 @@ $config_array = [
                 'visible_on_front' => false,
                 'used_in_product_listing' => true,
                 'unique' => false,
-                'apply_to' => 'simple,virtual,downloadable'
+                'apply_to' => ''
             ],
             [
                 "code"=>"zeo_test2",
