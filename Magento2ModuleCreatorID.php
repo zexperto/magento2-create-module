@@ -1016,7 +1016,7 @@ class %3$sData implements %3$sDataInterface
 
     private function createBackEndModels()
     {
-        if ($this->_config["backend_model"]) {
+        if (isset($this->_config["backend_model"])) {
             
             foreach ($this->_config["backend_model"] as $model) {
                 
@@ -2492,6 +2492,16 @@ class Observer implements ObserverInterface
         if (count($this->_config["observer"]) == 0) {
             return;
         }
+        if (
+                count($this->_config["observer"]["global"]) == 0
+                && 
+                count($this->_config["observer"]["frontend"]) == 0
+                &&
+                count($this->_config["observer"]["adminhtml"]) == 0
+                ) {
+            return;
+        }
+        
         if ($this->_config["observer"]) {
             $this->createFolder(sprintf('%s/%s/Model/Observer', $this->_vendor, $this->_module));
             $this->CreateGlobalEventsXML();
