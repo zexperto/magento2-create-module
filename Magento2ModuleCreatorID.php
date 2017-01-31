@@ -37,9 +37,21 @@ class Magento2ModuleCreator
     {
         $txt = '<?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../lib/internal/Magento/Framework/Module/etc/module.xsd">
-	<module name="%s_%s" setup_version="%s" />
+	<module name="%s_%s" setup_version="%s">%4s
+    </module>
 </config>';
-        $txt = sprintf($txt, $this->_vendor, $this->_module, $this->_version);
+        
+       
+        if(count($this->_config["sequence"])>0 ) {
+            $_sequence = "\n\t\t"."<sequence>"."\n";
+            foreach($this->_config["sequence"] as $sequence) {
+                $_sequence .="\t\t\t".'<module name="'.$sequence.'" />'."\n";
+            }
+            $_sequence .= "\t\t"."</sequence>";
+        }
+        
+        
+        $txt = sprintf($txt, $this->_vendor, $this->_module, $this->_version, $_sequence);
         
         $path = sprintf('%s/%s/etc/module.xml', $this->_vendor, $this->_module);
         $this->saveFileData($path, $txt);
@@ -101,13 +113,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         
                     if ($column["type"] == "string") :
                     $columns .= sprintf(
-                            '->addColumn(
-                \'%1$s\',
-                \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
-                \'%3$s\',
-                [\'nullable\' => false ],
-                \'%2$s\'
-            )', $column["name"], $column["label"], $column["size"]);
+                            '->addColumn(\'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_TEXT, \'%3$s\', [\'nullable\' => false ], \'%2$s\' )',
+                            $column["name"], $column["label"], $column["size"]);
         
         
                     endif;
@@ -126,14 +133,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         
                     if ($column["type"] == "decimal") {
                         $columns .= sprintf(
-                                '->addColumn(
-                \'%1$s\',
-                \Magento\Framework\DB\Ddl\Table::TYPE_DECIMAL,
-                \'12,4\',
-				[\'nullable\' => false,
-				\'default\' => \'0.0000\'],
-				\'%2$s\'
-			)', $column["name"], $column["label"]);
+                                '->addColumn(\'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_DECIMAL, \'12,4\', [\'nullable\' => false, \'default\' => \'0.0000\'], \'%2$s\' )',
+                                $column["name"], $column["label"]);
                     }
         
                     $columns .= "\n\t\t\t";
@@ -145,11 +146,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                         '
 		$table = $setup->getConnection()
             ->newTable($setup->getTable(\'%s_%s_%s\'))
-			->addColumn(
-				\'entity_id\',
-				\Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
-				null,
-                [
+			->addColumn( \'entity_id\', \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER, null, [
 				\'identity\' => true,
 				\'unsigned\' => true,
 				\'nullable\' => false,
@@ -311,7 +308,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
             $class = isset($attribute["class"]) ? $attribute["class"] : "";
             $source = isset($attribute["source"]) ? $attribute["source"] : "";
             $visible = (string) isset($attribute["visible"]) ? $attribute["visible"] : 'true';
-            $required = isset($attribute["required"]) ? $attribute["required"] : 'true';
+            $required = isset($attribute["required"]) ? $attribute["required"] : 'false';
             $user_defined = isset($attribute["user_defined"]) ? $attribute["user_defined"] : 'true';
             $default = isset($attribute["default"]) ? $attribute["default"] : "''";
             $searchable = isset($attribute["searchable"]) ? $attribute["searchable"] : 'true';
@@ -322,6 +319,23 @@ class UpgradeSchema implements UpgradeSchemaInterface
             $unique = isset($attribute["unique"]) ? $attribute["unique"] : 'true';
             $apply_to = isset($attribute["apply_to"]) ? "'".$attribute["apply_to"]."'" : "''";
             
+           
+         if($entity_type == "customer") {
+                $txt .= '$eavSetup->addAttribute' . "($entity, '$code', [
+                'type' => '$type',
+                'backend' => '$backend',
+                'frontend' => '$frontend',
+                'label' => '$label',
+                'input' => '$input',
+                'class' => '$class',
+                'source' => '$source',
+                'global' => $scope,
+                'required' => " . ($required=='true' ? 'true' : 'false') . ",
+                'user_defined' => " . ($user_defined ? 'true' : 'false') . ",
+                'default' => $default,
+                'unique' => " . ($unique ? 'true' : 'false') . "
+                ]);";
+         }else {
             $txt .= '$eavSetup->addAttribute' . "($entity, '$code', [
                     'type' => '$type',
                     'backend' => '$backend',
@@ -332,7 +346,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                     'source' => '$source',
                     'global' => $scope,
                     'visible' => " . ($visible ? 'true' : 'false') . ",
-                    'required' => " . ($required ? 'true' : 'false') . ",
+                    'required' => " . ($required=='true' ? 'true' : 'false') . ",
                     'user_defined' => " . ($user_defined ? 'true' : 'false') . ",
                     'default' => $default,
                     'searchable' => " . ($searchable ? 'true' : 'false') . ",
@@ -343,7 +357,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                     'unique' => " . ($unique ? 'true' : 'false') . ",
                     'apply_to' => $apply_to
                 ]);";
-            
+            }
             if (end($attributes) != $attribute) {
                 $txt .= "\n\t\t\t";
             }
@@ -364,7 +378,7 @@ namespace %s\%s\Setup;
         
 use Magento\Eav\Setup\EavSetup;
 use Magento\Eav\Setup\EavSetupFactory;
-use Magento\Framework\Setup\UpgradeDataInterface;
+use Magento\Framework\Setup\InstallDataInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
         
@@ -374,6 +388,11 @@ use Magento\Framework\Setup\ModuleDataSetupInterface;
 class InstallData implements InstallDataInterface
 {
 
+    public function __construct(EavSetupFactory $eavSetupFactory)
+    {
+        $this->eavSetupFactory = $eavSetupFactory;
+    }
+                
     /**
      * {@inheritdoc}
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
@@ -1209,7 +1228,8 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended
 	public function __construct(
 		\Magento\Backend\Block\Template\Context $context,
 		\Magento\Backend\Helper\Data $backendHelper,
-		\%1$s\%2$s\Model\ResourceModel\%3$s\Collection $collectionFactory,
+		\%1$s\%2$s\Model\ResourceModel\%3$s\CollectionFactory $collectionFactory,
+        //\%1$s\%2$s\Model\ResourceModel\%3$s\Collection $collectionFactory,
 		Status $status,
 		array $data = []
 	) {
@@ -1247,7 +1267,8 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended
      */
 	protected function _prepareCollection()
     {
-        $collection = $this->_collectionFactory->load();
+        $collection = $this->_collectionFactory->create();
+        //$collection = $this->_collectionFactory->load();
         $this->setCollection($collection);
         parent::_prepareCollection();
         return $this;
