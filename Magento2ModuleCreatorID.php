@@ -41,7 +41,7 @@ class Magento2ModuleCreator
     </module>
 </config>';
         
-       
+        $_sequence = "";
         if(count($this->_config["sequence"])>0 ) {
             $_sequence = "\n\t\t"."<sequence>"."\n";
             foreach($this->_config["sequence"] as $sequence) {
@@ -130,10 +130,20 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                                 '->addColumn(\'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_DATE, null, [], \'%2$s\')',
                                 $column["name"], $column["label"]);
                     }
+                    if ($column["type"] == "timestamp") {
+                        $columns .= sprintf(
+                                '->addColumn(\'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_TIMESTAMP, null, [], \'%2$s\')',
+                                $column["name"], $column["label"]);
+                    }
         
                     if ($column["type"] == "decimal") {
                         $columns .= sprintf(
                                 '->addColumn(\'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_DECIMAL, \'12,4\', [\'nullable\' => false, \'default\' => \'0.0000\'], \'%2$s\' )',
+                                $column["name"], $column["label"]);
+                    }
+                    if ($column["type"] == "boolean") {
+                        $columns .= sprintf(
+                                '->addColumn(\'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_BOOLEAN, null, [\'nullable\' => false], \'%2$s\' )',
                                 $column["name"], $column["label"]);
                     }
         
@@ -934,7 +944,9 @@ class %3$sData implements %3$sDataInterface
         
         $route = "";
         foreach ($this->_config["backend_model"] as $model) {
-            
+            if (!$model["api"]) {
+                continue;
+            }
             $route .= "\n\t" . sprintf(
                     '
 	
@@ -1070,7 +1082,7 @@ class %3$sData implements %3$sDataInterface
         foreach ($this->_config["backend_model"] as $model) {
             
             $txt .= "\t\t" . sprintf(
-                    '<add id="%4$s_%5$s::%6$s" title="%3$s" module="%1$s_%2$s" sortOrder="10" parent="%4$s_%5$s::%5$s" action="%4$s_%5$s/%6$s/" resource="%1$s_%2$s::main"/>', 
+                    '<add id="%4$s_%5$s::%5$s_%6$s" title="%3$s" module="%1$s_%2$s" sortOrder="10" parent="%4$s_%5$s::%5$s" action="%4$s_%5$s/%6$s/" resource="%1$s_%2$s::main"/>', 
                     $this->_vendor, $this->_module, $model["name"], strtolower($this->_vendor), 
                     strtolower($this->_module), strtolower($model["name"])) . "\n";
         }
@@ -1143,7 +1155,7 @@ class %s extends \Magento\Backend\Block\Widget\Grid\Container
 			\'header\' => __(\'%2$s\'),
 			\'index\' => \'%1$s\',
 			\'class\' => \'%1$s\'
-			]);', $column["name"], $column["label"], $column["rquired"]);
+			]);', $column["name"], $column["label"], isset($column["rquired"])?$column["rquired"]:'false');
             
             
             
@@ -1159,12 +1171,20 @@ class %s extends \Magento\Backend\Block\Widget\Grid\Container
 			\'class\' => \'%1$s\'
 			]);', $column["name"], $column["label"], $column["rquired"]);
             
-            
-            
-            
-			
 			endif;
             
+			if ($column["type"] == "boolean") :
+			$columns .= sprintf(
+			        '$this->addColumn(\'%1$s\', [
+			\'header\' => __(\'%2$s\'),
+			\'type\' => \'options\',
+			\'align\' => \'center\',
+			\'index\' => \'%1$s\',
+            \'options\' => $this->_status->toOptionArrayYesNo(), 
+			\'default\' => \' ---- \'
+            ]);', $column["name"], $column["label"], $column["rquired"]);
+
+			endif;
             if ($column["type"] == "date") :
                 $columns .= sprintf(
                         '$this->addColumn(\'%1$s\', [
@@ -1175,13 +1195,8 @@ class %s extends \Magento\Backend\Block\Widget\Grid\Container
 			\'default\' => \' ---- \'
             ]);', $column["name"], $column["label"], $column["rquired"]);
             
-            
-            
-            
-			
-			endif;
-            
-            if ($column["type"] == "decimal") :
+         endif;
+             if ($column["type"] == "decimal") :
                 $columns .= sprintf(
                         '$this->addColumn(\'%1$s\', [
 			\'header\' => __(\'%2$s\'),
@@ -1529,14 +1544,21 @@ class Tabs extends \Magento\Backend\Block\Widget\Tabs
 			\'required\' => %3$s,
 			\'label\' => __(\'%2$s\'),
 			\'title\' => __(\'%2$s\'),
-			]);', $column["name"], $column["label"], $column["rquired"]);
+			]);', $column["name"], $column["label"], isset($column["rquired"])?$column["rquired"]:'false');
             
-            
-            
-            
-			
 			endif;
             
+			if ($column["type"] == "boolean") :
+			$columns .= sprintf(
+			        '$fieldset->addField(\'%1$s\', \'select\', [
+			\'name\' => \'%1$s\',
+			\'required\' => %3$s,
+			\'label\' => __(\'%2$s\'),
+			\'title\' => __(\'%2$s\'),
+            \'options\' => $this->_status->toOptionArrayYesNo(),
+			]);', $column["name"], $column["label"], $column["rquired"]);
+			endif;
+			
             if ($column["type"] == "int") :
                 $columns .= sprintf(
                         '$fieldset->addField(\'%1$s\', \'text\', [
@@ -2200,6 +2222,15 @@ class Status implements ArrayInterface
 		];
 		return $options;
 	}
+
+    public function toOptionArrayYesNo()
+        {
+            $options = [
+                self::ENABLED => __(\'Yes\'),
+                self::DISABLED => __(\'No\')
+            ];
+            return $options;
+        }
 }',
             $this->_vendor,
             $this->_module
