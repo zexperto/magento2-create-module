@@ -2525,7 +2525,7 @@ class Observer implements ObserverInterface
 }',
             $this->_vendor,
             $this->_module,
-            $events
+                $switch
         );
         if (count($this->_config["observer"]["adminhtml"]) > 0) {
             $path = sprintf('%s/%s/Model/Observer/Adminhtml/Observer.php', $this->_vendor, $this->_module);
