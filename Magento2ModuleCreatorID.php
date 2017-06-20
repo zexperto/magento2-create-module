@@ -694,7 +694,7 @@ interface %3$sDataInterface
         $txt = sprintf(
                 '<?php
 	
-namespace %s\%s\Model\APi;
+namespace %s\%s\Model\Api;
 	
 use %1$s\%2$s\Api\%3$sInterface;
 				
