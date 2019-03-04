@@ -11,13 +11,16 @@ class Magento2ModuleCreator
 
     private $_config;
 
+    private $_description;
+
     private $_helper;
 
-    public function __construct($vendor, $module, $version = "1.0.0")
+    public function __construct($vendor, $module,$description="", $version = "1.0.0")
     {
         $this->_vendor = $vendor;
         $this->_module = $module;
         $this->_version = $version;
+        $this->_description = $description;
         $this->_config = [];
     }
 
@@ -42,12 +45,14 @@ class Magento2ModuleCreator
 </config>';
         
         $_sequence = "";
-        if(count($this->_config["sequence"])>0 ) {
-            $_sequence = "\n\t\t"."<sequence>"."\n";
-            foreach($this->_config["sequence"] as $sequence) {
-                $_sequence .="\t\t\t".'<module name="'.$sequence.'" />'."\n";
+        if(isset($this->_config["sequence"])) {
+            if(count($this->_config["sequence"])>0 ) {
+                $_sequence = "\n\t\t"."<sequence>"."\n";
+                foreach($this->_config["sequence"] as $sequence) {
+                    $_sequence .="\t\t\t".'<module name="'.$sequence.'" />'."\n";
+                }
+                $_sequence .= "\t\t"."</sequence>";
             }
-            $_sequence .= "\t\t"."</sequence>";
         }
         
         
@@ -81,10 +86,7 @@ namespace %s\%s\Helper;
 class Data extends \Magento\Framework\App\Helper\AbstractHelper
 {
 
-    public function isDisable()
-    {
-        return $module_status = (boolean) $this->_scopeConfig->getValue(\'advanced/modules_disable_output/%1$s_%2$s\');
-    }
+   
 }';
         $txt = sprintf($txt, $this->_vendor, $this->_module);
         
@@ -115,20 +117,47 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     $columns .= sprintf(
                             '->addColumn(\'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_TEXT, \'%3$s\', [\'nullable\' => false ], \'%2$s\' )',
                             $column["name"], $column["label"], $column["size"]);
-        
-        
+                
                     endif;
         
+				 if ($column["type"] == "text") :
+                    $columns .= sprintf(
+                            '->addColumn(\'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_TEXT, null, [\'nullable\' => false ], \'%2$s\' )',
+                            $column["name"], $column["label"]);
+                
+                    endif;
+
                     if ($column["type"] == "int") {
                         $columns .= sprintf(
                                 '->addColumn(\'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER, null, [\'nullable\' => false ], \'%2$s\')',
                                 $column["name"], $column["label"]);
                     }
+                    if ($column["type"] == "smallint") {
+                        $columns .= sprintf(
+                            '->addColumn(\'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT, null, [\'nullable\' => false ], \'%2$s\')',
+                            $column["name"], $column["label"]);
+                    }
         
                     if ($column["type"] == "date") {
-                        $columns .= sprintf(
+                        if($column["name"] == "created_at") {
+                            $columns .= sprintf('->addColumn(\'%1$s\',
+                            \Magento\Framework\DB\Ddl\Table::TYPE_TIMESTAMP,
+                            null,
+                            [\'nullable\' => false, \'default\' => \Magento\Framework\DB\Ddl\Table::TIMESTAMP_INIT],
+                            \'%2$s\'
+                         )', $column["name"], $column["label"]);
+                        }else if($column["name"] == "updated_at") {
+                            $columns .= sprintf('->addColumn(\'%1$s\',
+                            \Magento\Framework\DB\Ddl\Table::TYPE_TIMESTAMP,
+                            null,
+                            [\'nullable\' => false, \'default\' => \Magento\Framework\DB\Ddl\Table::TIMESTAMP_INIT_UPDATE],
+                            \'%2$s\'
+                         )', $column["name"], $column["label"]);
+                        }else {
+                            $columns .= sprintf(
                                 '->addColumn(\'%1$s\', \Magento\Framework\DB\Ddl\Table::TYPE_DATE, null, [], \'%2$s\')',
                                 $column["name"], $column["label"]);
+                        }
                     }
                     if ($column["type"] == "timestamp") {
                         $columns .= sprintf(
@@ -547,7 +576,7 @@ interface %sInterface
             
             $property = str_replace(' ', '', ucwords(str_replace('_', ' ', $column["name"])));
             
-            if ($column["type"] == "string") :
+            if ($column["type"] == "string" || $column["type"] == "text") :
                 $columns .= sprintf(
                         '
 	/**
@@ -571,7 +600,7 @@ interface %sInterface
 			
 endif;
             
-            if ($column["type"] == "int") :
+            if ($column["type"] == "int" || $column["type"] == "smallint") :
                 $columns .= sprintf(
                         '
 
@@ -992,8 +1021,10 @@ class %3$sData implements %3$sDataInterface
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"	xsi:noNamespaceSchemaLocation="../../../../../app/code/Magento/Webapi/etc/webapi.xsd">
 	%1$s
 </routes>', $route);
-        
-        $this->saveFileData($path, $txt);
+
+        if($route!="") {
+            $this->saveFileData($path, $txt);
+        }
     }
 
     private function createModel()
@@ -1053,12 +1084,12 @@ class %3$sData implements %3$sDataInterface
                 
                 $this->CreateBackEndModel($model);
                 if ($model["api"]) {
-                    
                     $this->CreateApi($model);
                 }
             }
             $this->CreateMenuFile();
-            $this->CreateRoutesFile();
+            $this->CreateRoutesFile("admin");
+            $this->CreateRoutesFile("front");
             $this->CreateDiFile();
             $this->CreateWebapiFile();
         }
@@ -1092,13 +1123,13 @@ class %3$sData implements %3$sDataInterface
         $this->saveFileData($path, $txt);
     }
 
-    private function createRoutesFile()
+
+    private function createRoutesFile($type)
     {
-        $this->createFolder($this->_vendor . "/" . $this->_module . "/" . "etc/adminhtml");
-        
-        $path = sprintf('%s/%s/etc/adminhtml/routes.xml', $this->_vendor, $this->_module);
-        
-        $txt = sprintf(
+        if($type == "admin") {
+            $this->createFolder($this->_vendor . "/" . $this->_module . "/" . "etc/adminhtml");
+            $path = sprintf('%s/%s/etc/adminhtml/routes.xml', $this->_vendor, $this->_module);
+            $txt = sprintf(
                 '<?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../lib/internal/Magento/Framework/App/etc/routes.xsd">
 	<router id="admin">
@@ -1107,8 +1138,25 @@ class %3$sData implements %3$sDataInterface
 		</route>
 	</router>
 </config>', $this->_vendor, $this->_module, strtolower($this->_vendor), strtolower($this->_module));
-        
-        $this->saveFileData($path, $txt);
+
+            $this->saveFileData($path, $txt);
+        }else {
+            $this->createFolder($this->_vendor . "/" . $this->_module . "/" . "etc/frontend");
+            $path = sprintf('%s/%s/etc/frontend/routes.xml', $this->_vendor, $this->_module);
+            $txt = sprintf(
+                '<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
+	<router id="standard">
+		<route id="%4$s" frontName="%4$s">
+			<module name="%1$s_%2$s" />
+		</route>
+	</router>
+</config>', $this->_vendor, $this->_module, strtolower($this->_vendor), strtolower($this->_module));
+
+            $this->saveFileData($path, $txt);
+        }
+
+
     }
 
     private function createAdminhtmlModelFile($model)
@@ -1163,7 +1211,7 @@ class %s extends \Magento\Backend\Block\Widget\Grid\Container
 			
 			endif;
             
-            if ($column["type"] == "int") :
+            if ($column["type"] == "int" || $column["type"] == "smallint") :
                 $columns .= sprintf(
                         '$this->addColumn(\'%1$s\', [
 			\'header\' => __(\'%2$s\'),
@@ -1547,6 +1595,19 @@ class Tabs extends \Magento\Backend\Block\Widget\Tabs
 			]);', $column["name"], $column["label"], isset($column["rquired"])?$column["rquired"]:'false');
             
 			endif;
+
+			 if ($column["type"] == "text") :
+                $columns .= sprintf(
+                        '$fieldset->addField(\'%1$s\', \'textarea\', [
+			\'name\' => \'%1$s\',
+			\'required\' => %3$s,
+			\'label\' => __(\'%2$s\'),
+			\'title\' => __(\'%2$s\'),
+			]);', $column["name"], $column["label"], isset($column["rquired"])?$column["rquired"]:'false');
+            
+			endif;
+
+			
             
 			if ($column["type"] == "boolean") :
 			$columns .= sprintf(
@@ -1559,7 +1620,7 @@ class Tabs extends \Magento\Backend\Block\Widget\Tabs
 			]);', $column["name"], $column["label"], $column["rquired"]);
 			endif;
 			
-            if ($column["type"] == "int") :
+            if ($column["type"] == "int" || $column["type"] == "smallint") :
                 $columns .= sprintf(
                         '$fieldset->addField(\'%1$s\', \'text\', [
 			\'name\' => \'%1$s\',
@@ -2577,32 +2638,30 @@ class Observer implements ObserverInterface
         
         $txt = sprintf(
             '{
-    "name": "%4$s/%5$s",
-    "description": "",
-    "require":
-{
-    "magento/project-community-edition": "*",
-        "magento/magento-composer-installer": "*"
-    },
+    "name": "%4$s/module-%5$s",
+    "description": "'.$this->_description.'",
     "type": "magento2-module",
+    "license": "OSL-3.0",
+    "require":{},
+    "minimum-stability": "dev",
     "version": "%3$s",
-    "extra":
-{
-    "map": [
-            [
-                "*",
-                "%1$s/%2$s/"
-            ]
-        ]
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "%1$s\\\%2$s\\\": ""
+        }
     },
     "authors": [
-       
-{
-        "name": "WISAM HAKIM",
-            "homepage": "https://www.zexperto.com/",
+        {
+            "email": "wh@itm-development.com",
+            "name": "WH",
+            "homepage": "https://www.itm-development.com/",
             "role": "Developer"
         }
-    ]}
+    ]
+}
 				
 				',
             $this->_vendor,
